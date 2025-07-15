@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_text.dart';
-import '../core/theme/app_colors.dart';
-import '../modules/auth/screens/login_screen.dart'; // Ensure this path is correct
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MoreOptionsBottomSheet extends StatelessWidget {
+import '../../core/constants/app_text.dart';
+import '../../core/theme/app_colors.dart';
+import '../../modules/auth/screens/login_screen.dart';
+import '../../providers/auth_provider.dart';
+
+class MoreOptionsBottomSheet extends ConsumerWidget {
   const MoreOptionsBottomSheet({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 🚗 Vehicle Registration Button
           ElevatedButton.icon(
             icon: const Icon(Icons.directions_car),
             label: const Text(AppText.vehicleRegistration),
@@ -28,7 +32,10 @@ class MoreOptionsBottomSheet extends StatelessWidget {
               );
             },
           ),
+
           const SizedBox(height: 16),
+
+          // 🛫 Temporary Leave Button
           ElevatedButton.icon(
             icon: const Icon(Icons.airplane_ticket_outlined),
             label: const Text(AppText.temporaryLeave),
@@ -44,7 +51,10 @@ class MoreOptionsBottomSheet extends StatelessWidget {
               );
             },
           ),
+
           const SizedBox(height: 16),
+
+          // 🔒 Logout Button
           ElevatedButton.icon(
             icon: const Icon(Icons.logout),
             label: const Text('Logout'),
@@ -53,16 +63,17 @@ class MoreOptionsBottomSheet extends StatelessWidget {
               foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 48),
             ),
-            onPressed: () {
-              Navigator.pop(context); // close the bottom sheet
+            onPressed: () async {
+              Navigator.pop(context); // Close the bottom sheet
 
-              // Safely navigate after the current frame is rendered
-              WidgetsBinding.instance.addPostFrameCallback((_) {
+              await ref.read(authProvider.notifier).logout();
+
+              if (context.mounted) {
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (_) => const LoginScreen()),
                       (route) => false,
                 );
-              });
+              }
             },
           ),
         ],

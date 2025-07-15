@@ -18,7 +18,7 @@ class ComplainMainShell extends ConsumerWidget {
 
     final screens = const [
       ComplainHomeScreen(),
-      ComplainDetailScreen(),
+      ComplaintAdminScreen(),
       ComplainFeedbackScreen()
     ];
 

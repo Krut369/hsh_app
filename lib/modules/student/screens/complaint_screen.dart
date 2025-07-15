@@ -12,18 +12,17 @@ import '../../../providers/complaint_provider.dart';
 class ViewComplaintsScreen extends ConsumerWidget {
   const ViewComplaintsScreen({super.key});
 
-  Color _getStatusColor(BuildContext context, String status) {
+  Color _getStatusColor(BuildContext context, ComplaintStatus status) {
     final scheme = Theme.of(context).colorScheme;
     switch (status) {
-      case AppText.pending:
+      case ComplaintStatus.underReview:
+        return Colors.orange;
+      case ComplaintStatus.pending:
         return scheme.secondary;
-      case 'In Progress':
+      case ComplaintStatus.awaitingFeedback:
         return Colors.blue;
-      case AppText.approved:
-      case AppText.completed:
+      case ComplaintStatus.resolved:
         return Colors.green;
-      default:
-        return scheme.primary;
     }
   }
 
@@ -48,23 +47,35 @@ class ViewComplaintsScreen extends ConsumerWidget {
 
   void _showFilterDialog(BuildContext context, WidgetRef ref) {
     final currentFilter = ref.read(complaintFilterProvider);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppText.filterComplaints, style: Theme.of(context).textTheme.titleLarge),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [AppText.all, AppText.pending, 'In Progress', AppText.completed].map((status) {
-            return RadioListTile(
-              title: Text(status),
-              value: status,
+          children: [
+            RadioListTile<ComplaintStatus?>(
+              title: const Text('All'),
+              value: null,
               groupValue: currentFilter,
               onChanged: (value) {
-                ref.read(complaintFilterProvider.notifier).state = value.toString();
+                ref.read(complaintFilterProvider.notifier).state = value;
                 Navigator.pop(context);
               },
-            );
-          }).toList(),
+            ),
+            ...ComplaintStatus.values.map((status) {
+              return RadioListTile<ComplaintStatus?>(
+                title: Text(status.label),
+                value: status,
+                groupValue: currentFilter,
+                onChanged: (value) {
+                  ref.read(complaintFilterProvider.notifier).state = value;
+                  Navigator.pop(context);
+                },
+              );
+            }).toList(),
+          ],
         ),
         actions: [
           TextButton(
@@ -103,7 +114,7 @@ class ViewComplaintsScreen extends ConsumerWidget {
                     children: [
                       Chip(
                         label: Text(
-                          filter,
+                          filter?.label ?? 'All',
                           style: textTheme.labelLarge?.copyWith(color: scheme.primary),
                         ),
                         backgroundColor: scheme.primary.withOpacity(0.1),
@@ -150,7 +161,7 @@ class ViewComplaintsScreen extends ConsumerWidget {
                   Icon(Icons.inbox_rounded, size: 64, color: scheme.onSurface.withOpacity(0.2)),
                   const SizedBox(height: 16),
                   Text(
-                    'No ${filter.toLowerCase()} complaints found',
+                    'No ${filter?.label.toLowerCase() ?? 'complaints'} found',
                     style: textTheme.titleMedium?.copyWith(color: scheme.onSurface.withOpacity(0.6)),
                   ),
                 ],
@@ -282,8 +293,7 @@ class ViewComplaintsScreen extends ConsumerWidget {
       ),
     );
   }
-
-  Widget _buildStatusChip(Color color, String status) {
+  Widget _buildStatusChip(Color color, ComplaintStatus status) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -294,17 +304,13 @@ class ViewComplaintsScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            status == AppText.completed
-                ? Icons.check_circle
-                : status == AppText.pending
-                ? Icons.pending
-                : Icons.schedule,
+            _getStatusIcon(status),
             color: color,
             size: 16,
           ),
           const SizedBox(width: 6),
           Text(
-            status,
+            status.label,
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.bold,
@@ -315,4 +321,20 @@ class ViewComplaintsScreen extends ConsumerWidget {
       ),
     );
   }
+
 }
+
+IconData _getStatusIcon(ComplaintStatus status) {
+  switch (status) {
+    case ComplaintStatus.underReview:
+      return Icons.visibility;
+    case ComplaintStatus.pending:
+      return Icons.pending_actions;
+    case ComplaintStatus.awaitingFeedback:
+      return Icons.feedback;
+    case ComplaintStatus.resolved:
+      return Icons.check_circle;
+  }
+}
+
+

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../providers/tab_controller_provider.dart.dart';
 import '../../../widgets/custom_tab_bar.dart';
 import '../widgets/holiday_tab.dart';
@@ -21,7 +22,7 @@ class _HolidayPaymentScreenState extends ConsumerState<HolidayPaymentScreen> wit
     super.initState();
     _tabController = TabController(length: _tabLabels.length, vsync: this);
 
-    // Safe provider update after build
+    // Set the controller to provider so others can access it
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(tabControllerProvider.notifier).state = _tabController;
@@ -37,9 +38,8 @@ class _HolidayPaymentScreenState extends ConsumerState<HolidayPaymentScreen> wit
 
   @override
   Widget build(BuildContext context) {
-    final currentTabController = ref.watch(tabControllerProvider);
-
-    if (currentTabController == null) return const SizedBox.shrink();
+    // Optional: just to keep provider in sync
+    ref.watch(tabControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -48,11 +48,11 @@ class _HolidayPaymentScreenState extends ConsumerState<HolidayPaymentScreen> wit
       ),
       body: Column(
         children: [
-          CustomTabBar(controller: currentTabController, tabLabels: _tabLabels),
+          CustomTabBar(controller: _tabController, tabLabels: _tabLabels),
           const SizedBox(height: 8),
           Expanded(
             child: TabBarView(
-              controller: currentTabController,
+              controller: _tabController,
               children: const [
                 HolidayTab(),
                 PaymentTab(),

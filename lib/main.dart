@@ -3,13 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hsh_app/providers/auth_provider.dart';
 import 'package:hsh_app/providers/theme_provider.dart';
 
+import 'core/constants/app_text.dart';
 import 'models/user_model.dart';
 import 'modules/auth/screens/login_screen.dart';
 import 'modules/complain/screens/complain_main_shell.dart';
 import 'modules/laundry/screens/laundry_main_shell.dart';
 import 'modules/student/screens/student_main_shell.dart';
-
-import 'core/constants/app_text.dart';
 import 'splash_screen.dart';
 
 /// 👇 Splash state provider
@@ -44,29 +43,32 @@ class _AppRoot extends ConsumerStatefulWidget {
 }
 
 class _AppRootState extends ConsumerState<_AppRoot> {
-  ProviderSubscription<AsyncValue<AuthState>>? _authSubscription;
+  late final ProviderSubscription<AsyncValue<AuthState>> _authListener;
 
   @override
   void initState() {
     super.initState();
 
-    // ✅ Splash Delay
+    // Delay splash screen for 2 seconds
     Future.delayed(const Duration(seconds: 2), () {
-      ref.read(splashFinishedProvider.notifier).state = true;
+      if (mounted) {
+        ref.read(splashFinishedProvider.notifier).state = true;
+      }
     });
 
-    // ✅ Safe listener for auth error
-    _authSubscription = ref.listenManual<AsyncValue<AuthState>>(
+    // Setup manual listener for auth errors
+    _authListener = ref.listenManual<AsyncValue<AuthState>>(
       authProvider,
-          (previous, next) {
+      (previous, next) {
         final error = next.valueOrNull?.error;
-        if (error != null && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(error),
-              backgroundColor: Colors.red,
-            ),
-          );
+        if (error != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(error), backgroundColor: Colors.red),
+              );
+            }
+          });
         }
       },
     );
@@ -74,7 +76,7 @@ class _AppRootState extends ConsumerState<_AppRoot> {
 
   @override
   void dispose() {
-    _authSubscription?.close();
+    _authListener.close(); // Clean up listener
     super.dispose();
   }
 
@@ -85,24 +87,24 @@ class _AppRootState extends ConsumerState<_AppRoot> {
 
     if (!splashFinished) return const SplashScreen();
 
-    if (auth.isLoading) {
-      return const Scaffold(
+    return auth.when(
+      loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
-      );
-    }
+      ),
+      error: (_, __) => const LoginScreen(),
+      data: (authState) {
+        if (!authState.isAuthenticated) return const LoginScreen();
 
-    if (auth.hasValue && auth.value!.isAuthenticated) {
-      final role = auth.value!.user!.role;
-      switch (role) {
-        case UserRole.laundry:
-          return const LaundryMainShell();
-        case UserRole.complain:
-          return const ComplainMainShell();
-        case UserRole.student:
-          return const StudentMainShell();
-      }
-    }
-
-    return const LoginScreen();
+        switch (authState.user?.role) {
+          case UserRole.laundry:
+            return const LaundryMainShell();
+          case UserRole.complain:
+            return const ComplainMainShell();
+          case UserRole.student:
+          default:
+            return const StudentMainShell();
+        }
+      },
+    );
   }
 }

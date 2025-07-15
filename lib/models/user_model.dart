@@ -13,21 +13,18 @@ class Student {
     required this.role,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'username': username,
-      'password': password,
-      'name': name,
-      'role': role.name,
-    };
-  }
+  Map<String, dynamic> toMap() => {
+    'username': username,
+    'password': password,
+    'name': name,
+    'role': role.name,
+  };
 
-  factory Student.fromMap(Map<String, dynamic> map) {
-    return Student(
-      username: map['username'],
-      password: map['password'],
-      name: map['name'],
-      role: UserRole.values.firstWhere((e) => e.name == map['role']),
-    );
-  }
+  factory Student.fromMap(Map<String, dynamic> map) => Student(
+    username: map['username'],
+    password: map['password'],
+    name: map['name'],
+    role: UserRole.values
+        .firstWhere((e) => e.name == map['role'], orElse: () => UserRole.student),
+  );
 }
