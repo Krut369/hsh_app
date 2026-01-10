@@ -6,7 +6,40 @@ import 'package:flutter/material.dart';
 enum LaundryServiceType {
   wash,
   press,
-  both,
+  both;
+
+  String get label {
+    switch (this) {
+      case LaundryServiceType.wash:
+        return 'Wash';
+      case LaundryServiceType.press:
+        return 'Press';
+      case LaundryServiceType.both:
+        return 'Both';
+    }
+  }
+
+  Color get backgroundColor {
+    switch (this) {
+      case LaundryServiceType.wash:
+        return Colors.blue.shade100;
+      case LaundryServiceType.press:
+        return Colors.purple.shade100;
+      case LaundryServiceType.both:
+        return Colors.green.shade100;
+    }
+  }
+
+  Color get textColor {
+    switch (this) {
+      case LaundryServiceType.wash:
+        return Colors.blue.shade800;
+      case LaundryServiceType.press:
+        return Colors.purple.shade800;
+      case LaundryServiceType.both:
+        return Colors.green.shade800;
+    }
+  }
 }
 
 /// A model representing a single laundry item (e.g., Shirt, Pants)

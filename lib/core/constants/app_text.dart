@@ -58,6 +58,55 @@
     static const all = 'All';
     static const completed = 'Completed';
     static const addComplaint = 'Add Complaint';
+
+    // Holiday Screen
+    static const noHolidaysTitle = 'No holidays requested yet!';
+    static const noHolidaysSubtitle = 'Tap the button below to request a holiday.';
+    static const requestHoliday = 'Request Holiday';
+    static const fromDate = 'From';
+
+    static const toDate = 'To';
+    static const holidayName = 'Holiday Name';
+    static const startDate = 'Start Date';
+    static const endDate = 'End Date';
+    static const submitRequest = 'Submit Request';
+    static const holidayNameHint = 'e.g., Diwali Break';
+    static const startDateHint = 'Select start date';
+    static const endDateHint = 'Select end date';
+    static const selectBothDatesError = 'Please select both start and end dates';
+    static const holidayAddedSuccess = 'Holiday added successfully!';
+    static const endDateBeforeStartError = 'End date cannot be before start date';
+    static const errorHolidayName = 'Please enter a holiday name';
+    static const errorStartDate = 'Please select a start date';
+    static const errorEndDate = 'Please select an end date';
+
+
+    // Vehicle Registration
+    static const vehicleType = 'Vehicle Type';
+    static const registrationNumber = 'Registration Number';
+    static const vehicleModel = 'Vehicle Model';
+    static const registerVehicle = 'Register Vehicle';
+    static const vehicleTypeHint = 'Select vehicle type';
+    static const registrationNumberHint = 'e.g., GJ-01-AB-1234';
+    static const vehicleModelHint = 'e.g., Honda City, Activa';
+    static const vehicleRegisteredSuccess = 'Vehicle registered successfully!';
+    static const errorVehicleType = 'Please select a vehicle type';
+    static const errorRegistrationNumber = 'Please enter registration number';
+    static const errorVehicleModel = 'Please enter vehicle model';
+
+
+    // Fees & Payments
+    static const feesAndPayments = 'Fees & Payments';
+    static const totalBill = 'Total Bill';
+    static const amountPaid = 'Amount Paid';
+    static const balancePending = 'Balance Pending';
+    static const paymentHistory = 'Payment History';
+    static const payNow = 'Pay Now';
+    static const viewAll = 'View All';
+    static const dueBy = 'Due by';
+    static const success = 'Success';
+    static const failed = 'Failed';
+
 // ... other labels
 
   }

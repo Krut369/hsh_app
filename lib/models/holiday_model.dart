@@ -1,6 +1,33 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
-enum HolidayStatus { pending, confirmed, rejected }
+enum HolidayStatus {
+  pending,
+  confirmed,
+  rejected;
+
+  String get label {
+    switch (this) {
+      case HolidayStatus.pending:
+        return 'Pending';
+      case HolidayStatus.confirmed:
+        return 'Confirmed';
+      case HolidayStatus.rejected:
+        return 'Rejected';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case HolidayStatus.pending:
+        return Colors.orange;
+      case HolidayStatus.confirmed:
+        return Colors.green; // Changed to green for better visibility
+      case HolidayStatus.rejected:
+        return Colors.redAccent;
+    }
+  }
+}
 
 @immutable
 class Holiday {

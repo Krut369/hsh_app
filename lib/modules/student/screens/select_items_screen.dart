@@ -24,9 +24,11 @@ class SelectItemsScreen extends ConsumerStatefulWidget {
 
 class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
   final Uuid _uuid = const Uuid();
+  final TextEditingController _noteController = TextEditingController();
 
   @override
   void dispose() {
+    _noteController.dispose();
     ref.read(selectableLaundryItemsProvider.notifier).resetItems();
     super.dispose();
   }
@@ -79,6 +81,7 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
       serviceType: serviceType,
       status: OrderStatus.inProgress,
       items: selectedItems,
+      note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
     );
 
     ref.read(laundryOrderListProvider.notifier).addOrder(newOrder);
@@ -122,86 +125,102 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
             child: SingleChildScrollView(
               padding: EdgeInsets.all(ResponsiveUtil.responsivePadding(context)),
               child: Column(
-                children: items.map((item) {
-                  return Card(
-                    margin: EdgeInsets.only(bottom: ResponsiveUtil.verticalSpacing(context)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: scheme.primary.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ...items.map((item) {
+                    return Card(
+                      margin: EdgeInsets.only(bottom: ResponsiveUtil.verticalSpacing(context)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 3,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: scheme.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(item.icon, color: scheme.primary, size: 24),
                                 ),
-                                child: Icon(item.icon, color: scheme.primary, size: 24),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Text(
-                                  item.name,
-                                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Text(
+                                    item.name,
+                                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
                                 ),
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: scheme.surfaceVariant.withOpacity(0.4),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.remove, size: 20),
-                                      onPressed: () {
-                                        if (item.quantity > 0) {
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: scheme.surfaceVariant.withOpacity(0.4),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.remove, size: 20),
+                                        onPressed: () {
+                                          if (item.quantity > 0) {
+                                            ref.read(selectableLaundryItemsProvider.notifier).updateItem(
+                                              item.copyWith(quantity: item.quantity - 1),
+                                            );
+                                          }
+                                        },
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                      Text('${item.quantity}', style: textTheme.bodyLarge),
+                                      IconButton(
+                                        icon: const Icon(Icons.add, size: 20),
+                                        onPressed: () {
                                           ref.read(selectableLaundryItemsProvider.notifier).updateItem(
-                                            item.copyWith(quantity: item.quantity - 1),
+                                            item.copyWith(quantity: item.quantity + 1),
                                           );
-                                        }
-                                      },
-                                      visualDensity: VisualDensity.compact,
-                                    ),
-                                    Text('${item.quantity}', style: textTheme.bodyLarge),
-                                    IconButton(
-                                      icon: const Icon(Icons.add, size: 20),
-                                      onPressed: () {
-                                        ref.read(selectableLaundryItemsProvider.notifier).updateItem(
-                                          item.copyWith(quantity: item.quantity + 1),
-                                        );
-                                      },
-                                      visualDensity: VisualDensity.compact,
-                                    ),
-                                  ],
+                                        },
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Service Type',
-                            style: textTheme.labelLarge?.copyWith(color: scheme.onSurface.withOpacity(0.7)),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              _buildServiceButton(context, item, LaundryServiceType.wash, 'Wash', scheme.primary),
-                              const SizedBox(width: 8),
-                              _buildServiceButton(context, item, LaundryServiceType.press, 'Press', Colors.deepPurple),
-                              const SizedBox(width: 8),
-                              _buildServiceButton(context, item, LaundryServiceType.both, 'Both', Colors.green),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Service Type',
+                              style: textTheme.labelLarge?.copyWith(color: scheme.onSurface.withOpacity(0.7)),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                _buildServiceButton(context, item, LaundryServiceType.wash, 'Wash', scheme.primary),
+                                const SizedBox(width: 8),
+                                _buildServiceButton(context, item, LaundryServiceType.press, 'Press', Colors.deepPurple),
+                                const SizedBox(width: 8),
+                                _buildServiceButton(context, item, LaundryServiceType.both, 'Both', Colors.green),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
+                    );
+                  }).toList(),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _noteController,
+                    decoration: InputDecoration(
+                      labelText: 'Add a note (optional)',
+                      hintText: 'e.g., Handle with care, Urgent',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      prefixIcon: const Icon(Icons.note_add_outlined),
                     ),
-                  );
-                }).toList(),
+                    maxLines: 3,
+                    minLines: 1,
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
           ),

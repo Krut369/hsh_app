@@ -1,4 +1,5 @@
 // lib/models/laundry_order_model.dart
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'laundry_item_model.dart'; // Import the LaundryItem model
 
@@ -6,7 +7,40 @@ import 'laundry_item_model.dart'; // Import the LaundryItem model
 enum OrderStatus {
   inProgress,
   completed,
-  cancelled,
+  cancelled;
+
+  String get label {
+    switch (this) {
+      case OrderStatus.inProgress:
+        return 'In Progress';
+      case OrderStatus.completed:
+        return 'Completed';
+      case OrderStatus.cancelled:
+        return 'Cancelled';
+    }
+  }
+
+  Color get backgroundColor {
+    switch (this) {
+      case OrderStatus.inProgress:
+        return Colors.amber.shade100;
+      case OrderStatus.completed:
+        return Colors.green.shade100;
+      case OrderStatus.cancelled:
+        return Colors.red.shade100;
+    }
+  }
+
+  Color get textColor {
+    switch (this) {
+      case OrderStatus.inProgress:
+        return Colors.amber.shade800;
+      case OrderStatus.completed:
+        return Colors.green.shade800;
+      case OrderStatus.cancelled:
+        return Colors.red.shade800;
+    }
+  }
 }
 
 /// Model representing a laundry order, including its metadata and items.
@@ -19,6 +53,7 @@ class LaundryOrder {
   final String serviceType;     // Combined service type string
   final OrderStatus status;     // Current status of the order
   final List<LaundryItem> items; // List of laundry items in this order
+  final String? note; // Optional note for the order
 
   const LaundryOrder({
     required this.id,
@@ -28,6 +63,7 @@ class LaundryOrder {
     required this.serviceType,
     required this.status,
     this.items = const [],
+    this.note,
   });
 
   /// Creates a copy of the current object with optional updated values.
@@ -39,6 +75,7 @@ class LaundryOrder {
     String? serviceType,
     OrderStatus? status,
     List<LaundryItem>? items,
+    String? note,
   }) {
     return LaundryOrder(
       id: id ?? this.id,
@@ -48,6 +85,7 @@ class LaundryOrder {
       serviceType: serviceType ?? this.serviceType,
       status: status ?? this.status,
       items: items ?? this.items,
+      note: note ?? this.note,
     );
   }
 
@@ -61,6 +99,7 @@ class LaundryOrder {
       'serviceType': serviceType,
       'status': status.name,
       'items': items.map((item) => item.toMap()).toList(),
+      'note': note,
     };
   }
 
@@ -80,6 +119,7 @@ class LaundryOrder {
           ?.map((item) => LaundryItem.fromMap(item as Map<String, dynamic>))
           .toList() ??
           [],
+      note: map['note'] as String?,
     );
   }
 
@@ -88,7 +128,7 @@ class LaundryOrder {
     return 'LaundryOrder('
         'id: $id, orderId: $orderId, date: $date, '
         'totalItems: $totalItems, serviceType: $serviceType, '
-        'status: $status, items: $items)';
+        'status: $status, items: $items, note: $note)';
   }
 
   @override
@@ -101,7 +141,8 @@ class LaundryOrder {
         other.totalItems == totalItems &&
         other.serviceType == serviceType &&
         other.status == status &&
-        listEquals(other.items, items);
+        listEquals(other.items, items) &&
+        other.note == note;
   }
 
   @override
@@ -112,6 +153,7 @@ class LaundryOrder {
     totalItems.hashCode ^
     serviceType.hashCode ^
     status.hashCode ^
-    items.hashCode;
+    items.hashCode ^
+    note.hashCode;
   }
 }

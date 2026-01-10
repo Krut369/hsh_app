@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/constants/app_text.dart';
 import '../../../core/utils/responsive_util.dart';
 import '../../../models/holiday_model.dart';
 import '../../../providers/holiday_provider.dart';
@@ -61,7 +62,7 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
         } else {
           if (_selectedStartDate != null && picked.isBefore(_selectedStartDate!)) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('End date cannot be before start date')),
+              const SnackBar(content: Text(AppText.endDateBeforeStartError)),
             );
             return;
           }
@@ -76,7 +77,7 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
     if (_formKey.currentState!.validate()) {
       if (_selectedStartDate == null || _selectedEndDate == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select both start and end dates')),
+          const SnackBar(content: Text(AppText.selectBothDatesError)),
         );
         return;
       }
@@ -92,7 +93,7 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
       ref.read(holidayListProvider.notifier).addHoliday(newHoliday);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Holiday added successfully!')),
+        const SnackBar(content: Text(AppText.holidayAddedSuccess)),
       );
 
       Navigator.of(context).pop();
@@ -109,64 +110,68 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Request Holiday',
+          AppText.requestHoliday,
           style: TextStyle(fontSize: titleFont),
         ),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
         centerTitle: true,
       ),
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(padding, vertical, padding, vertical + 8),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(padding, vertical, padding, vertical + 20),
         child: Column(
           children: [
-            Expanded(
-              child: SingleChildScrollView(
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: EdgeInsets.all(padding),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     children: [
                       CustomTextField(
-                        labelText: 'Holiday Name',
-                        hintText: 'e.g., Diwali Break',
+                        labelText: AppText.holidayName,
+                        hintText: AppText.holidayNameHint,
                         controller: _nameController,
                         validator: (value) =>
-                        value == null || value.isEmpty ? 'Please enter a holiday name' : null,
+                        value == null || value.isEmpty ? AppText.errorHolidayName : null,
                       ),
                       SizedBox(height: vertical),
                       CustomTextField(
-                        labelText: 'Start Date',
-                        hintText: 'Select start date',
+                        labelText: AppText.startDate,
+                        hintText: AppText.startDateHint,
                         controller: _startDateController,
                         readOnly: true,
                         onTap: () => _selectDate(context, _startDateController, true),
                         suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
                         validator: (value) =>
-                        value == null || value.isEmpty ? 'Please select a start date' : null,
+                        value == null || value.isEmpty ? AppText.errorStartDate : null,
                       ),
                       SizedBox(height: vertical),
                       CustomTextField(
-                        labelText: 'End Date',
-                        hintText: 'Select end date',
+                        labelText: AppText.endDate,
+                        hintText: AppText.endDateHint,
                         controller: _endDateController,
                         readOnly: true,
                         onTap: () => _selectDate(context, _endDateController, false),
                         suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
                         validator: (value) =>
-                        value == null || value.isEmpty ? 'Please select an end date' : null,
+                        value == null || value.isEmpty ? AppText.errorEndDate : null,
                       ),
                     ],
                   ),
                 ),
               ),
             ),
+            SizedBox(height: vertical * 2),
             CustomButton(
-              text: 'Submit Request',
+              text: AppText.submitRequest,
               onPressed: _submitForm,
               backgroundColor: theme.colorScheme.primary,
-              borderRadius: 12,
+              borderRadius: 15,
               padding: EdgeInsets.symmetric(
-                vertical: ResponsiveUtil.verticalSpacing(context),
+                vertical: 18,
                 horizontal: ResponsiveUtil.horizontalSpacing(context),
               ),
             ),

@@ -5,6 +5,7 @@ import '../../core/constants/app_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../modules/auth/screens/login_screen.dart';
 import '../../providers/auth_provider.dart';
+import '../modules/student/screens/vehicle_registration_screen.dart';
 
 class MoreOptionsBottomSheet extends ConsumerWidget {
   const MoreOptionsBottomSheet({super.key});
@@ -27,8 +28,11 @@ class MoreOptionsBottomSheet extends ConsumerWidget {
             ),
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Navigate to Vehicle Registration")),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VehicleRegistrationScreen(),
+                ),
               );
             },
           ),
