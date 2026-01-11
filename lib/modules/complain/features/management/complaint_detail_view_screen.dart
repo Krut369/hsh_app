@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/utils/responsive_util.dart';
-import '../../../models/complaint_model.dart';
-import '../../../providers/complaint_provider.dart';
-import '../../../widgets/custom_button.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../models/complaint_model.dart';
+import '../../../../providers/complaint_provider.dart';
+import '../../../../widgets/custom_button.dart';
 
 class ComplaintDetailViewScreen extends ConsumerStatefulWidget {
   final Complaint complaint;

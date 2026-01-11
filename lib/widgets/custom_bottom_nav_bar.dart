@@ -45,7 +45,7 @@ class BottomNavBar extends ConsumerWidget {
       ),
 
       items: items.map((item) => BottomNavigationBarItem(
-        icon: Icon(item.icon),
+        icon: Icon(item.icon,size: 28,),
         label: item.label,
       )).toList(),
     );

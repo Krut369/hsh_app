@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hsh_app/modules/complain/screens/complain_detail_screen.dart';
-import 'package:hsh_app/modules/complain/screens/complain_feedback_screen.dart';
 
-import '../../../core/constants/app_text.dart'; // ✅ Import static text labels
+import '../../../core/constants/app_text.dart';
 import '../../../providers/bottom_nav_provider.dart';
 import '../../../widgets/custom_bottom_nav_bar.dart';
 import 'laundry_detail_screen.dart';
