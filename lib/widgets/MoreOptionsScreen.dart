@@ -5,7 +5,7 @@ import '../../core/constants/app_text.dart';
 import '../../core/theme/app_colors.dart';
 import '../../modules/auth/screens/login_screen.dart';
 import '../../providers/auth_provider.dart';
-import '../modules/student/screens/vehicle_registration_screen.dart';
+import 'package:hsh_app/modules/student/features/vehicle/vehicle_registration_screen.dart';
 
 class MoreOptionsBottomSheet extends ConsumerWidget {
   const MoreOptionsBottomSheet({super.key});
