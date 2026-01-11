@@ -12,9 +12,6 @@ class AppColors {
   static const Color textSecondary = Color(0xFF5D90B3);
 
   static const Color border = Color(0xFFE9F1F8);
+  static const successGreen = Color(0xFF10B981);
+  static const warningOrange = Color(0xFFF59E0B);
 }
-
-
-
-
-
