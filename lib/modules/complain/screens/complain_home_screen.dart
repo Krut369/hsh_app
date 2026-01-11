@@ -23,14 +23,14 @@ class _ComplainHomeScreenState extends ConsumerState<ComplainHomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
         centerTitle: false,
         elevation: 0,
 
         title: const Text(
           'Complaint Manager',
           style: TextStyle(
-            color: Colors.black87,
+            color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -39,7 +39,7 @@ class _ComplainHomeScreenState extends ConsumerState<ComplainHomeScreen> {
           Stack(
             children: [
               IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Colors.black87),
+                icon: const Icon(Icons.notifications_outlined, color: Colors.white),
                 onPressed: () {
                   // Handle notification tap
                 },

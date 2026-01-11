@@ -19,13 +19,13 @@ class ComplainMainShell extends ConsumerWidget {
     final screens = const [
       ComplainHomeScreen(),
       ComplaintAdminScreen(),
-      ComplainFeedbackScreen()
+      // ComplainFeedbackScreen()
     ];
 
     final studentNavItems = [
       const BottomNavBarItemData(icon: Icons.home, label: AppText.home),
       const BottomNavBarItemData(icon: Icons.settings_input_component_sharp, label: AppText.leave),
-      const BottomNavBarItemData(icon: Icons.feedback_rounded, label: AppText.attendance),
+      // const BottomNavBarItemData(icon: Icons.feedback_rounded, label: AppText.attendance),
 
     ];
 
