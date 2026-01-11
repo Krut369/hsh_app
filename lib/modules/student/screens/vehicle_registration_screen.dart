@@ -4,6 +4,7 @@ import '../../../core/constants/app_text.dart';
 import '../../../core/utils/responsive_util.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/custom_text_field.dart';
+import '../widgets/vehicle_registration_components.dart';
 
 class VehicleRegistrationScreen extends StatefulWidget {
   const VehicleRegistrationScreen({super.key});
@@ -15,22 +16,28 @@ class VehicleRegistrationScreen extends StatefulWidget {
 
 class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _registrationNumberController;
+  late TextEditingController _plateNumberController;
   late TextEditingController _modelController;
   String? _selectedVehicleType;
+  String? _selectedParkingPreference;
 
   final List<String> _vehicleTypes = ['Car', 'Bike', 'Scooter', 'Bicycle'];
+  final List<String> _parkingPreferences = [
+    'Near Hostel Block A',
+    'Near Canteen',
+    'Main Gate Parking'
+  ];
 
   @override
   void initState() {
     super.initState();
-    _registrationNumberController = TextEditingController();
+    _plateNumberController = TextEditingController();
     _modelController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _registrationNumberController.dispose();
+    _plateNumberController.dispose();
     _modelController.dispose();
     super.dispose();
   }
@@ -44,7 +51,6 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
         return;
       }
 
-      // Logic to save/send data would go here
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text(AppText.vehicleRegisteredSuccess)),
       );
@@ -61,93 +67,118 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
     final titleFont = ResponsiveUtil.responsiveFontSize(context, 20);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           AppText.vehicleRegistration,
-          style: TextStyle(fontSize: titleFont),
+          style: TextStyle(
+              fontSize: titleFont,
+              fontWeight: FontWeight.bold,
+              color: Colors.black),
         ),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(padding, vertical, padding, vertical + 20),
-        child: Column(
-          children: [
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: EdgeInsets.all(padding),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Vehicle Type Dropdown
-                      DropdownButtonFormField<String>(
-                        value: _selectedVehicleType,
-                        decoration: InputDecoration(
-                          labelText: AppText.vehicleType,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          prefixIcon: const Icon(Icons.directions_car),
-                        ),
-                        hint: const Text(AppText.vehicleTypeHint),
-                        items: _vehicleTypes.map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedVehicleType = value;
-                          });
-                        },
-                        validator: (value) =>
-                        value == null ? AppText.errorVehicleType : null,
-                      ),
-                      SizedBox(height: vertical),
-
-                      // Registration Number
-                      CustomTextField(
-                        labelText: AppText.registrationNumber,
-                        hintText: AppText.registrationNumberHint,
-                        controller: _registrationNumberController,
-                        validator: (value) => value == null || value.isEmpty
-                            ? AppText.errorRegistrationNumber
-                            : null,
-                      ),
-                      SizedBox(height: vertical),
-
-                      // Vehicle Model
-                      CustomTextField(
-                        labelText: AppText.vehicleModel,
-                        hintText: AppText.vehicleModelHint,
-                        controller: _modelController,
-                        validator: (value) => value == null || value.isEmpty
-                            ? AppText.errorVehicleModel
-                            : null,
-                      ),
-                    ],
-                  ),
+        padding: EdgeInsets.all(padding),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppText.registerYourVehicleTitle,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
-            ),
-            SizedBox(height: vertical * 2),
-            CustomButton(
-              text: AppText.registerVehicle,
-              onPressed: _submitForm,
-              backgroundColor: theme.colorScheme.primary,
-              borderRadius: 15,
-              padding: EdgeInsets.symmetric(
-                vertical: 18,
-                horizontal: ResponsiveUtil.horizontalSpacing(context),
+              const SizedBox(height: 8),
+              Text(
+                AppText.vehicleRegistrationSubtitle,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
+                  height: 1.5,
+                ),
               ),
-            ),
-          ],
+              SizedBox(height: vertical * 1.5),
+
+              // Vehicle Type
+              VehicleLabel(AppText.vehicleType),
+              const SizedBox(height: 8),
+              VehicleDropdown(
+                hint: AppText.vehicleTypeHint,
+                value: _selectedVehicleType,
+                items: _vehicleTypes,
+                onChanged: (val) => setState(() => _selectedVehicleType = val),
+              ),
+              SizedBox(height: vertical),
+
+              // Plate Number
+              VehicleLabel(AppText.plateNumber),
+              const SizedBox(height: 8),
+              CustomTextField(
+                hintText: AppText.plateNumberHint,
+                controller: _plateNumberController,
+                validator: (value) => value == null || value.isEmpty
+                    ? AppText.errorRegistrationNumber
+                    : null,
+                borderRadius: 12,
+              ),
+              SizedBox(height: vertical),
+
+              // Model / Make
+              VehicleLabel(AppText.modelMake),
+              const SizedBox(height: 8),
+              CustomTextField(
+                hintText: AppText.modelMakeHint,
+                controller: _modelController,
+                validator: (value) => value == null || value.isEmpty
+                    ? AppText.errorVehicleModel
+                    : null,
+                borderRadius: 12,
+              ),
+              SizedBox(height: vertical),
+
+              // Parking Preference
+              VehicleLabel(AppText.parkingPreference),
+              const SizedBox(height: 8),
+              VehicleDropdown(
+                hint: AppText.parkingPreferenceHint,
+                value: _selectedParkingPreference,
+                items: _parkingPreferences,
+                onChanged: (val) =>
+                    setState(() => _selectedParkingPreference = val),
+              ),
+              SizedBox(height: vertical),
+
+              // Upload Registration Papers
+              VehicleLabel(AppText.uploadPapers),
+              const SizedBox(height: 8),
+              const UploadContainer(),
+              SizedBox(height: vertical * 2),
+
+              // Submit Button
+              SafeArea(
+                child: CustomButton(
+                  text: AppText.submitApplication,
+                  onPressed: _submitForm,
+                  backgroundColor: const Color(0xFF1976D2), // Strong blue
+                  borderRadius: 25,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  fontSize: 18,
+                  elevation: 5,
+                ),
+              ),
+              SizedBox(height: vertical),
+            ],
+          ),
         ),
       ),
     );

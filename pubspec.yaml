@@ -41,6 +41,7 @@ dependencies:
   uuid: ^4.4.0 # For generating unique IDs
   shared_preferences: ^2.2.2
   collection: ^1.18.0
+  flutter_markdown: ^0.7.7+1
 
 dev_dependencies:
   flutter_test:

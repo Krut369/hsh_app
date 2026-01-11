@@ -9,8 +9,8 @@ import '../widgets/add_complaint_screen.dart';
 import '../../../models/complaint_model.dart';
 import '../../../providers/complaint_provider.dart';
 
-class ViewComplaintsScreen extends ConsumerWidget {
-  const ViewComplaintsScreen({super.key});
+class ComplaintScreen extends ConsumerWidget {
+  const ComplaintScreen({super.key});
 
   Color _getStatusColor(BuildContext context, ComplaintStatus status) {
     final scheme = Theme.of(context).colorScheme;
