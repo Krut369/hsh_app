@@ -12,6 +12,8 @@ import 'package:hsh_app/modules/student/features/chat/chat_screen.dart';
 import 'package:hsh_app/modules/student/features/notes/notes_screen.dart';
 import 'package:hsh_app/modules/student/features/services/all_services_screen.dart';
 import 'package:hsh_app/modules/student/features/holiday/holiday_payment_screen.dart';
+
+import '../../../../providers/bottom_nav_provider.dart';
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -130,12 +132,14 @@ class ProfileScreen extends ConsumerWidget {
                       iconColor: Colors.blue,
                       iconBgColor: Colors.blue.withOpacity(0.1),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AttendanceScreen(),
-                          ),
-                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => const AttendanceScreen(),
+                        //   ),
+                        // );
+
+                        ref.read(bottomNavIndexProvider.notifier).state = 2;
                       },
                     ),
                   ),
