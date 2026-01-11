@@ -11,7 +11,7 @@ import 'package:hsh_app/modules/student/features/payment/payment_screen.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_screen.dart';
 import 'package:hsh_app/modules/student/features/notes/notes_screen.dart';
 import 'package:hsh_app/modules/student/features/services/all_services_screen.dart';
-
+import 'package:hsh_app/modules/student/features/holiday/holiday_payment_screen.dart';
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -210,6 +210,25 @@ class ProfileScreen extends ConsumerWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => const NotesScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 110,
+                    child: QuickActionCard(
+                      icon: Icons.holiday_village_outlined,
+                      title: 'Holiday',
+                      subtitle: 'Apply Leave',
+                      iconColor: Colors.pink,
+                      iconBgColor: Colors.pink.withOpacity(0.1),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HolidayPaymentScreen(),
                           ),
                         );
                       },
