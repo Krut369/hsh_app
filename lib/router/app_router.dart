@@ -4,11 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:hsh_app/providers/auth_provider.dart';
 import 'package:hsh_app/models/user_model.dart';
+import 'package:hsh_app/models/laundry_order_model.dart';
+import 'package:hsh_app/models/complaint_model.dart';
 import 'package:hsh_app/splash_screen.dart';
 
 import 'package:hsh_app/modules/auth/screens/login_screen.dart';
+import 'package:hsh_app/modules/complain/complain_main_shell.dart';
 import 'package:hsh_app/modules/student/student_main_shell.dart';
-import 'package:hsh_app/modules/complain/screens/complain_main_shell.dart';
+
+import 'package:hsh_app/modules/complain/features/management/complain_admin_screen.dart';
+import 'package:hsh_app/modules/complain/features/feedback/complain_feedback_screen.dart';
+import 'package:hsh_app/modules/complain/features/management/complaint_detail_view_screen.dart';
 import 'package:hsh_app/modules/laundry/screens/laundry_main_shell.dart';
 
 // Feature screens
@@ -111,7 +117,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
            ),
              GoRoute(
              path: 'orders',
-             builder: (context, state) => const OrderDetailsScreen(),
+             builder: (context, state) {
+               final order = state.extra as LaundryOrder;
+               return OrderDetailsScreen(order: order);
+             },
            ),
         ],
       ),
@@ -124,6 +133,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/complain',
         builder: (context, state) => const ComplainMainShell(),
+        routes: [
+           GoRoute(
+             path: 'feedback',
+             builder: (context, state) => const ComplainFeedbackScreen(),
+           ),
+           GoRoute(
+             path: 'admin',
+             builder: (context, state) => const ComplaintAdminScreen(),
+           ),
+           GoRoute(
+             path: 'detail',
+             builder: (context, state) {
+               final complaint = state.extra as Complaint;
+               return ComplaintDetailViewScreen(complaint: complaint);
+             },
+           ),
+        ],
       ),
     ],
   );
