@@ -6,7 +6,7 @@ import 'package:hsh_app/providers/theme_provider.dart';
 import 'core/constants/app_text.dart';
 import 'models/user_model.dart';
 import 'modules/auth/screens/login_screen.dart';
-import 'modules/complain/screens/complain_main_shell.dart';
+import 'modules/complain/complain_main_shell.dart';
 import 'modules/laundry/screens/laundry_main_shell.dart';
 import 'modules/student/student_main_shell.dart';
 import 'router/app_router.dart';
