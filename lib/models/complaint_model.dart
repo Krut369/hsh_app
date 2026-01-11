@@ -64,6 +64,7 @@ class Complaint {
   final DateTime dateTime;
   final String complaintType;
   final Map<String, String> descriptions; // SubComplaint name → description
+  final String? imagePath; // Optional image attachment
   ComplaintStatus status;
 
   Complaint({
@@ -71,6 +72,7 @@ class Complaint {
     required this.dateTime,
     required this.complaintType,
     required this.descriptions,
+    this.imagePath,
     this.status = ComplaintStatus.pending,
   });
 }

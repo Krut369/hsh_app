@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/utils/responsive_util.dart';
 import '../../../models/complaint_model.dart';
 import '../../../providers/complaint_provider.dart';
+import 'complaint_detail_view_screen.dart';
 
 class ComplaintAdminScreen extends ConsumerStatefulWidget {
   const ComplaintAdminScreen({super.key});
@@ -137,6 +138,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
           dateTime: c.dateTime,
           complaintType: c.complaintType,
           descriptions: c.descriptions,
+          imagePath: c.imagePath,
           status: newStatus,
         );
       }
@@ -461,149 +463,10 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
   }
 
   void _showComplaintDetails(Complaint complaint) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final statusColor = _getStatusColor(context, complaint.status);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.8,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) => SingleChildScrollView(
-          controller: scrollController,
-          padding: EdgeInsets.all(ResponsiveUtil.responsivePadding(context)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: EdgeInsets.only(
-                      bottom: ResponsiveUtil.verticalSpacing(context)),
-                  decoration: BoxDecoration(
-                    color: scheme.onSurface.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  Icon(
-                    _getComplaintTypeIcon(complaint.complaintType),
-                    color: scheme.primary,
-                    size: ResponsiveUtil.responsiveIconSize(context, 32),
-                  ),
-                  SizedBox(width: ResponsiveUtil.horizontalSpacing(context)),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          complaint.complaintType,
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize:
-                                ResponsiveUtil.responsiveFontSize(context, 20),
-                          ),
-                        ),
-                        Text(
-                          'Complaint ID: ${complaint.id}',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: scheme.onSurface.withOpacity(0.6),
-                            fontSize:
-                                ResponsiveUtil.responsiveFontSize(context, 14),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: ResponsiveUtil.verticalSpacing(context)),
-              Row(
-                children: [
-                  _buildStatusChip(statusColor, complaint.status),
-                  const Spacer(),
-                  OutlinedButton.icon(
-                    icon: Icon(
-                      Icons.edit,
-                      size: ResponsiveUtil.responsiveIconSize(context, 16),
-                    ),
-                    label: Text(
-                      'Update Status',
-                      style: TextStyle(
-                        fontSize:
-                            ResponsiveUtil.responsiveFontSize(context, 14),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _showStatusUpdateDialog(context, complaint);
-                    },
-                  ),
-                ],
-              ),
-              SizedBox(height: ResponsiveUtil.verticalSpacing(context)),
-              Text(
-                'Submitted: ${DateFormat('MMM dd, yyyy hh:mm a').format(complaint.dateTime)}',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: scheme.onSurface.withOpacity(0.6),
-                  fontSize: ResponsiveUtil.responsiveFontSize(context, 14),
-                ),
-              ),
-              SizedBox(height: ResponsiveUtil.verticalSpacing(context) * 2),
-              Text(
-                'Issues Reported:',
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: ResponsiveUtil.responsiveFontSize(context, 16),
-                ),
-              ),
-              SizedBox(height: ResponsiveUtil.verticalSpacing(context)),
-              ...complaint.descriptions.entries.map((entry) => Padding(
-                    padding: EdgeInsets.only(
-                        bottom: ResponsiveUtil.verticalSpacing(context)),
-                    child: Container(
-                      padding: EdgeInsets.all(
-                          ResponsiveUtil.responsivePadding(context)),
-                      decoration: BoxDecoration(
-                        color: scheme.surfaceContainerHighest.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            entry.key,
-                            style: textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: ResponsiveUtil.responsiveFontSize(
-                                  context, 16),
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            entry.value,
-                            style: textTheme.bodyLarge?.copyWith(
-                              fontSize: ResponsiveUtil.responsiveFontSize(
-                                  context, 16),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )),
-            ],
-          ),
-        ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ComplaintDetailViewScreen(complaint: complaint),
       ),
     );
   }
@@ -651,7 +514,8 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
         title: Text(
           'Complaint Management',
           style: TextStyle(
-            fontSize: ResponsiveUtil.responsiveFontSize(context, 18),
+            fontSize: ResponsiveUtil.responsiveFontSize(context, 20),
+            fontWeight: FontWeight.bold
           ),
         ),
         backgroundColor: scheme.primary,
