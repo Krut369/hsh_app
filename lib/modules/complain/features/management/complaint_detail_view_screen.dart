@@ -75,8 +75,7 @@ class _ComplaintDetailViewScreenState
           id: c.id,
           dateTime: c.dateTime,
           complaintType: c.complaintType,
-          descriptions: c.descriptions,
-          imagePath: c.imagePath,
+          issues: c.issues,
           status: selectedStatus!,
         );
       }
@@ -105,7 +104,7 @@ class _ComplaintDetailViewScreenState
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: widget.complaint.descriptions.entries
+        children: widget.complaint.issues.entries
             .map((entry) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: RichText(
@@ -124,7 +123,7 @@ class _ComplaintDetailViewScreenState
                           ),
                         ),
                         TextSpan(
-                          text: entry.value,
+                          text: entry.value.description,
                           style: const TextStyle(
                             color: Color(0xFFCE9178),
                           ),
@@ -274,11 +273,11 @@ class _ComplaintDetailViewScreenState
                   ),
                   const SizedBox(height: 16),
                   // Image or Code-like display box
-                  widget.complaint.imagePath != null
+                  (widget.complaint.issues.isNotEmpty && widget.complaint.issues.entries.first.value.imagePath != null)
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.file(
-                            File(widget.complaint.imagePath!),
+                            File(widget.complaint.issues.entries.first.value.imagePath!),
                             width: double.infinity,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
@@ -291,7 +290,7 @@ class _ComplaintDetailViewScreenState
                   const SizedBox(height: 20),
                   // Issue Title
                   Text(
-                    widget.complaint.descriptions.entries.first.key,
+                    widget.complaint.issues.isNotEmpty ? widget.complaint.issues.entries.first.key : '',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -301,7 +300,7 @@ class _ComplaintDetailViewScreenState
                   const SizedBox(height: 12),
                   // Issue Description
                   Text(
-                    widget.complaint.descriptions.entries.first.value,
+                    widget.complaint.issues.isNotEmpty ? widget.complaint.issues.entries.first.value.description : '',
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,

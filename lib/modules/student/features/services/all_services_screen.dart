@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
-import 'package:hsh_app/modules/student/features/home/home_components.dart';
+import 'package:hsh_app/modules/student/features/common/quick_action_card.dart';
 import 'package:hsh_app/modules/student/features/attendance/attendance_screen.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_screen.dart';
 import 'package:hsh_app/modules/student/features/payment/payment_screen.dart';

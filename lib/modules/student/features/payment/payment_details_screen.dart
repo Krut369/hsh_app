@@ -5,6 +5,8 @@ import 'package:hsh_app/modules/student/features/payment/imps_payment_details.da
 import 'package:hsh_app/modules/student/features/payment/neft_payment_details.dart';
 import 'package:hsh_app/modules/student/features/payment/upi_payment_details.dart';
 
+import 'package:hsh_app/widgets/custom_app_bar.dart';
+
 class PaymentDetailsScreen extends StatelessWidget {
   final String paymentMethod;
 
@@ -33,19 +35,12 @@ class PaymentDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text('$paymentMethod Payment'),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
+      appBar: CustomAppBar(
+        title: '$paymentMethod Payment',
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-            ),
       ),
       body: SingleChildScrollView(
         child: content,

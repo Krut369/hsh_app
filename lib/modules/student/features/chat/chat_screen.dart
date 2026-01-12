@@ -1,89 +1,97 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
-import 'package:hsh_app/modules/student/features/chat/chat_details_screen.dart';
+import 'package:hsh_app/modules/student/features/chat/chat_components.dart';
+import 'package:hsh_app/modules/student/features/chat/chat_provider.dart';
+import 'package:hsh_app/widgets/custom_app_bar.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
 
   @override
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends ConsumerState<ChatScreen> {
+  bool isGridView = false;
+
+  @override
   Widget build(BuildContext context) {
+    final conversations = ref.watch(chatProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(AppText.chat),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            leading: Stack(
-              children: [
-                const CircleAvatar(
-                  radius: 28,
-                  backgroundColor: Color(0xFFE9F1F8),
-                  child: Icon(Icons.support_agent, color: Colors.blue, size: 30),
-                ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
-              ],
+      appBar: CustomAppBar(
+        title: AppText.chat,
+        showNotificationIcon: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.white),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(
+              isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+              color: Colors.white,
             ),
-            title: const Text(
-              AppText.hostelSupport,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            subtitle: const Text(
-              AppText.chatMsg4,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.grey),
-            ),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const Text(
-                  '10:47 AM',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Text(
-                    '1',
-                    style: TextStyle(color: Colors.white, fontSize: 10),
-                  ),
-                ),
-              ],
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ChatDetailsScreen()),
-              );
+            onPressed: () {
+              setState(() {
+                isGridView = !isGridView;
+              });
             },
           ),
-          // Add more chat items here if needed
-          const Divider(height: 1),
         ],
       ),
+      body: conversations.isEmpty
+          ? const Center(child: Text('No conversations'))
+          : isGridView
+              ? GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.85,
+                  ),
+                  itemCount: conversations.length,
+                  itemBuilder: (context, index) {
+                    final chat = conversations[index];
+                    final lastMessage = chat.lastMessage;
+
+                    return ChatGridTile(
+                      name: chat.name,
+                      message: lastMessage?.text ?? '',
+                      time: lastMessage?.timeString ?? '',
+                      unreadCount: chat.unreadCount,
+                      isOnline: chat.isOnline,
+                      onTap: () {
+                        context.push('/student/chat/details', extra: chat.id);
+                      },
+                    );
+                  },
+                )
+              : ListView.separated(
+                  itemCount: conversations.length,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1, indent: 84),
+                  itemBuilder: (context, index) {
+                    final chat = conversations[index];
+                    final lastMessage = chat.lastMessage;
+
+                    return ChatListTile(
+                      name: chat.name,
+                      message: lastMessage?.text ?? '',
+                      time: lastMessage?.timeString ?? '',
+                      unreadCount: chat.unreadCount,
+                      isOnline: chat.isOnline,
+                      onTap: () {
+                        context.push('/student/chat/details', extra: chat.id);
+                      },
+                    );
+                  },
+                ),
     );
   }
 }

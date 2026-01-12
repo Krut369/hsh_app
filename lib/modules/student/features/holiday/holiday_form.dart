@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import 'package:hsh_app/core/constants/app_text.dart';
+import 'package:hsh_app/core/constants/font.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/models/holiday_model.dart';
 import 'package:hsh_app/providers/holiday_provider.dart';
 import 'package:hsh_app/widgets/custom_button.dart';
 import 'package:hsh_app/widgets/custom_text_field.dart';
+import 'package:hsh_app/widgets/custom_app_bar.dart';
 
 class HolidayForm extends ConsumerStatefulWidget {
   const HolidayForm({super.key});
@@ -21,6 +25,7 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
   late TextEditingController _nameController;
   late TextEditingController _startDateController;
   late TextEditingController _endDateController;
+  late TextEditingController _reasonController;
 
   DateTime? _selectedStartDate;
   DateTime? _selectedEndDate;
@@ -31,6 +36,7 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
     _nameController = TextEditingController();
     _startDateController = TextEditingController();
     _endDateController = TextEditingController();
+    _reasonController = TextEditingController();
   }
 
   @override
@@ -38,6 +44,7 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
     _nameController.dispose();
     _startDateController.dispose();
     _endDateController.dispose();
+    _reasonController.dispose();
     super.dispose();
   }
 
@@ -47,8 +54,18 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
       initialDate: isStartDate
           ? (_selectedStartDate ?? DateTime.now())
           : (_selectedEndDate ?? _selectedStartDate ?? DateTime.now()),
-      firstDate: DateTime(2000),
+      firstDate: DateTime.now(),
       lastDate: DateTime(2101),
+      builder: (context, child) { 
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).primaryColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -56,8 +73,8 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
           _selectedStartDate = picked;
           _startDateController.text = DateFormat('yyyy-MM-dd').format(picked);
           if (_selectedEndDate != null && _selectedEndDate!.isBefore(picked)) {
-            _selectedEndDate = picked;
-            _endDateController.text = DateFormat('yyyy-MM-dd').format(picked);
+            _selectedEndDate = null;
+            _endDateController.clear();
           }
         } else {
           if (_selectedStartDate != null && picked.isBefore(_selectedStartDate!)) {
@@ -88,94 +105,129 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
         startDate: _selectedStartDate!,
         endDate: _selectedEndDate!,
         status: HolidayStatus.pending,
+        reason: _reasonController.text.isNotEmpty ? _reasonController.text : null,
       );
 
       ref.read(holidayListProvider.notifier).addHoliday(newHoliday);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppText.holidayAddedSuccess)),
+        SnackBar(
+          content: const Row(
+            children: [
+               Icon(Icons.check_circle, color: Colors.white),
+               SizedBox(width: 12),
+               Text(AppText.holidayAddedSuccess),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ),
       );
 
-      Navigator.of(context).pop();
+      context.pop();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final vertical = ResponsiveUtil.verticalSpacing(context);
     final padding = ResponsiveUtil.responsivePadding(context);
-    final titleFont = ResponsiveUtil.responsiveFontSize(context, 20);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppText.requestHoliday,
-          style: TextStyle(fontSize: titleFont),
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        title: 'Request Leave',
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.white),
+          onPressed: () => context.pop(),
         ),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(padding, vertical, padding, vertical + 20),
-        child: Column(
-          children: [
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: EdgeInsets.all(padding),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      CustomTextField(
-                        labelText: AppText.holidayName,
-                        hintText: AppText.holidayNameHint,
-                        controller: _nameController,
-                        validator: (value) =>
-                        value == null || value.isEmpty ? AppText.errorHolidayName : null,
-                      ),
-                      SizedBox(height: vertical),
-                      CustomTextField(
-                        labelText: AppText.startDate,
-                        hintText: AppText.startDateHint,
-                        controller: _startDateController,
-                        readOnly: true,
-                        onTap: () => _selectDate(context, _startDateController, true),
-                        suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
-                        validator: (value) =>
-                        value == null || value.isEmpty ? AppText.errorStartDate : null,
-                      ),
-                      SizedBox(height: vertical),
-                      CustomTextField(
-                        labelText: AppText.endDate,
-                        hintText: AppText.endDateHint,
-                        controller: _endDateController,
-                        readOnly: true,
-                        onTap: () => _selectDate(context, _endDateController, false),
-                        suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
-                        validator: (value) =>
-                        value == null || value.isEmpty ? AppText.errorEndDate : null,
-                      ),
-                    ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+               Text(
+                 'New Holiday Request',
+                 style: AppFonts.heading2(context),
+               ),
+               const SizedBox(height: 8),
+               Text(
+                 'Fill in the details below to submit your holiday request for hostel leave.',
+                 style: AppFonts.bodyRegular(context).copyWith(
+                   color: AppColors.textSecondary,
+                 ),
+               ),
+               SizedBox(height: vertical * 1.5),
+
+               CustomTextField(
+                 labelText: AppText.holidayName,
+                 hintText: 'e.g., Diwali Break',
+                 controller: _nameController,
+                 validator: (value) =>
+                 value == null || value.isEmpty ? AppText.errorHolidayName : null,
+               ),
+               SizedBox(height: vertical),
+               CustomTextField(
+                 labelText: AppText.startDate,
+                 hintText: 'mm/dd/yyyy',
+                 controller: _startDateController,
+                 readOnly: true,
+                 onTap: () => _selectDate(context, _startDateController, true),
+                 suffixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.grey),
+                 validator: (value) =>
+                 value == null || value.isEmpty ? AppText.errorStartDate : null,
+               ),
+               SizedBox(height: vertical),
+               CustomTextField(
+                 labelText: AppText.endDate,
+                 hintText: 'mm/dd/yyyy',
+                 controller: _endDateController,
+                 readOnly: true,
+                 onTap: () => _selectDate(context, _endDateController, false),
+                 suffixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.grey),
+                 validator: (value) =>
+                 value == null || value.isEmpty ? AppText.errorEndDate : null,
+               ),
+               SizedBox(height: vertical),
+               CustomTextField(
+                 labelText: 'Reason (Optional)',
+                 hintText: 'Briefly describe your reason for leave',
+                 controller: _reasonController,
+                 maxLines: 4,
+                 minLines: 3,
+               ),
+              
+              SizedBox(height: vertical * 2),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: CustomButton(
+                  text: 'Submit Request',
+                  onPressed: _submitForm,
+                  backgroundColor: const Color(0xFF2C5282),
+                  borderRadius: 12,
+                  icon: const Icon(Icons.send, size: 18, color: Colors.white),
+                  iconSpacing: 8,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  "Your request will be sent to the hostel warden for\napproval. You'll be notified once reviewed.",
+                  textAlign: TextAlign.center,
+                  style: AppFonts.smallText(context).copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.5,
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: vertical * 2),
-            CustomButton(
-              text: AppText.submitRequest,
-              onPressed: _submitForm,
-              backgroundColor: theme.colorScheme.primary,
-              borderRadius: 15,
-              padding: EdgeInsets.symmetric(
-                vertical: 18,
-                horizontal: ResponsiveUtil.horizontalSpacing(context),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

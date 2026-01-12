@@ -6,6 +6,8 @@ import 'package:hsh_app/widgets/custom_button.dart';
 import 'package:hsh_app/modules/student/features/payment/payment_components.dart';
 import 'package:hsh_app/modules/student/features/payment/payment_method_sheet.dart';
 
+import 'package:hsh_app/widgets/custom_app_bar.dart';
+
 class PaymentScreen extends StatelessWidget {
   const PaymentScreen({super.key});
 
@@ -17,27 +19,12 @@ class PaymentScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FE), // Light background color
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FE),
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          AppText.feesAndPayments,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
+      appBar: CustomAppBar(
+        title: AppText.feesAndPayments,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white), // Color changed to white for CustomAppBar
           onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(padding),

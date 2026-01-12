@@ -1,55 +1,73 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:hsh_app/core/constants/app_text.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
 
-class UploadContainer extends StatelessWidget {
-  const UploadContainer({super.key});
+class FileUploadCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const FileUploadCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    this.icon = Icons.cloud_upload_outlined,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: DashedBorderPainter(
-        color: Colors.blue.withOpacity(0.3),
-        strokeWidth: 1,
-        gap: 5,
-        dash: 5,
+        color: AppColors.primary.withOpacity(0.3),
+        strokeWidth: 1.5,
+        gap: 6,
+        dash: 6,
         borderRadius: 16,
       ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FE),
+      child: Material(
+        color: const Color(0xFFF8F9FE),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: Colors.blue,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.cloud_upload, color: Colors.white, size: 28),
+          splashColor: AppColors.primary.withOpacity(0.05),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: AppColors.primary, size: 32),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            const Text(
-              AppText.uploadHint,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppText.uploadSubHint,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[500],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

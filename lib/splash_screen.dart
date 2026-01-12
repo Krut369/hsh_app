@@ -9,7 +9,7 @@ import 'modules/auth/screens/login_screen.dart';
 final splashStateProvider = StateProvider<bool>((ref) => false);
 
 class SplashScreen extends ConsumerStatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
@@ -225,8 +225,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         opacity: _logoFadeAnimation,
         child: Transform(
           alignment: Alignment.center,
-          transform:
-          Matrix4.identity()
+          transform: Matrix4.identity()
             ..scale(1.08)
             ..setEntry(3, 2, 0.001)
             ..rotateY(-0.10), // slight 3D tilt
@@ -294,8 +293,7 @@ class _WavePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-    Paint()
+    final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
     final path = Path();
@@ -326,8 +324,7 @@ class _ShinePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-    Paint()
+    final paint = Paint()
       ..shader = LinearGradient(
         begin: Alignment(-1.0 + 2 * shinePos, -1.0),
         end: Alignment(1.0 + 2 * shinePos, 1.0),

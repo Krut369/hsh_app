@@ -1,107 +1,51 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:hsh_app/models/complaint_model.dart';
 import 'package:hsh_app/providers/complaint_provider.dart';
+import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
+
+import 'package:hsh_app/widgets/custom_button.dart';
 
 class AddComplaintScreen extends ConsumerWidget {
   const AddComplaintScreen({super.key});
 
-  IconData _getComplaintTypeIcon(String typeName) {
-    switch (typeName) {
-      case 'Carpentry':
-        return Icons.handyman;
-      case 'Electrical':
-        return Icons.electrical_services;
-      case 'Plumbing':
-        return Icons.water_damage;
-      case 'Housekeeping':
-        return Icons.cleaning_services;
-      case 'Internet':
-        return Icons.wifi;
-      case 'Others':
-        return Icons.miscellaneous_services;
-      default:
-        return Icons.build;
+  Future<void> _pickImage(WidgetRef ref, String key, ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+    if (pickedFile != null) {
+      ref
+          .read(addComplaintProvider.notifier)
+          .updateIssueImage(key, pickedFile.path);
     }
   }
 
-  IconData _getSubComplaintIcon(String typeName, String subName) {
-    if (typeName == 'Electrical') {
-      switch (subName) {
-        case 'Fan':
-          return Icons.wind_power;
-        case 'Light':
-          return Icons.lightbulb;
-        case 'Geyser':
-          return Icons.hot_tub;
-        case 'Switch Board':
-          return Icons.power;
-        default:
-          return Icons.electrical_services;
-      }
-    } else if (typeName == 'Plumbing') {
-      switch (subName) {
-        case 'Tap':
-          return Icons.water_drop;
-        case 'Flush':
-          return Icons.water;
-        case 'Jet Spray':
-          return Icons.shower;
-        default:
-          return Icons.plumbing;
-      }
-    } else if (typeName == 'Carpentry') {
-      switch (subName) {
-        case 'Bed':
-          return Icons.bed;
-        case 'Door':
-          return Icons.door_back_door_outlined;
-        case 'Cupboard':
-          return Icons.door_sliding;
-        default:
-          return Icons.carpenter;
-      }
-    }
-    return Icons.build;
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedType = ref.watch(selectedComplaintTypeProvider);
-    final hasSubComplaints = ref.watch(hasSubComplaintsProvider);
-    final subComplaints = ref.watch(subComplaintsForTypeProvider);
-    final selectedSubComplaints = ref.watch(selectedSubComplaintsProvider);
-    final descriptions = ref.watch(complaintDescriptionsProvider);
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Complaint'),
+  void _showImagePickerModal(BuildContext context, WidgetRef ref, String key) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      builder: (context) => SafeArea(
+        child: Wrap(
           children: [
-            // Type Selector
-            _buildComplaintTypeSelector(context, ref, selectedType, scheme),
-
-            // Sub-Complaint Selector (if applicable)
-            if (hasSubComplaints)
-              _buildSubComplaintSection(ref, selectedType!, subComplaints, selectedSubComplaints, descriptions, scheme),
-
-            // Direct Description (if no sub-complaints)
-            if (selectedType != null && !hasSubComplaints)
-              _buildDirectDescriptionSection(ref, selectedType, descriptions, scheme),
-
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.send),
-              label: const Text('Submit Complaint'),
-              onPressed: _canSubmit(selectedType, hasSubComplaints, selectedSubComplaints, descriptions)
-                  ? () => _submitComplaint(context, ref, selectedType!, descriptions, scheme)
-                  : null,
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ref, key, ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ref, key, ImageSource.camera);
+              },
             ),
           ],
         ),
@@ -109,109 +53,259 @@ class AddComplaintScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildComplaintTypeSelector(BuildContext context, WidgetRef ref, ComplaintType? selectedType, ColorScheme scheme) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: scheme.outline.withOpacity(0.2)),
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(addComplaintProvider);
+    final notifier = ref.read(addComplaintProvider.notifier);
+
+    final type = state.selectedType;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final hasSubComplaints = type?.subComplaints.isNotEmpty ?? false;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Add Complaint',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.black),
+          onPressed: () {
+            notifier.reset();
+            context.pop();
+          },
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Select Complaint Type',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: scheme.primary,
-                  fontWeight: FontWeight.bold,
-                )),
-            const SizedBox(height: 12),
-            DropdownButtonHideUnderline(
-              child: DropdownButton<ComplaintType>(
-                isExpanded: true,
-                value: selectedType,
-                hint: const Text('Select type'),
-                items: complaintTypes.map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Row(
+            Text(
+              'Select Complaint Type',
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            // Updated Grid Selector
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.0,
+              ),
+              itemCount: complaintTypes.length,
+              itemBuilder: (context, index) {
+                final itemType = complaintTypes[index];
+                final isSelected = type == itemType;
+
+                return InkWell(
+                  onTap: () => notifier.selectType(itemType),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isSelected ? scheme.primary : scheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected ? scheme.primary : Colors.grey[200]!,
+                        width: 2,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                  color: scheme.primary.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4))
+                            ]
+                          : [],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(_getComplaintTypeIcon(type.name), color: scheme.primary),
-                        const SizedBox(width: 12),
-                        Text(type.name),
+                        Icon(
+                          ComplaintUtils.getComplaintTypeIcon(itemType.name),
+                          color: isSelected ? Colors.white : Colors.grey[600],
+                          size: 28,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          itemType.name,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.grey[800],
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ],
                     ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  ref.read(selectedComplaintTypeProvider.notifier).state = value as ComplaintType?;
-                  ref.read(selectedSubComplaintsProvider.notifier).state = [];
-                  ref.read(complaintDescriptionsProvider.notifier).state = {};
-                },
-              ),
+                  ),
+                );
+              },
             ),
+
+            const SizedBox(height: 24),
+
+            // Sub-Complaint Selector (if applicable)
+            if (hasSubComplaints && type != null) ...[
+              Text(
+                'Select Specific Issue',
+                style: theme.textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              _buildSubComplaintSection(
+                  ref, type, state.selectedSubComplaints, state.issues, scheme),
+            ] else if (type != null) ...[
+              Text(
+                'Describe Issue',
+                style: theme.textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              // Use type name as key for direct complaints
+              _buildDirectDescriptionSection(
+                  ref, type.name, state.issues[type.name], scheme),
+            ],
+
+            const SizedBox(height: 32),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: SizedBox(
+            height: 56,
+            child: CustomButton(
+              text: 'Submit Complaint',
+              onPressed: _canSubmit(state)
+                  ? () => _submitComplaint(context, ref, state)
+                  : null,
+              borderRadius: 16,
+            ),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildSubComplaintSection(
-      WidgetRef ref,
-      ComplaintType selectedType,
-      List<SubComplaint> subComplaints,
-      List<SubComplaint> selectedSubComplaints,
-      Map<String, String> descriptions,
-      ColorScheme scheme,
-      ) {
+    WidgetRef ref,
+    ComplaintType selectedType,
+    List<SubComplaint> selectedSubComplaints,
+    Map<String, ComplaintIssueData> issues,
+    ColorScheme scheme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 16),
-        ...subComplaints.map((subComplaint) {
+        ...selectedType.subComplaints.map((subComplaint) {
           final isSelected = selectedSubComplaints.contains(subComplaint);
-          return Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: isSelected ? scheme.primary : scheme.outline.withOpacity(0.2)),
-            ),
+          final issueData = issues[subComplaint.name];
+
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFFF8F9FE) : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: isSelected
+                        ? scheme.primary.withOpacity(0.5)
+                        : Colors.grey[200]!)),
             child: Column(
               children: [
                 CheckboxListTile(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  activeColor: scheme.primary,
                   title: Row(
                     children: [
-                      Icon(_getSubComplaintIcon(selectedType.name, subComplaint.name), color: scheme.primary),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? scheme.primary.withOpacity(0.1)
+                              : Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          ComplaintUtils.getSubComplaintIcon(
+                              selectedType.name, subComplaint.name),
+                          color: isSelected ? scheme.primary : Colors.grey[600],
+                          size: 20,
+                        ),
+                      ),
                       const SizedBox(width: 12),
-                      Text(subComplaint.name),
+                      Text(
+                        subComplaint.name,
+                        style: TextStyle(
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: Colors.black87),
+                      ),
                     ],
                   ),
                   value: isSelected,
                   onChanged: (value) {
-                    final updated = List<SubComplaint>.from(selectedSubComplaints);
-                    if (value == true) {
-                      updated.add(subComplaint);
-                    } else {
-                      updated.remove(subComplaint);
-                      final updatedDesc = Map<String, String>.from(descriptions)..remove(subComplaint.name);
-                      ref.read(complaintDescriptionsProvider.notifier).state = updatedDesc;
-                    }
-                    ref.read(selectedSubComplaintsProvider.notifier).state = updated;
+                    ref
+                        .read(addComplaintProvider.notifier)
+                        .toggleSubComplaint(subComplaint);
                   },
                 ),
                 if (isSelected)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: TextField(
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        hintText: 'Describe issue with ${subComplaint.name}...',
-                      ),
-                      onChanged: (value) {
-                        final updated = Map<String, String>.from(descriptions)
-                          ..[subComplaint.name] = value;
-                        ref.read(complaintDescriptionsProvider.notifier).state = updated;
-                      },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextField(
+                          maxLines: 2,
+                          controller: TextEditingController.fromValue(
+                              TextEditingValue(
+                                  text: issueData?.description ?? '',
+                                  selection: TextSelection.collapsed(
+                                      offset: (issueData?.description ?? '')
+                                          .length))), // Simple way to keep cursor at end for now
+                          decoration: InputDecoration(
+                            hintText:
+                                'Describe issue with ${subComplaint.name}...',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: scheme.primary),
+                            ),
+                            contentPadding: const EdgeInsets.all(12),
+                          ),
+                          style: const TextStyle(fontSize: 14),
+                          onChanged: (value) {
+                            ref
+                                .read(addComplaintProvider.notifier)
+                                .updateIssueDescription(
+                                    subComplaint.name, value);
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        // Image for this sub-complaint
+                        _buildImagePicker(
+                            ref, subComplaint.name, issueData?.imagePath),
+                      ],
                     ),
                   ),
               ],
@@ -223,60 +317,156 @@ class AddComplaintScreen extends ConsumerWidget {
   }
 
   Widget _buildDirectDescriptionSection(
-      WidgetRef ref,
-      ComplaintType selectedType,
-      Map<String, String> descriptions,
-      ColorScheme scheme,
-      ) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: scheme.outline.withOpacity(0.2)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: TextField(
-          maxLines: 4,
+    WidgetRef ref,
+    String key,
+    ComplaintIssueData? issueData,
+    ColorScheme scheme,
+  ) {
+    return Column(
+      children: [
+        TextField(
+          maxLines: 5,
+          controller: TextEditingController.fromValue(TextEditingValue(
+              text: issueData?.description ?? '',
+              selection: TextSelection.collapsed(
+                  offset: (issueData?.description ?? '').length))),
           decoration: InputDecoration(
-            hintText: 'Describe your ${selectedType.name.toLowerCase()} complaint in detail...',
+            hintText: 'Describe your complaint in detail...',
+            filled: true,
+            fillColor: Colors.grey[50],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: scheme.primary),
+            ),
+            contentPadding: const EdgeInsets.all(16),
           ),
           onChanged: (value) {
-            final updated = Map<String, String>.from(descriptions)
-              ..[selectedType.name] = value;
-            ref.read(complaintDescriptionsProvider.notifier).state = updated;
+            ref
+                .read(addComplaintProvider.notifier)
+                .updateIssueDescription(key, value);
           },
         ),
-      ),
+        const SizedBox(height: 12),
+        _buildImagePicker(ref, key, issueData?.imagePath),
+      ],
     );
   }
 
-  bool _canSubmit(
-      ComplaintType? type,
-      bool hasSubComplaints,
-      List<SubComplaint> selected,
-      Map<String, String> descriptions,
-      ) {
-    if (type == null) return false;
-    if (hasSubComplaints) {
-      return selected.isNotEmpty && selected.every((sc) => descriptions[sc.name]?.isNotEmpty == true);
+  Widget _buildImagePicker(WidgetRef ref, String key, String? imagePath) {
+    if (imagePath == null) {
+      return InkWell(
+        onTap: () => _showImagePickerModal(ref.context, ref, key),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 100,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(12),
+            border:
+                Border.all(color: Colors.grey[300]!), // Fixed dashPattern error
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.add_a_photo, size: 24, color: Colors.grey[400]),
+              const SizedBox(height: 4),
+              Text(
+                'Add Photo',
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      );
     } else {
-      return descriptions[type.name]?.isNotEmpty == true;
+      return Stack(
+        alignment: Alignment.topRight,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.file(
+              File(imagePath),
+              height: 150,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.black.withOpacity(0.5),
+              radius: 14,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.close, size: 16, color: Colors.white),
+                onPressed: () {
+                  ref
+                      .read(addComplaintProvider.notifier)
+                      .updateIssueImage(key, null);
+                },
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+  }
+
+  bool _canSubmit(AddComplaintState state) {
+    if (state.selectedType == null) return false;
+    final hasSub = state.selectedType!.subComplaints.isNotEmpty;
+
+    if (hasSub) {
+      // Must select at least one sub-complaint
+      return state.selectedSubComplaints.isNotEmpty;
+    } else {
+      // For direct complaints using type name as key
+      final key = state.selectedType!.name;
+      // Require at least some description logic if needed, or if relaxed just type selected
+      // Let's stick to previous logic: description required for general types
+      return state.issues[key]?.description.isNotEmpty == true;
     }
   }
 
   void _submitComplaint(
-      BuildContext context,
-      WidgetRef ref,
-      ComplaintType type,
-      Map<String, String> descriptions,
-      ColorScheme scheme,
-      ) {
+    BuildContext context,
+    WidgetRef ref,
+    AddComplaintState state,
+  ) {
     final complaints = ref.read(complaintsProvider);
+    final notifier = ref.read(addComplaintProvider.notifier);
+
+    // Filter issues map to only include selected sub-complaints (or the main type)
+    final Map<String, ComplaintIssueData> effectiveIssues = {};
+    if (state.selectedType!.subComplaints.isNotEmpty) {
+      for (var sub in state.selectedSubComplaints) {
+        // If data exists, use it. If not (no desc/image), create empty valid data?
+        // Or if logic allows empty, we just store it.
+        // We need to ensure we save what was selected.
+        effectiveIssues[sub.name] =
+            state.issues[sub.name] ?? ComplaintIssueData(description: '');
+      }
+    } else {
+      final key = state.selectedType!.name;
+      effectiveIssues[key] =
+          state.issues[key] ?? ComplaintIssueData(description: '');
+    }
+
     final newComplaint = Complaint(
       id: (complaints.length + 1).toString(),
       dateTime: DateTime.now(),
-      complaintType: type.name,
-      descriptions: descriptions,
+      complaintType: state.selectedType!.name,
+      issues: effectiveIssues,
     );
     ref.read(complaintsProvider.notifier).state = [newComplaint, ...complaints];
 
@@ -290,13 +480,13 @@ class AddComplaintScreen extends ConsumerWidget {
           ],
         ),
         backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
       ),
     );
 
-    ref.read(selectedComplaintTypeProvider.notifier).state = null;
-    ref.read(selectedSubComplaintsProvider.notifier).state = [];
-    ref.read(complaintDescriptionsProvider.notifier).state = {};
-
-    Navigator.pop(context);
+    notifier.reset();
+    context.pop();
   }
 }

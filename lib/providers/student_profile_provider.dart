@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/material.dart';
 
-import '../models/student_profile.dart';
+import 'package:hsh_app/models/student_profile.dart';
+
 final studentProfileProvider = StateProvider<StudentProfile>(
-      (ref) => StudentProfile(
+  (ref) => StudentProfile(
     name: 'Parth Prajapati',
     college: 'V.P. & R.P.T.P. Science College',
     room: '3000',

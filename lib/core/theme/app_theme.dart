@@ -6,7 +6,6 @@ final ThemeData appTheme = ThemeData(
   primaryColor: AppColors.primary,
   scaffoldBackgroundColor: AppColors.background,
   fontFamily: 'Roboto',
-
   appBarTheme: const AppBarTheme(
     backgroundColor: AppColors.primary,
     foregroundColor: Colors.white,
@@ -19,7 +18,6 @@ final ThemeData appTheme = ThemeData(
       fontSize: 22,
     ),
   ),
-
   colorScheme: ColorScheme.fromSwatch(
     primarySwatch: MaterialColor(AppColors.primary.value, {
       50: AppColors.surface,
@@ -40,15 +38,12 @@ final ThemeData appTheme = ThemeData(
     onPrimary: Colors.white,
     secondary: AppColors.secondary,
     onSecondary: AppColors.textPrimary,
-    background: AppColors.background,
-    onBackground: AppColors.textPrimary,
     surface: AppColors.surface,
     onSurface: AppColors.textPrimary,
     error: Colors.redAccent,
     onError: Colors.white,
   ),
-
-  cardTheme: CardTheme(
+  cardTheme: CardThemeData(
     color: AppColors.card,
     elevation: 6,
     shadowColor: Colors.black12,
@@ -56,7 +51,6 @@ final ThemeData appTheme = ThemeData(
       borderRadius: BorderRadius.circular(16),
     ),
   ),
-
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: AppColors.primary,
@@ -71,7 +65,6 @@ final ThemeData appTheme = ThemeData(
       ),
     ),
   ),
-
   textButtonTheme: TextButtonThemeData(
     style: TextButton.styleFrom(
       foregroundColor: AppColors.primary,
@@ -81,19 +74,16 @@ final ThemeData appTheme = ThemeData(
       ),
     ),
   ),
-
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
     backgroundColor: AppColors.secondary,
     foregroundColor: AppColors.textPrimary,
     elevation: 8,
     shape: CircleBorder(),
   ),
-
   iconTheme: const IconThemeData(
     color: AppColors.primary,
     size: 26.0,
   ),
-
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
     fillColor: AppColors.surface,
@@ -121,21 +111,47 @@ final ThemeData appTheme = ThemeData(
       borderSide: const BorderSide(color: Colors.redAccent, width: 3),
     ),
   ),
-
   textTheme: TextTheme(
-    displayLarge: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 57),
-    displayMedium: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 45),
-    displaySmall: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 36),
-    headlineMedium: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 32),
-    headlineSmall: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 28),
-    titleLarge: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 22),
-    titleMedium: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w500, fontSize: 16),
-    titleSmall: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500, fontSize: 14),
+    displayLarge: TextStyle(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.bold,
+        fontSize: 57),
+    displayMedium: TextStyle(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.bold,
+        fontSize: 45),
+    displaySmall: TextStyle(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.bold,
+        fontSize: 36),
+    headlineMedium: TextStyle(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w600,
+        fontSize: 32),
+    headlineSmall: TextStyle(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w600,
+        fontSize: 28),
+    titleLarge: TextStyle(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w600,
+        fontSize: 22),
+    titleMedium: TextStyle(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w500,
+        fontSize: 16),
+    titleSmall: TextStyle(
+        color: AppColors.textSecondary,
+        fontWeight: FontWeight.w500,
+        fontSize: 14),
     bodyLarge: TextStyle(color: AppColors.textPrimary, fontSize: 16),
     bodyMedium: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-    bodySmall: TextStyle(color: AppColors.textSecondary.withOpacity(0.8), fontSize: 12),
-    labelLarge: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+    bodySmall: TextStyle(
+        color: AppColors.textSecondary.withOpacity(0.8), fontSize: 12),
+    labelLarge: const TextStyle(
+        color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
     labelMedium: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-    labelSmall: TextStyle(color: AppColors.textSecondary.withOpacity(0.6), fontSize: 11),
+    labelSmall: TextStyle(
+        color: AppColors.textSecondary.withOpacity(0.6), fontSize: 11),
   ),
 );

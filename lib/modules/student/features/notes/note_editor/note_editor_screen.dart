@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
-import 'package:hsh_app/models/note_model.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
+import 'package:hsh_app/core/constants/font.dart';
+import 'package:hsh_app/modules/student/features/notes/models/note_model.dart';
 import 'package:hsh_app/providers/notes_provider.dart';
 import 'package:hsh_app/modules/student/features/notes/note_components.dart';
 import 'markdown_controller.dart';
 import 'note_toolbar.dart';
 import 'format_bottom_sheet.dart';
+import 'note_formatting_logic.dart';
 
 class NoteEditorScreen extends ConsumerStatefulWidget {
   final Note? noteToEdit;
@@ -24,6 +27,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   late MarkdownSyntaxController _bodyController; // Use custom controller
   final FocusNode _bodyFocusNode = FocusNode();
   TextSelection _lastSelection = const TextSelection.collapsed(offset: 0);
+  TextEditingValue? _lastValue;
   
   // Track if we are editing
   bool get _isEditing => widget.noteToEdit != null;
@@ -51,9 +55,18 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       _bodyController = MarkdownSyntaxController();
     }
     
-    // Listeners for auto-save
+    // Listeners for auto-save and auto-format
     _titleController.addListener(_onTextChanged);
     _bodyController.addListener(() {
+      final newValue = _bodyController.value;
+      if (_lastValue != null && newValue != _lastValue) {
+          final formattedValue = NoteFormattingLogic.processAutoFormatting(_lastValue!, newValue);
+          if (formattedValue != newValue) {
+              _bodyController.value = formattedValue;
+          }
+      }
+      _lastValue = _bodyController.value;
+
       if (_bodyFocusNode.hasFocus && _bodyController.selection.isValid) {
         _lastSelection = _bodyController.selection;
       }
@@ -89,7 +102,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.amber), 
+          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary), 
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -111,12 +124,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                 TextButton(
                   onPressed: () => _saveNote(silent: false),
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.amber[700], // Professional accent color
+                    foregroundColor: AppColors.primary,
                   ),
-                  child: const Text(
+                  child: Text(
                     AppText.save,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                    style: AppFonts.buttonText(context).copyWith(
+                      color: AppColors.primary, 
                       fontSize: 17,
                     ),
                   ),
@@ -160,10 +173,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                     const SizedBox(height: 16),
                      TextField(
                       controller: _titleController,
-                      style: const TextStyle(
-                        fontSize: 28, // Larger title
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                      style: AppFonts.heading1(context).copyWith(
                         height: 1.2,
                       ),
                       decoration: const InputDecoration(
@@ -182,10 +192,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                         controller: _bodyController,
                         maxLines: null,
                         expands: true,
-                        style: const TextStyle(
-                          fontSize: 17, // Standard readable size
+                        style: AppFonts.bodyRegular(context).copyWith(
+                          fontSize: 17,
                           height: 1.5,
-                          color: Colors.black87,
                         ),
                         decoration: const InputDecoration(
                           hintText: AppText.noteBodyHint,
@@ -277,179 +286,15 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
        _bodyFocusNode.requestFocus();
     }
 
-    final text = _bodyController.text;
-    final selection = _bodyController.selection.isValid && _bodyController.selection.start >= 0
-        ? _bodyController.selection 
-        : _lastSelection;
-    
-    final effectiveSelection = selection.start >= 0 && selection.end <= text.length
-        ? selection
-        : TextSelection.collapsed(offset: text.length);
-
-    final start = effectiveSelection.start;
-    final end = effectiveSelection.end;
-    
-    String newText = text;
-    int newSelectionOffset = start;
-
-    switch (type) {
-      case 'bold':
-        if (start == end) {
-          newText = text.replaceRange(start, end, '****');
-          newSelectionOffset = start + 2;
-        } else {
-          final selectedText = text.substring(start, end);
-          newText = text.replaceRange(start, end, '**$selectedText**');
-          newSelectionOffset = end + 4; 
-        }
-        break;
-      case 'italic':
-        if (start == end) {
-          newText = text.replaceRange(start, end, '__'); // Using _ since controller supports it
-          newSelectionOffset = start + 1;
-        } else {
-          final selectedText = text.substring(start, end);
-          newText = text.replaceRange(start, end, '_${selectedText}_');
-          newSelectionOffset = end + 2;
-        }
-        break;
-      case 'list':
-        // If start is at beginning of line or empty, add '- '
-        // Ideally checking for newline logic, but stick to simple for now
-        newText = text.replaceRange(start, end, '\n- ');
-        newSelectionOffset = start + 3;
-        break;
-      case 'numbered':
-        newText = text.replaceRange(start, end, '\n1. ');
-        newSelectionOffset = start + 4;
-        break;
-      case 'quote':
-        newText = text.replaceRange(start, end, '\n> ');
-        newSelectionOffset = start + 3;
-        break;
-      case 'checkbox':
-        newText = text.replaceRange(start, end, '\n- [ ] ');
-        newSelectionOffset = start + 7;
-        break;
-      
-      // New Formats from Bottom Sheet
-      case 'title':
-        _applyLinePrefix(start, '# ');
-        return; // Early return as handled by helper
-      case 'heading':
-        _applyLinePrefix(start, '## ');
-        return;
-      case 'subheading':
-        _applyLinePrefix(start, '### ');
-        return;
-      case 'body':
-        _removeLinePrefix(start);
-        return;
-      
-      case 'strikethrough':
-        if (start == end) {
-           newText = text.replaceRange(start, end, '~~~~');
-           newSelectionOffset = start + 2;
-        } else {
-           final selected = text.substring(start, end);
-           newText = text.replaceRange(start, end, '~~$selected~~');
-           newSelectionOffset = end + 4;
-        }
-        break;
-      
-      case 'underline':
-        // Markdown doesn't support underline well. Fallback to italic for now.
-        _handleFormat('italic'); 
-        return;
-    }
-
-    _bodyController.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(offset: newSelectionOffset),
+    final newValue = NoteFormattingLogic.applyFormat(
+      type, 
+      _bodyController.value, 
+      fallbackSelection: _lastSelection
     );
+    _bodyController.value = newValue;
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_bodyFocusNode.hasFocus) _bodyFocusNode.requestFocus();
     });
-  }
-
-  void _applyLinePrefix(int cursorPosition, String prefix) {
-     final text = _bodyController.text;
-     // Find start of line
-     int lineStart = text.lastIndexOf('\n', cursorPosition < text.length ? cursorPosition : cursorPosition - 1);
-     if (lineStart == -1) {
-       lineStart = 0;
-     } else {
-       lineStart += 1;
-     }
-
-     // Remove existing headers if any (# )
-     // Regex to check if line starts with #+ 
-     // For simplicity, just check current line content
-     
-     // Ideally we get the full line content to check replacement
-     // Simplification: Just insert at start of line for now or replace if existing
-     
-     // Hard to robustly replace without full line scanning.
-     // Let's just insert.
-     
-     final newText = text.replaceRange(lineStart, lineStart, prefix);
-     
-     _bodyController.value = TextEditingValue(
-       text: newText,
-       selection: TextSelection.collapsed(offset: cursorPosition + prefix.length),
-     );
-  }
-
-  void _removeLinePrefix(int cursorPosition) {
-     final text = _bodyController.text;
-     int lineStart = text.lastIndexOf('\n', cursorPosition < text.length ? cursorPosition : cursorPosition - 1);
-     if (lineStart == -1) {
-       lineStart = 0;
-     } else {
-       lineStart += 1;
-     }
-
-     // Get rest of line to find what to remove
-     // Simple check: if starts with #, remove it.
-     
-     final RegExp headerPattern = RegExp(r'^#{1,6}\s+');
-     final RegExp listPattern = RegExp(r'^-\s+');
-     final RegExp numListPattern = RegExp(r'^\d+\.\s+');
-     final RegExp quotePattern = RegExp(r'^>\s+');
-     
-     // We need to look at the substring from lineStart to end of line or next newline
-     int lineEnd = text.indexOf('\n', lineStart);
-     if (lineEnd == -1) lineEnd = text.length;
-     
-     final lineText = text.substring(lineStart, lineEnd);
-     
-     String newText = text;
-     int newCursor = cursorPosition;
-
-     if (headerPattern.hasMatch(lineText)) {
-       final match = headerPattern.firstMatch(lineText)!;
-       newText = text.replaceRange(lineStart, lineStart + match.group(0)!.length, '');
-       newCursor -= match.group(0)!.length;
-     } else if (listPattern.hasMatch(lineText)) {
-       final match = listPattern.firstMatch(lineText)!;
-       newText = text.replaceRange(lineStart, lineStart + match.group(0)!.length, '');
-       newCursor -= match.group(0)!.length;
-     } else if (numListPattern.hasMatch(lineText)) {
-       final match = numListPattern.firstMatch(lineText)!;
-       newText = text.replaceRange(lineStart, lineStart + match.group(0)!.length, '');
-       newCursor -= match.group(0)!.length;
-     } else if (quotePattern.hasMatch(lineText)) {
-       final match = quotePattern.firstMatch(lineText)!;
-       newText = text.replaceRange(lineStart, lineStart + match.group(0)!.length, '');
-       newCursor -= match.group(0)!.length;
-     }
-
-     if (newText != text) {
-        _bodyController.value = TextEditingValue(
-          text: newText,
-          selection: TextSelection.collapsed(offset: newCursor < 0 ? 0 : newCursor),
-        );
-     }
   }
 }

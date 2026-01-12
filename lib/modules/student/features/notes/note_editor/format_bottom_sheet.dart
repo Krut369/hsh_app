@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
 
 class FormatBottomSheet extends StatelessWidget {
   final Function(String) onFormat;
@@ -12,7 +13,7 @@ class FormatBottomSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       decoration: const BoxDecoration(
-        color: Color(0xFF1E1E1E), // Dark background matching screenshots
+        color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
@@ -26,7 +27,7 @@ class FormatBottomSheet extends StatelessWidget {
               const Text(
                 'Format',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black87,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -162,7 +163,7 @@ class _StyleButton extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: Colors.white,
+              color: Colors.black87,
               fontSize: fontSize,
               fontWeight: fontWeight,
             ),
@@ -197,16 +198,16 @@ class _FormatIconButton extends StatelessWidget {
         width: 50,
         height: 50,
         decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2C), // Dark grey button background
+          color: Colors.grey[200], // Light grey button background
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: Alignment.center,
         child: isIcon 
-            ? Icon(icon, color: Colors.white, size: 24)
+            ? Icon(icon, color: AppColors.primary, size: 24)
             : Text(
                 label ?? '',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.primary,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   fontStyle: fontStyle,

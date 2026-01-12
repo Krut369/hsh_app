@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:hsh_app/models/student_profile.dart';
 
-class ProfileCard extends StatelessWidget {
-  final StudentProfile profile;
+class StudentHeaderCard extends StatelessWidget {
+  final String userName;
+  final String roomNumber;
+  final String imagePath;
+  final VoidCallback? onNotificationTap;
 
-  // Unused params kept for backward compatibility if needed, or remove them.
-  // The caller (ProfileScreen) might still be passing them, so we can make them optional or ignore them.
-  // Ideally, we should update the caller to stop passing animations.
-  // For now, I'll update the constructor to accept them as optional/ignored to avoid breaking the build immediately,
-  // but I plan to clean up ProfileScreen too.
-
-  const ProfileCard({
-    required this.profile,
-    // Animations are no longer needed
+  const StudentHeaderCard({
     super.key,
+    required this.userName,
+    required this.roomNumber,
+    required this.imagePath,
+    this.onNotificationTap,
   });
 
   @override
@@ -42,12 +40,11 @@ class ProfileCard extends StatelessWidget {
               border: Border.all(
                   color: AppColors.primary.withOpacity(0.2), width: 2),
             ),
-            padding: const EdgeInsets.all(2),
+            padding: const EdgeInsets.all(2), // Space for border
             child: CircleAvatar(
               radius: 35,
               backgroundColor: const Color(0xFFFFF3E0),
-              backgroundImage: AssetImage(profile.imagePath),
-              onBackgroundImageError: (_, __) => const Icon(Icons.person),
+              backgroundImage: AssetImage(imagePath),
             ),
           ),
           const SizedBox(width: 16),
@@ -56,7 +53,7 @@ class ProfileCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${AppText.goodMorning}, ${profile.name.split(' ').first}',
+                  '${AppText.goodMorning}, $userName',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
@@ -77,12 +74,12 @@ class ProfileCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.meeting_room_outlined,
+                          Icon(Icons.meeting_room_outlined,
                               size: 14, color: AppColors.primary),
                           const SizedBox(width: 4),
                           Text(
-                            'Room ${profile.room}',
-                            style: const TextStyle(
+                            'Room $roomNumber',
+                            style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,

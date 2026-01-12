@@ -3,7 +3,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'dart:math' as math;
 
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:hsh_app/core/theme/app_theme.dart';
 
 class MobileScannerScreen extends StatefulWidget {
   const MobileScannerScreen({super.key});
@@ -50,11 +49,11 @@ class _MobileScannerScreenState extends State<MobileScannerScreen>
 
   @override
   Widget build(BuildContext context) {
-    final double scanAreaSize = MediaQuery.of(context).size.width * 0.7; // Size of the central square
+    final double scanAreaSize =
+        MediaQuery.of(context).size.width * 0.7; // Size of the central square
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-
       appBar: AppBar(
         // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
@@ -76,7 +75,8 @@ class _MobileScannerScreenState extends State<MobileScannerScreen>
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: const Text("Help"),
-                    content: const Text("Position the QR code within the scanning frame."),
+                    content: const Text(
+                        "Position the QR code within the scanning frame."),
                     actions: <Widget>[
                       TextButton(
                         child: const Text("OK"),
@@ -132,7 +132,8 @@ class _MobileScannerScreenState extends State<MobileScannerScreen>
           // 3. Central Scanning Frame with Animation (on top of overlay)
           Align(
             alignment: Alignment.center,
-            child: SizedBox( // Use SizedBox instead of Container if no decoration
+            child: SizedBox(
+              // Use SizedBox instead of Container if no decoration
               width: scanAreaSize,
               height: scanAreaSize,
               child: Stack(
@@ -145,7 +146,8 @@ class _MobileScannerScreenState extends State<MobileScannerScreen>
                     builder: (context, child) {
                       const double lineHeight = 3.0;
                       return Positioned(
-                        top: _scanLineAnimation.value * (scanAreaSize - lineHeight),
+                        top: _scanLineAnimation.value *
+                            (scanAreaSize - lineHeight),
                         left: 0,
                         right: 0,
                         child: Container(
@@ -186,12 +188,10 @@ class _MobileScannerScreenState extends State<MobileScannerScreen>
                   const SizedBox(height: 50),
                   Text(
                     "HSH Hostel Scanner",
-
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white
-                    ),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                 ],
               ),
@@ -242,7 +242,8 @@ class ScannerOverlayPainter extends CustomPainter {
 
     // Paint for the overlay
     final Paint overlayPaint = Paint()
-      ..color = Colors.black.withOpacity(0.6); // Adjust opacity for desired "blur" effect
+      ..color = Colors.black
+          .withOpacity(0.6); // Adjust opacity for desired "blur" effect
 
     // Create a path that covers the entire canvas
     final Path fullPath = Path()
@@ -251,8 +252,10 @@ class ScannerOverlayPainter extends CustomPainter {
     // Calculate the dimensions of the transparent hole
     final double holeLeft = (size.width - scanAreaSize) / 2;
     final double holeTop = (size.height - scanAreaSize) / 2;
-    final Rect holeRect = Rect.fromLTWH(holeLeft, holeTop, scanAreaSize, scanAreaSize);
-    final RRect holeRRect = RRect.fromRectAndRadius(holeRect, Radius.circular(cornerRadius));
+    final Rect holeRect =
+        Rect.fromLTWH(holeLeft, holeTop, scanAreaSize, scanAreaSize);
+    final RRect holeRRect =
+        RRect.fromRectAndRadius(holeRect, Radius.circular(cornerRadius));
 
     // Subtract the rounded rectangle hole from the full path
     final Path cutOutPath = Path.combine(
@@ -286,11 +289,13 @@ class ScannerCornersPainter extends CustomPainter {
 
     // Define the rect for the rounded rectangle border
     final Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    final RRect rrect = RRect.fromRectAndRadius(rect, Radius.circular(cornerRadius));
+    final RRect rrect =
+        RRect.fromRectAndRadius(rect, Radius.circular(cornerRadius));
 
     final double horizontalLength = size.width - 2 * cornerRadius;
     final double verticalLength = size.height - 2 * cornerRadius;
-    final double totalLength = 2 * (horizontalLength + verticalLength) + 2 * math.pi * cornerRadius;
+    final double totalLength =
+        2 * (horizontalLength + verticalLength) + 2 * math.pi * cornerRadius;
 
     final List<Color> colors = [
       topColor,
@@ -302,9 +307,12 @@ class ScannerCornersPainter extends CustomPainter {
 
     final List<double> stops = [
       0.0, // Start point (adjusted by startAngle)
-      (horizontalLength + math.pi * cornerRadius / 2) / totalLength, // End of top straight + first corner arc
-      (horizontalLength + verticalLength + math.pi * cornerRadius) / totalLength, // End of right straight + second corner arc
-      (2 * horizontalLength + verticalLength + 3 * math.pi * cornerRadius / 2) / totalLength, // End of bottom straight + third corner arc
+      (horizontalLength + math.pi * cornerRadius / 2) /
+          totalLength, // End of top straight + first corner arc
+      (horizontalLength + verticalLength + math.pi * cornerRadius) /
+          totalLength, // End of right straight + second corner arc
+      (2 * horizontalLength + verticalLength + 3 * math.pi * cornerRadius / 2) /
+          totalLength, // End of bottom straight + third corner arc
       1.0, // End of left straight + final corner arc (completing the circle)
     ];
 

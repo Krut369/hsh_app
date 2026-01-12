@@ -98,9 +98,9 @@ class SelectableLaundryItemsNotifier extends StateNotifier<List<LaundryItem>> {
     const LaundryItem(id: 's1', name: 'Shirts', icon: Icons.checkroom),
     const LaundryItem(id: 'p1', name: 'Pants', icon: Icons.person),
     const LaundryItem(id: 'j1', name: 'Jackets', icon: Icons.work),
-    const LaundryItem(id: 'd1', name: 'Dresses', icon: Icons.woman),
     const LaundryItem(id: 't1', name: 'T-Shirts', icon: Icons.content_cut),
     const LaundryItem(id: 'c1', name: 'Coats', icon: Icons.accessibility_new),
+    const LaundryItem(id: 'o1', name: 'Others', icon: Icons.devices_other),
   ]);
 
   /// Updates a specific laundry item in the selectable list.

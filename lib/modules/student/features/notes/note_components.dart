@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hsh_app/core/constants/app_text.dart';
-import 'package:hsh_app/core/theme/app_colors.dart';
 
 class NoteTag extends StatelessWidget {
   final String label;
@@ -21,7 +19,9 @@ class NoteTag extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE3F2FD) : Colors.transparent, // Light blue selection
+          color: isSelected
+              ? const Color(0xFFE3F2FD)
+              : Colors.transparent, // Light blue selection
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? Colors.blue : Colors.transparent,
@@ -40,5 +40,3 @@ class NoteTag extends StatelessWidget {
     );
   }
 }
-
-

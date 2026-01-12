@@ -1,5 +1,5 @@
 // lib/models/laundry_item_model.dart
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 
 /// Represents the type of laundry service selected for an item.
@@ -114,7 +114,7 @@ class LaundryItem {
       ),
       quantity: map['quantity'] as int,
       selectedService: LaundryServiceType.values.firstWhere(
-            (e) => e.name == map['selectedService'],
+        (e) => e.name == map['selectedService'],
         orElse: () => LaundryServiceType.wash,
       ),
     );
@@ -139,9 +139,9 @@ class LaundryItem {
   @override
   int get hashCode {
     return id.hashCode ^
-    name.hashCode ^
-    icon.hashCode ^
-    quantity.hashCode ^
-    selectedService.hashCode;
+        name.hashCode ^
+        icon.hashCode ^
+        quantity.hashCode ^
+        selectedService.hashCode;
   }
 }
