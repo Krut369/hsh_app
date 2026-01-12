@@ -8,7 +8,7 @@ import '../../../core/constants/font.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/responsive_util.dart';
 
-import '../../../widgets/more_options_screen.dart';
+
 import '../../../widgets/custom_bottom_nav_bar.dart';
 
 class StudentMainShell extends ConsumerWidget {
@@ -33,7 +33,6 @@ class StudentMainShell extends ConsumerWidget {
       const BottomNavBarItemData(
           icon: Icons.check_circle, label: AppText.attendance),
       // const BottomNavBarItemData(icon: Icons.flight_takeoff, label: AppText.leave),
-      const BottomNavBarItemData(icon: Icons.more_vert, label: 'More'),
     ];
 
     return Scaffold(
@@ -41,24 +40,13 @@ class StudentMainShell extends ConsumerWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
-          if (index == 4) {
-            // Bottom sheet on "More"
-            showModalBottomSheet(
-              context: context,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              ),
-              builder: (context) => const MoreOptionsBottomSheet(),
-            );
-          } else {
-            // Use navigationShell to switch branches
-            navigationShell.goBranch(
-              index,
-              // A common pattern when switching tabs, to support
-              // popping to the first route of the stack on re-tap
-              initialLocation: index == navigationShell.currentIndex,
-            );
-          }
+          // Use navigationShell to switch branches
+          navigationShell.goBranch(
+            index,
+            // A common pattern when switching tabs, to support
+            // popping to the first route of the stack on re-tap
+            initialLocation: index == navigationShell.currentIndex,
+          );
         },
         selectedItemColor: AppColors.primary,
         unselectedItemColor: Colors.grey,

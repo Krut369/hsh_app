@@ -21,7 +21,7 @@ import 'package:hsh_app/modules/laundry/screens/laundry_main_shell.dart';
 import 'package:hsh_app/modules/student/features/attendance/attendance_screen.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_screen.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_screen.dart';
-import 'package:hsh_app/modules/student/features/holiday/holiday_payment_screen.dart';
+import 'package:hsh_app/modules/student/features/holiday/holiday_screen.dart';
 import 'package:hsh_app/modules/student/features/notes/notes_screen.dart';
 import 'package:hsh_app/modules/student/features/payment/payment_screen.dart';
 import 'package:hsh_app/modules/student/features/services/all_services_screen.dart';
@@ -148,19 +148,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                   path: '/student/leave',
-                  builder: (context, state) => const HolidayPaymentScreen(),
+                  builder: (context, state) => const HolidayScreen(),
               ),
             ],
           ),
-           // Branch 5: More (Placeholder, usually handled by UI opening a sheet, 
-           // but we need a 5th branch to match the 5 bottom nav items if we want index sync, 
-           // HOWEVER, implementation plan says "More" just opens a sheet.
-           // `StudentMainShell` handles index 4 by opening sheet and NOT calling `goBranch`.
-           // So we only need 4 branches for the 4 actual tabs.
-           // The BottomNavBar has 5 items. 
-           // Logic in StudentMainShell: "if index == 4 showSheet else goBranch(index)"
-           // So navigationShell will only ever see indices 0, 1, 2, 3.
-           // So we only need 4 branches.
         ],
       ),
 
@@ -182,7 +173,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/student/holiday',
-        builder: (context, state) => const HolidayPaymentScreen(),
+        builder: (context, state) => const HolidayScreen(),
         routes: [
            GoRoute(
              path: 'add',

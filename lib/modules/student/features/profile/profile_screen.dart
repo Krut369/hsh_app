@@ -154,6 +154,20 @@ class ProfileScreen extends ConsumerWidget {
                       },
                     ),
                   ),
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 110,
+                    child: QuickActionCard(
+                      icon: Icons.directions_car,
+                      title: 'Vehicle', // Short title for UI
+                      subtitle: 'Register',
+                      iconColor: Colors.indigo,
+                      iconBgColor: Colors.indigo.withOpacity(0.1),
+                      onTap: () {
+                        context.push('/student/vehicle-registration');
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -31,24 +31,7 @@ class MoreOptionsBottomSheet extends ConsumerWidget {
             },
           ),
 
-          const SizedBox(height: 16),
 
-          // 🛫 Temporary Leave Button
-          ElevatedButton.icon(
-            icon: const Icon(Icons.airplane_ticket_outlined),
-            label: const Text(AppText.temporaryLeave),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.secondary,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 48),
-            ),
-            onPressed: () {
-              context.pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Navigate to Temporary Leave")),
-              );
-            },
-          ),
 
           const SizedBox(height: 16),
 

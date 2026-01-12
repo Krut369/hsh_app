@@ -30,19 +30,22 @@ enum HolidayStatus {
 }
 
 @immutable
+@immutable
 class Holiday {
   final String id;
   final String name;
   final DateTime startDate;
   final DateTime endDate;
-  final HolidayStatus status; // NEW FIELD
+  final HolidayStatus status;
+  final String? reason; // NEW FIELD
 
   const Holiday({
     required this.id,
     required this.name,
     required this.startDate,
     required this.endDate,
-    this.status = HolidayStatus.pending, // default is pending
+    this.status = HolidayStatus.pending,
+    this.reason,
   });
 
   Holiday copyWith({
@@ -51,6 +54,7 @@ class Holiday {
     DateTime? startDate,
     DateTime? endDate,
     HolidayStatus? status,
+    String? reason,
   }) {
     return Holiday(
       id: id ?? this.id,
@@ -58,6 +62,7 @@ class Holiday {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       status: status ?? this.status,
+      reason: reason ?? this.reason,
     );
   }
 
@@ -67,7 +72,8 @@ class Holiday {
       'name': name,
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
-      'status': status.name, // saved as string
+      'status': status.name,
+      'reason': reason,
     };
   }
 
@@ -81,12 +87,13 @@ class Holiday {
             (e) => e.name == map['status'],
         orElse: () => HolidayStatus.pending,
       ),
+      reason: map['reason'] as String?,
     );
   }
 
   @override
   String toString() {
-    return 'Holiday(id: $id, name: $name, startDate: $startDate, endDate: $endDate, status: $status)';
+    return 'Holiday(id: $id, name: $name, startDate: $startDate, endDate: $endDate, status: $status, reason: $reason)';
   }
 
   @override
@@ -98,7 +105,8 @@ class Holiday {
         other.name == name &&
         other.startDate == startDate &&
         other.endDate == endDate &&
-        other.status == status;
+        other.status == status &&
+        other.reason == reason;
   }
 
   @override
@@ -107,6 +115,7 @@ class Holiday {
     name.hashCode ^
     startDate.hashCode ^
     endDate.hashCode ^
-    status.hashCode;
+    status.hashCode ^
+    reason.hashCode;
   }
 }

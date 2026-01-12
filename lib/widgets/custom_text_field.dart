@@ -18,6 +18,8 @@ class CustomTextField extends StatelessWidget {
   final TextCapitalization textCapitalization;
   final double borderRadius;
 
+  final Color? borderColor;
+
   const CustomTextField({
     super.key,
     this.labelText,
@@ -36,6 +38,7 @@ class CustomTextField extends StatelessWidget {
     this.minLines = 1,
     this.textCapitalization = TextCapitalization.none,
     this.borderRadius = 12.0,
+    this.borderColor,
   });
 
   @override
@@ -53,6 +56,7 @@ class CustomTextField extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         TextFormField(
+          // ... existing props ...
           controller: controller,
           keyboardType: keyboardType,
           obscureText: obscureText,
@@ -79,7 +83,7 @@ class CustomTextField extends StatelessWidget {
             prefixIcon: prefixIcon,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(borderRadius),
-              borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+              borderSide: BorderSide(color: borderColor ?? Colors.grey.shade300, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(borderRadius),

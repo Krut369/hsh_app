@@ -9,7 +9,8 @@ import 'package:hsh_app/widgets/custom_text_field.dart';
 import 'package:hsh_app/modules/student/features/vehicle/vehicle_dropdown.dart';
 import 'package:hsh_app/modules/student/features/common/upload_container.dart';
 
-import 'package:file_picker/file_picker.dart';
+// ignore: depend_on_referenced_packages
+import "package:file_picker/file_picker.dart";
 
 class VehicleRegistrationScreen extends StatefulWidget {
   const VehicleRegistrationScreen({super.key});
