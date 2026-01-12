@@ -1,17 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hsh_app/providers/auth_provider.dart';
-import 'package:hsh_app/providers/theme_provider.dart';
-
-import 'core/constants/app_text.dart';
-import 'models/user_model.dart';
-import 'modules/auth/screens/login_screen.dart';
-import 'modules/complain/complain_main_shell.dart';
-import 'modules/laundry/screens/laundry_main_shell.dart';
-import 'modules/student/student_main_shell.dart';
+import 'package:hsh_app/providers/theme_provider.dart' show themeProvider;
 import 'router/app_router.dart';
 
-/// 👇 Splash state provider
 final splashFinishedProvider = StateProvider<bool>((ref) => false);
 
 void main() async {
@@ -31,10 +22,7 @@ class MyApp extends ConsumerWidget {
       title: 'HSH App',
       debugShowCheckedModeBanner: false,
       theme: appTheme,
-      // Provide the router configuration
       routerConfig: goRouter,
     );
   }
 }
-
-

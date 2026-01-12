@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
 
 class MarkdownSyntaxController extends TextEditingController {
   MarkdownSyntaxController({super.text});
@@ -18,9 +19,10 @@ class MarkdownSyntaxController extends TextEditingController {
     final TextStyle italicStyle = baseStyle.copyWith(fontStyle: FontStyle.italic);
     
     // Faint syntax style
+    // Faint syntax style - Made darker for visibility
     final TextStyle syntaxStyle = baseStyle.copyWith(
-      color: Colors.grey.withOpacity(0.3), 
-      fontSize: (baseStyle.fontSize ?? 16) * 0.8, // Slightly smaller
+      color: Colors.grey[400], 
+      fontSize: (baseStyle.fontSize ?? 16) * 0.9,
     );
 
     // This is a simplified parser. For production, a more robust parser is recommended.
@@ -49,8 +51,9 @@ class MarkdownSyntaxController extends TextEditingController {
       r'(__(?!_).+?__)|' // Bold alt
       r'(_(?!_).+?_)|' // Italic
       r'(~~.+?~~)|' // Strikethrough
-      r'(^\s*-\s+.+$)|' // List item
-      r'(^\s*\d+\.\s+.+$)', // Numbered List item
+      r'(<u>.+?</u>)|' // Underline
+      r'(^\s*-\s+.*$)|' // List item (relaxed)
+      r'(^\s*\d+\.\s+.*$)', // Numbered List item (relaxed)
       multiLine: true,
     ); 
     
@@ -105,7 +108,15 @@ class MarkdownSyntaxController extends TextEditingController {
 
       } else if (fullMatch.trim().startsWith('- ')) {
          // List Item
-         children.add(TextSpan(text: '- ', style: syntaxStyle.copyWith(fontWeight: FontWeight.bold, fontSize: baseStyle.fontSize)));
+         // Hide the dash, show a bullet point
+         // We make the dash transparent/zero-width effectively by strictly controlling the TextSpan
+         
+         // Visual replacement: Render '• ' instead of '- '
+         children.add(TextSpan(text: '• ', style: syntaxStyle.copyWith(
+             fontWeight: FontWeight.bold, 
+             color: AppColors.primary, 
+             fontSize: baseStyle.fontSize
+         )));
          children.add(TextSpan(text: fullMatch.substring(2), style: baseStyle.copyWith(
            height: 1.5,
          )));
@@ -113,7 +124,11 @@ class MarkdownSyntaxController extends TextEditingController {
       } else if (RegExp(r'^\s*\d+\.').hasMatch(fullMatch)) {
          // Numbered List
          final dotIndex = fullMatch.indexOf('.');
-         children.add(TextSpan(text: fullMatch.substring(0, dotIndex + 1), style: syntaxStyle.copyWith(fontWeight: FontWeight.bold, fontSize: baseStyle.fontSize)));
+         children.add(TextSpan(text: fullMatch.substring(0, dotIndex + 1), style: syntaxStyle.copyWith(
+             fontWeight: FontWeight.bold, 
+             color: AppColors.primary, // Primary color for number
+             fontSize: baseStyle.fontSize
+         )));
          children.add(TextSpan(text: fullMatch.substring(dotIndex + 1), style: baseStyle.copyWith(
            height: 1.5,
          )));
@@ -133,6 +148,11 @@ class MarkdownSyntaxController extends TextEditingController {
         children.add(TextSpan(text: '~~', style: syntaxStyle));
         children.add(TextSpan(text: fullMatch.substring(2, fullMatch.length - 2), style: baseStyle.copyWith(decoration: TextDecoration.lineThrough)));
         children.add(TextSpan(text: '~~', style: syntaxStyle)); 
+      } else if (fullMatch.startsWith('<u>') && fullMatch.endsWith('</u>') && fullMatch.length >= 7) {
+         // Underline
+        children.add(TextSpan(text: '<u>', style: syntaxStyle));
+        children.add(TextSpan(text: fullMatch.substring(3, fullMatch.length - 4), style: baseStyle.copyWith(decoration: TextDecoration.underline)));
+        children.add(TextSpan(text: '</u>', style: syntaxStyle));
       } else {
         // Fallback
          children.add(TextSpan(text: fullMatch, style: baseStyle));

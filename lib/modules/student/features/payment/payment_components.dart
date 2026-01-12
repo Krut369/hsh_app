@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
-import 'package:hsh_app/core/utils/responsive_util.dart';
 
 class SummaryCard extends StatelessWidget {
   final String title;
@@ -191,7 +190,9 @@ class TransactionTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  isSuccess ? AppText.success.toUpperCase() : AppText.failed.toUpperCase(),
+                  isSuccess
+                      ? AppText.success.toUpperCase()
+                      : AppText.failed.toUpperCase(),
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: isSuccess ? Colors.green : Colors.red,
                     fontWeight: FontWeight.bold,

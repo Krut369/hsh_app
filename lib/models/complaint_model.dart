@@ -45,6 +45,15 @@ class SubComplaint {
     required this.name,
     this.description = '',
   });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is SubComplaint && other.name == name;
+  }
+
+  @override
+  int get hashCode => name.hashCode;
 }
 
 // Represents a complaint type category with its sub-complaints
@@ -56,6 +65,26 @@ class ComplaintType {
     required this.name,
     required this.subComplaints,
   });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ComplaintType && other.name == name;
+  }
+
+  @override
+  int get hashCode => name.hashCode;
+}
+
+// Represents the data for a specific valid complaint issue
+class ComplaintIssueData {
+  final String description;
+  final String? imagePath;
+
+  ComplaintIssueData({
+    required this.description,
+    this.imagePath,
+  });
 }
 
 // Represents a user-submitted complaint
@@ -63,16 +92,14 @@ class Complaint {
   final String id;
   final DateTime dateTime;
   final String complaintType;
-  final Map<String, String> descriptions; // SubComplaint name → description
-  final String? imagePath; // Optional image attachment
+  final Map<String, ComplaintIssueData> issues; // SubComplaint name (or Type name) → Issue Data
   ComplaintStatus status;
 
   Complaint({
     required this.id,
     required this.dateTime,
     required this.complaintType,
-    required this.descriptions,
-    this.imagePath,
+    required this.issues,
     this.status = ComplaintStatus.pending,
   });
 }

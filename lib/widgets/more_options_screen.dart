@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_colors.dart';
-import '../../modules/auth/screens/login_screen.dart';
 import '../../providers/auth_provider.dart';
-import 'package:hsh_app/modules/student/features/vehicle/vehicle_registration_screen.dart';
 
 class MoreOptionsBottomSheet extends ConsumerWidget {
   const MoreOptionsBottomSheet({super.key});
@@ -27,13 +26,8 @@ class MoreOptionsBottomSheet extends ConsumerWidget {
               minimumSize: const Size(double.infinity, 48),
             ),
             onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const VehicleRegistrationScreen(),
-                ),
-              );
+              context.pop(); // Close bottom sheet
+              context.push('/student/vehicle-registration');
             },
           ),
 
@@ -49,7 +43,7 @@ class MoreOptionsBottomSheet extends ConsumerWidget {
               minimumSize: const Size(double.infinity, 48),
             ),
             onPressed: () {
-              Navigator.pop(context);
+              context.pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Navigate to Temporary Leave")),
               );
@@ -68,15 +62,12 @@ class MoreOptionsBottomSheet extends ConsumerWidget {
               minimumSize: const Size(double.infinity, 48),
             ),
             onPressed: () async {
-              Navigator.pop(context); // Close the bottom sheet
+              context.pop(); // Close the bottom sheet
 
               await ref.read(authProvider.notifier).logout();
 
               if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      (route) => false,
-                );
+                 context.go('/login');
               }
             },
           ),

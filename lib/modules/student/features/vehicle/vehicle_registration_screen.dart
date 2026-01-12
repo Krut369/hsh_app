@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-
+import 'package:hsh_app/core/constants/font.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
+import 'package:hsh_app/widgets/custom_app_bar.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/widgets/custom_button.dart';
 import 'package:hsh_app/widgets/custom_text_field.dart';
-import 'vehicle_label.dart';
-import 'vehicle_dropdown.dart';
+import 'package:hsh_app/modules/student/features/vehicle/vehicle_dropdown.dart';
 import 'package:hsh_app/modules/student/features/common/upload_container.dart';
+
+import 'package:file_picker/file_picker.dart';
 
 class VehicleRegistrationScreen extends StatefulWidget {
   const VehicleRegistrationScreen({super.key});
@@ -22,6 +25,7 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
   late TextEditingController _modelController;
   String? _selectedVehicleType;
   String? _selectedParkingPreference;
+  PlatformFile? _pickedFile;
 
   final List<String> _vehicleTypes = ['Car', 'Bike', 'Scooter', 'Bicycle'];
   final List<String> _parkingPreferences = [
@@ -44,11 +48,37 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
     super.dispose();
   }
 
+  Future<void> _pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'png', 'jpg', 'jpeg'],
+    );
+
+    if (result != null) {
+      setState(() {
+        _pickedFile = result.files.first;
+      });
+    }
+  }
+
+  void _clearFile() {
+    setState(() {
+      _pickedFile = null;
+    });
+  }
+
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       if (_selectedVehicleType == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text(AppText.errorVehicleType)),
+        );
+        return;
+      }
+
+      if (_pickedFile == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please upload registration papers')),
         );
         return;
       }
@@ -63,27 +93,16 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    // ... theme variables ...
     final vertical = ResponsiveUtil.verticalSpacing(context);
     final padding = ResponsiveUtil.responsivePadding(context);
-    final titleFont = ResponsiveUtil.responsiveFontSize(context, 20);
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          AppText.vehicleRegistration,
-          style: TextStyle(
-              fontSize: titleFont,
-              fontWeight: FontWeight.bold,
-              color: Colors.black),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-        centerTitle: true,
+      backgroundColor: AppColors.surface,
+      appBar: CustomAppBar(
+        title: AppText.vehicleRegistration,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -96,23 +115,19 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
             children: [
               Text(
                 AppText.registerYourVehicleTitle,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: AppFonts.heading2(context),
               ),
               const SizedBox(height: 8),
               Text(
                 AppText.vehicleRegistrationSubtitle,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                  height: 1.5,
+                style: AppFonts.bodyRegular(context).copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
               SizedBox(height: vertical * 1.5),
 
               // Vehicle Type
-              VehicleLabel(AppText.vehicleType),
+              Text(AppText.vehicleType, style: AppFonts.bodyBold(context)),
               const SizedBox(height: 8),
               VehicleDropdown(
                 hint: AppText.vehicleTypeHint,
@@ -123,9 +138,8 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
               SizedBox(height: vertical),
 
               // Plate Number
-              VehicleLabel(AppText.plateNumber),
-              const SizedBox(height: 8),
               CustomTextField(
+                labelText: AppText.plateNumber,
                 hintText: AppText.plateNumberHint,
                 controller: _plateNumberController,
                 validator: (value) => value == null || value.isEmpty
@@ -136,9 +150,8 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
               SizedBox(height: vertical),
 
               // Model / Make
-              VehicleLabel(AppText.modelMake),
-              const SizedBox(height: 8),
               CustomTextField(
+                labelText: AppText.modelMake,
                 hintText: AppText.modelMakeHint,
                 controller: _modelController,
                 validator: (value) => value == null || value.isEmpty
@@ -149,7 +162,7 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
               SizedBox(height: vertical),
 
               // Parking Preference
-              VehicleLabel(AppText.parkingPreference),
+              Text(AppText.parkingPreference, style: AppFonts.bodyBold(context)),
               const SizedBox(height: 8),
               VehicleDropdown(
                 hint: AppText.parkingPreferenceHint,
@@ -161,21 +174,67 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
               SizedBox(height: vertical),
 
               // Upload Registration Papers
-              VehicleLabel(AppText.uploadPapers),
+              Text(AppText.uploadPapers, style: AppFonts.bodyBold(context)),
               const SizedBox(height: 8),
-              const UploadContainer(),
+              if (_pickedFile == null)
+                FileUploadCard(
+                  title: 'Upload Registration Papers',
+                  subtitle: 'PDF, PNG or JPG (Max 5MB)',
+                  onTap: _pickFile,
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.insert_drive_file,
+                          color: AppColors.primary, size: 32),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _pickedFile!.name,
+                              style: AppFonts.bodyBold(context),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              '${(_pickedFile!.size / 1024).toStringAsFixed(1)} KB',
+                              style: TextStyle(
+                                  color: Colors.grey[600], fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.red),
+                        onPressed: _clearFile,
+                      ),
+                    ],
+                  ),
+                ),
               SizedBox(height: vertical * 2),
 
               // Submit Button
               SafeArea(
-                child: CustomButton(
-                  text: AppText.submitApplication,
-                  onPressed: _submitForm,
-                  backgroundColor: const Color(0xFF1976D2), // Strong blue
-                  borderRadius: 25,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  fontSize: 18,
-                  elevation: 5,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: CustomButton(
+                    text: AppText.submitApplication,
+                    onPressed: _submitForm,
+                    backgroundColor: AppColors.primary,
+                    borderRadius: 16,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    fontSize: 16,
+                    elevation: 0,
+                  ),
                 ),
               ),
               SizedBox(height: vertical),

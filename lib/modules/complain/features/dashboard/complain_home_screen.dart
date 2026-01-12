@@ -5,7 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../models/complaint_model.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../providers/complaint_provider.dart';
-import 'activity_item_widget.dart';
+
 import 'stat_card_widget.dart';
 
 class ComplainHomeScreen extends ConsumerStatefulWidget {
@@ -16,12 +16,13 @@ class ComplainHomeScreen extends ConsumerStatefulWidget {
 }
 
 class _ComplainHomeScreenState extends ConsumerState<ComplainHomeScreen> {
-
   @override
   Widget build(BuildContext context) {
     final totalComplaints = ref.watch(totalComplaintCountProvider);
-    final pendingCount = ref.watch(complaintCountByStatusProvider(ComplaintStatus.pending));
-    final resolvedCount = ref.watch(complaintCountByStatusProvider(ComplaintStatus.resolved));
+    final pendingCount =
+        ref.watch(complaintCountByStatusProvider(ComplaintStatus.pending));
+    final resolvedCount =
+        ref.watch(complaintCountByStatusProvider(ComplaintStatus.resolved));
     final authNotifier = ref.read(authProvider.notifier);
 
     return Scaffold(
@@ -30,7 +31,6 @@ class _ComplainHomeScreenState extends ConsumerState<ComplainHomeScreen> {
         backgroundColor: AppColors.primary,
         centerTitle: false,
         elevation: 0,
-
         title: const Text(
           'Complaint Manager',
           style: TextStyle(
@@ -43,7 +43,8 @@ class _ComplainHomeScreenState extends ConsumerState<ComplainHomeScreen> {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+                icon: const Icon(Icons.notifications_outlined,
+                    color: Colors.white),
                 onPressed: () {
                   // Handle notification tap
                 },
@@ -55,7 +56,6 @@ class _ComplainHomeScreenState extends ConsumerState<ComplainHomeScreen> {
                   authNotifier.logout();
                 },
               ),
-
             ],
           ),
           const SizedBox(width: 8),

@@ -27,7 +27,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   @override
   Widget build(BuildContext context) {
     final padding = EdgeInsets.all(ResponsiveUtil.responsivePadding(context));
-    final verticalSpacing = SizedBox(height: ResponsiveUtil.verticalSpacing(context));
+    final verticalSpacing =
+        SizedBox(height: ResponsiveUtil.verticalSpacing(context));
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -37,7 +38,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
-              // TODO: Implement notification logic
             },
           ),
         ],
@@ -52,8 +52,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               verticalSpacing,
               GridView.builder(
                 itemCount: _attendanceOptions.length,
-                shrinkWrap: true, // 👈 Important: makes GridView take only needed space
-                physics: const NeverScrollableScrollPhysics(), // 👈 avoid nested scrolls
+                shrinkWrap:
+                    true, // 👈 Important: makes GridView take only needed space
+                physics:
+                    const NeverScrollableScrollPhysics(), // 👈 avoid nested scrolls
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 12,
@@ -73,17 +75,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
                       final result = await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const MobileScannerScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const MobileScannerScreen()),
                       );
 
-                      if (result != null) {
+                      if (result != null && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Scanned: $result')),
                         );
                         setState(() => _scanCount += 1); // example logic
                       }
                     },
-
                   );
                 },
               ),
@@ -91,11 +93,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               Card(
                 elevation: 6, // Increased elevation for a more prominent shadow
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16), // Slightly more rounded corners
+                  borderRadius: BorderRadius.circular(
+                      16), // Slightly more rounded corners
                 ),
-                margin: const EdgeInsets.all(16), // Added margin around the card for better spacing
+                margin: const EdgeInsets.all(
+                    16), // Added margin around the card for better spacing
                 child: Padding(
-                  padding: const EdgeInsets.all(20), // Increased padding inside the card
+                  padding: const EdgeInsets.all(
+                      20), // Increased padding inside the card
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -104,26 +109,37 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         children: [
                           Text(
                             'Scan Progress', // More descriptive title
-                            style: AppFonts.headline6(context)?.copyWith(fontWeight: FontWeight.bold), // Using a larger, bolder font
+                            style: AppFonts.headline6(context).copyWith(
+                                fontWeight: FontWeight
+                                    .bold), // Using a larger, bolder font
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor.withOpacity(0.1), // Light background for the count
+                              color: Theme.of(context).primaryColor.withOpacity(
+                                  0.1), // Light background for the count
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               '$_scanCount/2 scans',
-                              style: AppFonts.bodyMedium(context)?.copyWith(color: Theme.of(context).primaryColor), // Color matching theme
+                              style: AppFonts.bodyMedium(context).copyWith(
+                                  color: Theme.of(context)
+                                      .primaryColor), // Color matching theme
                             ),
                           ),
                         ],
                       ),
-                       Divider(height: 24, thickness: 2,color: Theme.of(context).primaryColor ), // Added a divider for visual separation
+                      Divider(
+                          height: 24,
+                          thickness: 2,
+                          color: Theme.of(context)
+                              .primaryColor), // Added a divider for visual separation
                       RadioListTile<String>(
                         title: Text(
                           'First Scan: Pending Attendance',
-                          style: AppFonts.subtitle1(context), // Slightly larger font for titles
+                          style: AppFonts.subtitle1(
+                              context), // Slightly larger font for titles
                         ),
                         subtitle: const Text(
                             'Awaiting confirmation for the initial scan.'), // Added a helpful subtitle
@@ -134,15 +150,18 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             _scanStatus = value;
                           });
                         },
-                        activeColor: Theme.of(context).primaryColor, // Use theme's primary color
-                        contentPadding: EdgeInsets.zero, // Remove default padding from RadioListTile
+                        activeColor: Theme.of(context)
+                            .primaryColor, // Use theme's primary color
+                        contentPadding: EdgeInsets
+                            .zero, // Remove default padding from RadioListTile
                       ),
                       RadioListTile<String>(
                         title: Text(
                           'Second Scan: Confirm Attendance',
                           style: AppFonts.subtitle1(context),
                         ),
-                        subtitle: const Text('Please confirm attendance for the final scan.'),
+                        subtitle: const Text(
+                            'Please confirm attendance for the final scan.'),
                         value: 'second_scan',
                         groupValue: _scanStatus,
                         onChanged: (value) {

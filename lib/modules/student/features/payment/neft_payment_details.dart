@@ -24,7 +24,8 @@ class NeftPaymentDetails extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           if (data.isNotEmpty)
-            ...data.entries.map((e) => AccountDetailRow(label: e.key, value: e.value)).toList()
+            ...data.entries
+                .map((e) => AccountDetailRow(label: e.key, value: e.value))
           else
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -36,7 +37,8 @@ class NeftPaymentDetails extends ConsumerWidget {
           const SizedBox(height: 24),
           const PaymentProofUploadSection(
             title: 'Upload NEFT Payment Proof',
-            description: 'Please upload a screenshot of your NEFT payment for verification.',
+            description:
+                'Please upload a screenshot of your NEFT payment for verification.',
           ),
         ],
       ),

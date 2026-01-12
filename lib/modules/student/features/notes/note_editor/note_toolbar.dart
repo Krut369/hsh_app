@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
 
 class NoteToolbar extends StatelessWidget {
   final Function(String) onFormat;
@@ -15,8 +16,8 @@ class NoteToolbar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E), // Dark background matching screenshots
-        border: Border(top: BorderSide(color: Colors.grey[800]!)),
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey[200]!)),
       ),
       child: SafeArea(
         top: false,
@@ -36,9 +37,9 @@ class NoteToolbar extends StatelessWidget {
               tooltip: 'Checklist',
             ),
             _ToolbarButton(
-              icon: Icons.grid_on, // Table placeholder
-              onTap: () => onFormat('table'),
-              tooltip: 'Table',
+              icon: Icons.format_list_numbered, 
+              onTap: () => onFormat('numbered'),
+              tooltip: 'Numbered List',
             ),
             _ToolbarButton(
               icon: Icons.attach_file,
@@ -87,15 +88,15 @@ class _ToolbarButton extends StatelessWidget {
             child: isText
                 ? Text(
                     label!,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: AppColors.primary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   )
                 : Icon(
                     icon,
-                    color: Colors.white,
+                    color: AppColors.primary,
                     size: 24, 
                   ),
           ),

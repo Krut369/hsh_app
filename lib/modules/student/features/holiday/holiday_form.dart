@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import 'package:hsh_app/core/constants/app_text.dart';
@@ -47,8 +48,18 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
       initialDate: isStartDate
           ? (_selectedStartDate ?? DateTime.now())
           : (_selectedEndDate ?? _selectedStartDate ?? DateTime.now()),
-      firstDate: DateTime(2000),
+      firstDate: DateTime.now(),
       lastDate: DateTime(2101),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).primaryColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -56,8 +67,8 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
           _selectedStartDate = picked;
           _startDateController.text = DateFormat('yyyy-MM-dd').format(picked);
           if (_selectedEndDate != null && _selectedEndDate!.isBefore(picked)) {
-            _selectedEndDate = picked;
-            _endDateController.text = DateFormat('yyyy-MM-dd').format(picked);
+            _selectedEndDate = null;
+            _endDateController.clear();
           }
         } else {
           if (_selectedStartDate != null && picked.isBefore(_selectedStartDate!)) {
@@ -93,10 +104,22 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
       ref.read(holidayListProvider.notifier).addHoliday(newHoliday);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppText.holidayAddedSuccess)),
+        SnackBar(
+          content: const Row(
+            children: [
+               Icon(Icons.check_circle, color: Colors.white),
+               SizedBox(width: 12),
+               Text(AppText.holidayAddedSuccess),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ),
       );
 
-      Navigator.of(context).pop();
+      context.pop();
     }
   }
 
@@ -105,31 +128,36 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
     final theme = Theme.of(context);
     final vertical = ResponsiveUtil.verticalSpacing(context);
     final padding = ResponsiveUtil.responsivePadding(context);
-    final titleFont = ResponsiveUtil.responsiveFontSize(context, 20);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           AppText.requestHoliday,
-          style: TextStyle(fontSize: titleFont),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.black),
+          onPressed: () => context.pop(),
+        ),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(padding, vertical, padding, vertical + 20),
-        child: Column(
-          children: [
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: EdgeInsets.all(padding),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              Container(
+                 padding: const EdgeInsets.all(16),
+                 decoration: BoxDecoration(
+                   color: const Color(0xFFF9FAFB),
+                   borderRadius: BorderRadius.circular(16),
+                   border: Border.all(color: const Color(0xFFEEEEEE)),
+                 ),
+                 child: Column(
+                   children: [
                       CustomTextField(
                         labelText: AppText.holidayName,
                         hintText: AppText.holidayNameHint,
@@ -144,7 +172,7 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
                         controller: _startDateController,
                         readOnly: true,
                         onTap: () => _selectDate(context, _startDateController, true),
-                        suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
+                        suffixIcon: const Icon(Icons.calendar_month_outlined, color: Colors.grey),
                         validator: (value) =>
                         value == null || value.isEmpty ? AppText.errorStartDate : null,
                       ),
@@ -155,27 +183,26 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
                         controller: _endDateController,
                         readOnly: true,
                         onTap: () => _selectDate(context, _endDateController, false),
-                        suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
+                        suffixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.grey),
                         validator: (value) =>
                         value == null || value.isEmpty ? AppText.errorEndDate : null,
                       ),
-                    ],
-                  ),
+                   ],
+                 ),
+              ),
+              
+              SizedBox(height: vertical * 2),
+              SizedBox(
+                height: 56,
+                child: CustomButton(
+                  text: AppText.submitRequest,
+                  onPressed: _submitForm,
+                  backgroundColor: theme.colorScheme.primary,
+                  borderRadius: 16,
                 ),
               ),
-            ),
-            SizedBox(height: vertical * 2),
-            CustomButton(
-              text: AppText.submitRequest,
-              onPressed: _submitForm,
-              backgroundColor: theme.colorScheme.primary,
-              borderRadius: 15,
-              padding: EdgeInsets.symmetric(
-                vertical: 18,
-                horizontal: ResponsiveUtil.horizontalSpacing(context),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-
-
 class StudentProfile {
   final String name;
   final String college;

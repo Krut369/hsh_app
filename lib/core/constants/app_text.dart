@@ -45,6 +45,16 @@
     static const studentId = 'Student ID';
     static const roomNumber = 'Room Number';
     static const hostelName = 'Hostel Name';
+    
+    // Short labels for Profile Card
+    static const college = 'College';
+    static const room = 'Room';
+    static const id = 'ID';
+    
+    // Services Labels
+    static const fees = 'Fees';
+    static const holiday = 'Holiday';
+    static const applyLeave = 'Apply Leave';
 
     // ✅ Add these for your More Options
     static const vehicleRegistration = 'Vehicle Registration';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
 
 class VehicleDropdown extends StatelessWidget {
   final String hint;
@@ -19,33 +20,24 @@ class VehicleDropdown extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          hint: Text(hint, style: TextStyle(color: Colors.grey[500])),
-          icon: Container(
-            width: 24,
-            height: 24,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue, Colors.greenAccent],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              shape: BoxShape.circle,
-            ),
-          ),
+          hint: Text(hint, style: TextStyle(color: AppColors.textPrimary.withOpacity(0.5))),
+          icon: const Icon(Icons.arrow_drop_down_circle_outlined, color: AppColors.primary),
           items: items.map((String item) {
             return DropdownMenuItem<String>(
               value: item,
-              child: Text(item),
+              child: Text(item, style: const TextStyle(color: AppColors.textPrimary)),
             );
           }).toList(),
           onChanged: onChanged,
+          dropdownColor: Colors.white,
         ),
       ),
     );

@@ -62,7 +62,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     final isLoading = authState.isLoading;
     final error = authState.valueOrNull?.error;
     final obscurePassword = ref.watch(obscurePasswordProvider);
-    final rememberMe = ref.watch(rememberMeProvider);
+
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
 
@@ -205,18 +205,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             onPressed: isLoading ? null : _onLogin,
                             child: isLoading
                                 ? const SizedBox(
-                              width: 26,
-                              height: 26,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            )
+                                    width: 26,
+                                    height: 26,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
                                 : const Text(
-                              'Log In',
-                              style: TextStyle(
-                                  fontSize: 17, color: Colors.white),
-                            ),
+                                    'Log In',
+                                    style: TextStyle(
+                                        fontSize: 17, color: Colors.white),
+                                  ),
                           ),
                         ),
                         const SizedBox(height: 22),

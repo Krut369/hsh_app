@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:hsh_app/core/constants/app_text.dart';
+import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
-import 'package:hsh_app/providers/studentProfileProvider.dart';
-import 'package:hsh_app/modules/student/features/home/home_components.dart';
-import 'package:hsh_app/modules/student/features/attendance/attendance_screen.dart';
-import 'package:hsh_app/modules/student/features/complaint/complaint_screen.dart';
-import 'package:hsh_app/modules/student/features/payment/payment_screen.dart';
-import 'package:hsh_app/modules/student/features/chat/chat_screen.dart';
-import 'package:hsh_app/modules/student/features/notes/notes_screen.dart';
-import 'package:hsh_app/modules/student/features/services/all_services_screen.dart';
-import 'package:hsh_app/modules/student/features/holiday/holiday_payment_screen.dart';
+import 'package:hsh_app/providers/student_profile_provider.dart';
+import 'package:hsh_app/modules/student/features/profile/profile_card.dart';
+import 'package:hsh_app/modules/student/features/common/quick_action_card.dart';
+import 'package:hsh_app/modules/student/features/common/activity_tile.dart';
 
-import '../../../../providers/bottom_nav_provider.dart';
+import 'package:hsh_app/widgets/custom_app_bar.dart';
+
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -23,72 +21,27 @@ class ProfileScreen extends ConsumerWidget {
     final padding = ResponsiveUtil.responsivePadding(context);
     final vertical = ResponsiveUtil.verticalSpacing(context);
 
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA), // Light grey background
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F7FA),
-        elevation: 0,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.apartment, color: Colors.blue),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              AppText.hostelHub,
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          Container(
-            margin: EdgeInsets.only(right: padding),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: Stack(
-                children: [
-                  const Icon(Icons.notifications_none, color: Colors.black),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              onPressed: () {},
-            ),
-          ),
-        ],
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: CustomAppBar(
+        title: AppText.hostelHub,
+        showNotificationIcon: true,
+        onNotificationTap: () {
+          // Handle notification tap
+        },
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(padding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Card
-            HomeHeader(
-              userName: profile.name.split(' ').first, // First name only
-              roomNumber: profile.room,
-              imagePath: profile.imagePath,
+            // Profile Card (Reverted to simple style)
+            Center(
+              child: ProfileCard(
+                profile: profile,
+              ),
             ),
             SizedBox(height: vertical * 2),
 
@@ -96,24 +49,19 @@ class ProfileScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   AppText.quickActions,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  style: AppFonts.heading3(context),
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const AllServicesScreen()),
-                    );
+                    context.push('/student/services-all');
                   },
                   child: const Text(
                     AppText.viewAll,
-                    style: TextStyle(color: Colors.blue),
+                    style: TextStyle(
+                        color: Colors
+                            .blue), // Theme primary color might be better but blue was requested
                   ),
                 ),
               ],
@@ -124,7 +72,7 @@ class ProfileScreen extends ConsumerWidget {
               child: Row(
                 children: [
                   SizedBox(
-                    width: 110, // Fixed width for scrollable items
+                    width: 110,
                     child: QuickActionCard(
                       icon: Icons.person_outline,
                       title: AppText.attendance,
@@ -132,14 +80,7 @@ class ProfileScreen extends ConsumerWidget {
                       iconColor: Colors.blue,
                       iconBgColor: Colors.blue.withOpacity(0.1),
                       onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => const AttendanceScreen(),
-                        //   ),
-                        // );
-
-                        ref.read(bottomNavIndexProvider.notifier).state = 2;
+                        context.go('/student/attendance');
                       },
                     ),
                   ),
@@ -148,17 +89,12 @@ class ProfileScreen extends ConsumerWidget {
                     width: 110,
                     child: QuickActionCard(
                       icon: Icons.payments_outlined,
-                      title: 'Fees',
+                      title: AppText.fees,
                       subtitle: AppText.payDue,
                       iconColor: Colors.green,
                       iconBgColor: Colors.green.withOpacity(0.1),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const PaymentScreen(),
-                          ),
-                        );
+                        context.push('/student/payment');
                       },
                     ),
                   ),
@@ -172,12 +108,7 @@ class ProfileScreen extends ConsumerWidget {
                       iconColor: Colors.orange,
                       iconBgColor: Colors.orange.withOpacity(0.1),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ComplaintScreen(),
-                          ),
-                        );
+                        context.push('/student/complaint');
                       },
                     ),
                   ),
@@ -191,12 +122,7 @@ class ProfileScreen extends ConsumerWidget {
                       iconColor: Colors.purple,
                       iconBgColor: Colors.purple.withOpacity(0.1),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ChatScreen(),
-                          ),
-                        );
+                        context.push('/student/chat');
                       },
                     ),
                   ),
@@ -210,12 +136,7 @@ class ProfileScreen extends ConsumerWidget {
                       iconColor: Colors.teal,
                       iconBgColor: Colors.teal.withOpacity(0.1),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const NotesScreen(),
-                          ),
-                        );
+                        context.push('/student/notes');
                       },
                     ),
                   ),
@@ -224,17 +145,12 @@ class ProfileScreen extends ConsumerWidget {
                     width: 110,
                     child: QuickActionCard(
                       icon: Icons.holiday_village_outlined,
-                      title: 'Holiday',
-                      subtitle: 'Apply Leave',
+                      title: AppText.holiday,
+                      subtitle: AppText.applyLeave,
                       iconColor: Colors.pink,
                       iconBgColor: Colors.pink.withOpacity(0.1),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HolidayPaymentScreen(),
-                          ),
-                        );
+                        context.go('/student/leave');
                       },
                     ),
                   ),
@@ -244,16 +160,11 @@ class ProfileScreen extends ConsumerWidget {
             SizedBox(height: vertical * 2),
 
             // Recent Activity
-            const Text(
+            Text(
               AppText.recentActivity,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+              style: AppFonts.heading3(context),
             ),
             const SizedBox(height: 16),
-            // Mock Activity List
             const ActivityTile(
               icon: Icons.check_circle,
               iconColor: Colors.green,

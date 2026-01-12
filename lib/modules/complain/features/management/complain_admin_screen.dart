@@ -137,8 +137,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
           id: c.id,
           dateTime: c.dateTime,
           complaintType: c.complaintType,
-          descriptions: c.descriptions,
-          imagePath: c.imagePath,
+          issues: c.issues,
           status: newStatus,
         );
       }
@@ -327,10 +326,10 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
                   fontSize: ResponsiveUtil.responsiveFontSize(context, 12),
                 ),
               ),
-              if (complaint.descriptions.isNotEmpty) ...[
+              if (complaint.issues.isNotEmpty) ...[
                 SizedBox(height: ResponsiveUtil.horizontalSpacing(context)),
                 Text(
-                  complaint.descriptions.entries.first.value,
+                  complaint.issues.entries.first.value.description,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.bodyMedium?.copyWith(
@@ -338,9 +337,9 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
                     fontSize: ResponsiveUtil.responsiveFontSize(context, 14),
                   ),
                 ),
-                if (complaint.descriptions.length > 1)
+                if (complaint.issues.length > 1)
                   Text(
-                    '+${complaint.descriptions.length - 1} more issues',
+                    '+${complaint.issues.length - 1} more issues',
                     style: textTheme.bodySmall?.copyWith(
                       color: scheme.onSurface.withOpacity(0.5),
                       fontSize: ResponsiveUtil.responsiveFontSize(context, 12),

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:hsh_app/providers/tab_controller_provider.dart.dart';
 import 'package:hsh_app/widgets/custom_tab_bar.dart';
-import 'package:hsh_app/modules/student/features/holiday/holiday_tab.dart';
+import 'package:hsh_app/modules/student/features/holiday/holiday_screen.dart';
 import 'package:hsh_app/modules/student/features/payment/payment_tab.dart';
 
 class HolidayPaymentScreen extends ConsumerStatefulWidget {
@@ -54,7 +54,7 @@ class _HolidayPaymentScreenState extends ConsumerState<HolidayPaymentScreen> wit
             child: TabBarView(
               controller: _tabController,
               children: const [
-                HolidayTab(),
+                HolidayScreen(),
                 PaymentTab(),
               ],
             ),
