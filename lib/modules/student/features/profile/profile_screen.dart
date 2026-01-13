@@ -150,7 +150,7 @@ class ProfileScreen extends ConsumerWidget {
                       iconColor: Colors.pink,
                       iconBgColor: Colors.pink.withOpacity(0.1),
                       onTap: () {
-                        context.go('/student/leave');
+                        context.push('/student/holiday');
                       },
                     ),
                   ),

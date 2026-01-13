@@ -143,15 +143,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-           // Branch 5: Leave / Holiday (Hidden/Extra)
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                  path: '/student/leave',
-                  builder: (context, state) => const HolidayScreen(),
-              ),
-            ],
-          ),
+
         ],
       ),
 

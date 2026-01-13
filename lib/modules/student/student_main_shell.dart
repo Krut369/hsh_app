@@ -32,7 +32,6 @@ class StudentMainShell extends ConsumerWidget {
           icon: Icons.local_laundry_service, label: 'Laundry'),
       const BottomNavBarItemData(
           icon: Icons.check_circle, label: AppText.attendance),
-      // const BottomNavBarItemData(icon: Icons.flight_takeoff, label: AppText.leave),
     ];
 
     return Scaffold(
