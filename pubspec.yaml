@@ -44,10 +44,7 @@ dependencies:
   flutter_markdown: ^0.7.7+1
   go_router: ^15.1.2
   file_picker: ^8.0.0
-<<<<<<< HEAD
-=======
 
->>>>>>> 1bb428e (index error solve)
 dev_dependencies:
   flutter_test:
     sdk: flutter
