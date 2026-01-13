@@ -16,6 +16,12 @@ import 'package:hsh_app/modules/complain/features/management/complain_admin_scre
 import 'package:hsh_app/modules/complain/features/feedback/complain_feedback_screen.dart';
 import 'package:hsh_app/modules/complain/features/management/complaint_detail_view_screen.dart';
 import 'package:hsh_app/modules/laundry/screens/laundry_main_shell.dart';
+import 'package:hsh_app/modules/leader/leader_main_shell.dart';
+import 'package:hsh_app/modules/leader/features/attendance/attendance_main_screen.dart';
+import 'package:hsh_app/modules/leader/features/chat/group_chat_screen.dart';
+import 'package:hsh_app/modules/leader/features/chat/create_new_group_screen.dart';
+import 'package:hsh_app/modules/leader/features/chat/finalize_group_screen.dart';
+import 'package:hsh_app/modules/leader/models/chat_group.dart';
 
 // Feature screens
 import 'package:hsh_app/modules/student/features/attendance/attendance_screen.dart';
@@ -66,6 +72,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             return '/laundry';
           case UserRole.complain:
             return '/complain';
+          case UserRole.leader:
+            return '/leader';
           case UserRole.student:
             // Redirect to the first tab (Profile)
             return '/student/profile';
@@ -217,6 +225,33 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                return ComplaintDetailViewScreen(complaint: complaint);
              },
            ),
+        ],
+      ),
+      
+      // Leader Routes
+      GoRoute(
+        path: '/leader',
+        builder: (context, state) => const LeaderMainShell(),
+        routes: [
+          GoRoute(
+            path: 'attendance',
+            builder: (context, state) => const AttendanceMainScreen(),
+          ),
+          GoRoute(
+            path: 'chat/messages',
+            builder: (context, state) {
+              final group = state.extra as ChatGroup;
+              return GroupChatScreen(group: group);
+            },
+          ),
+          GoRoute(
+            path: 'chat/create',
+            builder: (context, state) => const CreateNewGroupScreen(),
+          ),
+          GoRoute(
+            path: 'chat/finalize',
+            builder: (context, state) => const FinalizeGroupScreen(),
+          ),
         ],
       ),
     ],

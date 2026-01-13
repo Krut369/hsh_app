@@ -1,4 +1,4 @@
-enum UserRole { student, laundry, complain }
+enum UserRole { student, laundry, complain, leader }
 
 class Student {
   final String username;
