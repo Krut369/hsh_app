@@ -6,6 +6,7 @@ import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/providers/student_profile_provider.dart';
+import 'package:hsh_app/providers/auth_provider.dart';
 import 'package:hsh_app/modules/student/features/profile/profile_card.dart';
 import 'package:hsh_app/modules/student/features/common/quick_action_card.dart';
 import 'package:hsh_app/modules/student/features/common/activity_tile.dart';
@@ -27,9 +28,10 @@ class ProfileScreen extends ConsumerWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: CustomAppBar(
         title: AppText.hostelHub,
-        showNotificationIcon: true,
-        onNotificationTap: () {
-          // Handle notification tap
+        showLogoutIcon: true,
+        onLogoutTap: () {
+          ref.read(authProvider.notifier).logout();
+          context.go('/login');
         },
       ),
       body: SingleChildScrollView(

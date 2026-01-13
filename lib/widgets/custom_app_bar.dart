@@ -7,8 +7,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? titleWidget;
   final List<Widget>? actions;
   final Widget? leading;
-  final VoidCallback? onNotificationTap;
-  final bool showNotificationIcon;
+   final VoidCallback? onNotificationTap;
+   final VoidCallback? onLogoutTap;
+   final bool showNotificationIcon;
+   final bool showLogoutIcon;
 
   const CustomAppBar({
     super.key,
@@ -17,7 +19,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.leading,
     this.onNotificationTap,
+    this.onLogoutTap,
     this.showNotificationIcon = false,
+    this.showLogoutIcon = false,
   });
 
   @override
@@ -41,6 +45,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               icon: Icons.notifications_none,
               onTap: onNotificationTap,
               showBadge: true,
+            ),
+          ),
+        if (showLogoutIcon)
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: CustomAppBarAction(
+              icon: Icons.logout,
+              onTap: onLogoutTap,
             ),
           ),
         if (actions != null) ...actions!,
