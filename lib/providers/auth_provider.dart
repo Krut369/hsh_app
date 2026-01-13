@@ -40,6 +40,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     Student(username: 'student@gmail.com', password: '123456', name: 'Student User', role: UserRole.student),
     Student(username: 'laundry@gmail.com', password: '123456', name: 'Laundry Manager', role: UserRole.laundry),
     Student(username: 'complain@gmail.com', password: '123456', name: 'Complain Handler', role: UserRole.complain),
+    Student(username: 'leader@gmail.com', password: '123456', name: 'Hostel Leader', role: UserRole.leader),
   ];
 
   Future<void> login(String username, String password) async {
