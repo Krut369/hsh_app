@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../models/student_result.dart';
 import 'widgets/result_card.dart';
-import 'widgets/grade_badge.dart';
 import 'student_result_detail_screen.dart';
 
 // Demo data provider

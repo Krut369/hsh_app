@@ -141,7 +141,7 @@ class _LaundryDetailScreenState extends State<LaundryDetailScreen> {
                             selectedDate = picked;
                           });
                           setModalState(() {});
-                          Navigator.pop(context);
+                          if (context.mounted) Navigator.pop(context);
                         }
                       },
                       child: Container(
@@ -352,7 +352,6 @@ class _LaundryDetailScreenState extends State<LaundryDetailScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actionsPadding: EdgeInsets.only(right: 8),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),

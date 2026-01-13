@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/constants/app_text.dart';
 import '../../widgets/custom_bottom_nav_bar.dart';
 import 'features/dashboard/leader_dashboard_screen.dart';
 import 'features/student_results/student_results_screen.dart';

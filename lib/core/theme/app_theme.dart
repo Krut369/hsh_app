@@ -38,24 +38,12 @@ final ThemeData appTheme = ThemeData(
     onPrimary: Colors.white,
     secondary: AppColors.secondary,
     onSecondary: AppColors.textPrimary,
-<<<<<<< HEAD
-=======
-    onBackground: AppColors.textPrimary,
->>>>>>> f80880b9b321a490b09019ff2959dd364ba6f61a
     surface: AppColors.surface,
     onSurface: AppColors.textPrimary,
     error: Colors.redAccent,
     onError: Colors.white,
-<<<<<<< HEAD
   ),
   cardTheme: CardTheme(
-=======
-
-    // onSurfaceVariant: AppColors.successGreen,
-    // onInverseSurface: AppColors.warningOrange,
-  ),
-  cardTheme: CardThemeData(
->>>>>>> f80880b9b321a490b09019ff2959dd364ba6f61a
     color: AppColors.card,
     elevation: 6,
     shadowColor: Colors.black12,
