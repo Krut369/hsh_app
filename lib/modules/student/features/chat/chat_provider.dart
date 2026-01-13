@@ -115,6 +115,42 @@ class ChatNotifier extends StateNotifier<List<ChatConversation>> {
           chat
     ];
   }
+  String getConversationIdByName(String studentName) {
+    // Attempt to find existing chat
+    final existingParams = state.firstWhere(
+      (chat) => chat.name.toLowerCase() == studentName.toLowerCase(),
+      orElse: () => ChatConversation(id: '', name: '', messages: []),
+    );
+
+    if (existingParams.id.isNotEmpty) {
+      return existingParams.id;
+    }
+
+    // specific hack for the demo to always have "John Doe"
+    if (studentName == 'John Doe') {
+        final chat = ChatConversation(
+          id: '2', 
+          name: 'John Doe', 
+          isOnline: false, 
+          unreadCount: 0,
+          messages: []
+        );
+        state = [...state, chat];
+        return '2';
+    }
+
+    // Create new temporary chat for this student if not found
+    final newId = const Uuid().v4();
+    final newChat = ChatConversation(
+      id: newId,
+      name: studentName,
+      isOnline: false, 
+      unreadCount: 0,
+      messages: [],
+    );
+    state = [...state, newChat];
+    return newId;
+  }
 }
 
 // --- Provider ---

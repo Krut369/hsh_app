@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/font.dart';
-import '../../../core/utils/responsive_util.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/constants/font.dart';
+import '../../../../core/utils/responsive_util.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../student/features/chat/chat_provider.dart';
+import '../../../../widgets/custom_app_bar.dart';
 
-class LaundryOrderDetailScreen extends StatefulWidget {
+class LaundryOrderDetailScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic> requestData;
 
   const LaundryOrderDetailScreen({super.key, required this.requestData});
 
   @override
-  State<LaundryOrderDetailScreen> createState() =>
+  ConsumerState<LaundryOrderDetailScreen> createState() =>
       _LaundryOrderDetailScreenState();
 }
 
-class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
+class _LaundryOrderDetailScreenState extends ConsumerState<LaundryOrderDetailScreen> {
   late Map<String, dynamic> _currentRequestData;
 
   @override
@@ -22,6 +26,10 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
     // Create a mutable copy of the data
     _currentRequestData = Map<String, dynamic>.from(widget.requestData);
   }
+
+
+
+
 
   void _showUpdateStatusSheet() {
     showModalBottomSheet(
@@ -107,7 +115,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Mock items data
+    // ... items list ...
     final List<Map<String, dynamic>> laundryItems = [
       {
         'name': 'T-Shirts',
@@ -129,36 +137,20 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background, // Match image (light/white-ish)
-        elevation: 0,
+      appBar: CustomAppBar(
+        title: 'Order Details',
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.textPrimary, size: 20),
+              color: Colors.white, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'Order Details',
-          style: AppFonts.heading3(context).copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_horiz_rounded,
-                color: AppColors.textPrimary),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(ResponsiveUtil.responsivePadding(context)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Student Info Card
+            // ... Student Info Card ...
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -173,7 +165,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
               ),
               child: Column(
                 children: [
-                  // Image Placeholder
+                   // Image Placeholder
                   Container(
                     height: 150,
                     width: double.infinity,
@@ -232,8 +224,9 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        // ... rest of student info ...
                         const SizedBox(height: 8),
-                        Row(
+                         Row(
                           children: [
                             const Icon(Icons.location_on,
                                 size: 16, color: AppColors.textSecondary),
@@ -267,9 +260,9 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-
-            // Order Status
+             const SizedBox(height: 24),
+            
+            // ... Status Section ...
             Text(
               'Order Status',
               style: AppFonts.heading3(context).copyWith(
@@ -304,7 +297,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Laundry Items
+            // ... Laundry Items Section ...
             Text(
               'Laundry Items',
               style: AppFonts.heading3(context).copyWith(
@@ -313,7 +306,7 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            ...laundryItems.map((item) => Padding(
+             ...laundryItems.map((item) => Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
                   child: Container(
                     padding: const EdgeInsets.all(12),
@@ -374,13 +367,22 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                     ),
                   ),
                 )),
+           
             const SizedBox(height: 40),
 
-            // Actions
-            SizedBox(
+
+             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Order status updated successfully'),
+                      backgroundColor: AppColors.successGreen,
+                    ),
+                  );
+                  Navigator.pop(context, _currentRequestData);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -407,7 +409,11 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                   final studentName = _currentRequestData['name'] ?? 'John Doe';
+                   final chatId = ref.read(chatProvider.notifier).getConversationIdByName(studentName);
+                   context.push('/laundry/chat/details', extra: chatId);
+                },
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   side: const BorderSide(color: AppColors.border),

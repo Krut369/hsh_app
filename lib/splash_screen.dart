@@ -2,9 +2,10 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'core/theme/app_colors.dart';
-import 'modules/auth/screens/login_screen.dart';
+
 
 final splashStateProvider = StateProvider<bool>((ref) => false);
 
@@ -76,7 +77,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       CurvedAnimation(parent: _textController, curve: Curves.easeOutBack),
     );
     Future.delayed(const Duration(milliseconds: 900), () {
-      _textController.forward();
+      if (mounted) {
+        _textController.forward();
+      }
     });
 
     _bgController = AnimationController(
@@ -91,9 +94,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       if (next == true && !_navigated) {
         _navigated = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-          );
+          if (mounted) {
+             context.go('/login'); 
+          }
         });
       }
     });
