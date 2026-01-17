@@ -7,11 +7,12 @@ import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
-import 'package:hsh_app/models/holiday_model.dart';
+import 'package:hsh_app/models/leave_request_model.dart';
 import 'package:hsh_app/providers/holiday_provider.dart';
 import 'package:hsh_app/widgets/custom_button.dart';
 import 'package:hsh_app/widgets/custom_text_field.dart';
 import 'package:hsh_app/widgets/custom_app_bar.dart';
+import 'package:hsh_app/providers/student_profile_provider.dart';
 
 class HolidayForm extends ConsumerStatefulWidget {
   const HolidayForm({super.key});
@@ -99,16 +100,23 @@ class _HolidayFormState extends ConsumerState<HolidayForm> {
         return;
       }
 
-      final newHoliday = Holiday(
+      final profile = ref.read(studentProfileProvider);
+
+      final newRequest = LeaveRequest(
         id: DateTime.now().toIso8601String(),
-        name: _nameController.text,
+        studentId: profile.id,
+        studentName: profile.name,
+        studentAvatar: profile.imagePath,
+        room: profile.room,
+        leaveType: _nameController.text, // Using input name as leave type e.g. "Diwali Vacation"
         startDate: _selectedStartDate!,
         endDate: _selectedEndDate!,
-        status: HolidayStatus.pending,
-        reason: _reasonController.text.isNotEmpty ? _reasonController.text : null,
+        status: LeaveStatus.pending,
+        reason: _reasonController.text,
+        appliedAt: DateTime.now(),
       );
 
-      ref.read(holidayListProvider.notifier).addHoliday(newHoliday);
+      ref.read(holidayListProvider.notifier).addHoliday(newRequest);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

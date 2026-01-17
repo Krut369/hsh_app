@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:hsh_app/models/holiday_model.dart';
+import 'package:hsh_app/models/leave_request_model.dart';
 
 class HolidayEmptyState extends StatelessWidget {
   const HolidayEmptyState({super.key});
@@ -53,8 +53,32 @@ class HolidayEmptyState extends StatelessWidget {
   }
 }
 
+extension LeaveStatusExtension on LeaveStatus {
+  String get label {
+    switch (this) {
+      case LeaveStatus.pending:
+        return 'Pending';
+      case LeaveStatus.approved:
+        return 'Approved'; // Was Confirmed in Holiday model
+      case LeaveStatus.rejected:
+        return 'Rejected';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case LeaveStatus.pending:
+        return Colors.orange;
+      case LeaveStatus.approved:
+        return Colors.green;
+      case LeaveStatus.rejected:
+        return Colors.redAccent;
+    }
+  }
+}
+
 class HolidayStatusTag extends StatelessWidget {
-  final HolidayStatus status;
+  final LeaveStatus status;
 
   const HolidayStatusTag({super.key, required this.status});
 
@@ -80,7 +104,7 @@ class HolidayStatusTag extends StatelessWidget {
 }
 
 class HolidayListTile extends StatelessWidget {
-  final Holiday holiday;
+  final LeaveRequest holiday;
 
   const HolidayListTile({super.key, required this.holiday});
 
@@ -128,7 +152,7 @@ class HolidayListTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        holiday.name,
+                        holiday.leaveType, // Changed from name to leaveType
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
