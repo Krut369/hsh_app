@@ -5,16 +5,22 @@ import 'laundry_item_model.dart'; // Import the LaundryItem model
 
 /// Enum representing the status of a laundry order.
 enum OrderStatus {
+  requested,
   inProgress,
+  readyForPickup,
   completed,
   cancelled;
 
   String get label {
     switch (this) {
+      case OrderStatus.requested:
+        return 'Requested';
       case OrderStatus.inProgress:
         return 'In Progress';
+      case OrderStatus.readyForPickup:
+        return 'Ready for Pickup';
       case OrderStatus.completed:
-        return 'Completed';
+        return 'Completed'; // Or 'Delivered' if preferred, keeping as Completed for now
       case OrderStatus.cancelled:
         return 'Cancelled';
     }
@@ -22,8 +28,12 @@ enum OrderStatus {
 
   Color get backgroundColor {
     switch (this) {
+      case OrderStatus.requested:
+        return Colors.grey.shade200;
       case OrderStatus.inProgress:
         return Colors.amber.shade100;
+      case OrderStatus.readyForPickup:
+        return Colors.orange.shade100;
       case OrderStatus.completed:
         return Colors.green.shade100;
       case OrderStatus.cancelled:
@@ -33,8 +43,12 @@ enum OrderStatus {
 
   Color get textColor {
     switch (this) {
+      case OrderStatus.requested:
+        return Colors.grey.shade800;
       case OrderStatus.inProgress:
         return Colors.amber.shade800;
+      case OrderStatus.readyForPickup:
+        return Colors.orange.shade800;
       case OrderStatus.completed:
         return Colors.green.shade800;
       case OrderStatus.cancelled:

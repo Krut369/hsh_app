@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/payment_data.dart';
+import 'package:hsh_app/models/payment_model.dart';
 
 class PaymentNotifier extends StateNotifier<PaymentData> {
   PaymentNotifier() : super(PaymentData.initial());

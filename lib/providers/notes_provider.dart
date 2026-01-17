@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hsh_app/modules/student/features/notes/models/note_model.dart';
+import 'package:hsh_app/models/note_model.dart';
 import '../core/constants/app_text.dart';
 
 class NotesNotifier extends StateNotifier<List<Note>> {

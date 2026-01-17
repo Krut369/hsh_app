@@ -17,12 +17,13 @@ import 'package:hsh_app/modules/complain/features/feedback/complain_feedback_scr
 import 'package:hsh_app/modules/complain/features/management/complaint_detail_view_screen.dart';
 import 'package:hsh_app/modules/laundry/laundry_main_shell.dart';
 import 'package:hsh_app/modules/laundry/features/chat/laundry_chat_details_screen.dart';
+import 'package:hsh_app/modules/laundry/features/orders/laundry_order_detail_screen.dart';
 import 'package:hsh_app/modules/leader/leader_main_shell.dart';
 import 'package:hsh_app/modules/leader/features/attendance/attendance_main_screen.dart';
 import 'package:hsh_app/modules/leader/features/chat/group_chat_screen.dart';
 import 'package:hsh_app/modules/leader/features/chat/create_new_group_screen.dart';
 import 'package:hsh_app/modules/leader/features/chat/finalize_group_screen.dart';
-import 'package:hsh_app/modules/leader/models/chat_group.dart';
+import 'package:hsh_app/models/chat_group_model.dart';
 
 // Feature screens
 import 'package:hsh_app/modules/student/features/attendance/attendance_screen.dart';
@@ -212,6 +213,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
              builder: (context, state) {
                final convId = state.extra as String?;
                return LaundryChatDetailsScreen(conversationId: convId);
+             },
+           ),
+           GoRoute(
+             path: 'order-detail',
+             builder: (context, state) {
+               final order = state.extra as LaundryOrder;
+               return LaundryOrderDetailScreen(order: order);
              },
            ),
         ],

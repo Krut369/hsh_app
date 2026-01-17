@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/utils/responsive_util.dart';
-import '../../../../models/complaint_model.dart';
-import '../../../../providers/complaint_provider.dart';
+import 'package:hsh_app/models/complaint_model.dart';
+import '../../providers/complaint_provider.dart';
 import 'complaint_detail_view_screen.dart';
 
 class ComplaintAdminScreen extends ConsumerStatefulWidget {

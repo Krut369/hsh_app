@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import 'package:hsh_app/modules/student/features/chat/models/chat_message.dart';
-import 'package:hsh_app/modules/student/features/chat/models/chat_conversation.dart';
+import 'package:hsh_app/models/chat_message_model.dart';
+import 'package:hsh_app/models/chat_conversation_model.dart';
 
 // --- State Notifier ---
 

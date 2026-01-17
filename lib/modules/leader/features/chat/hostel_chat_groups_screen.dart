@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../models/chat_group.dart';
+import 'package:hsh_app/models/chat_group_model.dart';
 import 'widgets/group_card.dart';
 
 // Demo data provider

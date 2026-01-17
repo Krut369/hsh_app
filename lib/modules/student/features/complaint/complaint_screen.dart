@@ -7,7 +7,7 @@ import 'package:hsh_app/core/utils/responsive_util.dart';
 
 import 'package:hsh_app/widgets/custom_app_bar.dart';
 import 'package:hsh_app/models/complaint_model.dart';
-import 'package:hsh_app/providers/complaint_provider.dart';
+import 'package:hsh_app/modules/complain/providers/complaint_provider.dart';
 import 'package:hsh_app/modules/student/features/complaint/widgets/complaint_card.dart';
 import 'package:hsh_app/modules/student/features/complaint/widgets/complaint_details_sheet.dart';
 

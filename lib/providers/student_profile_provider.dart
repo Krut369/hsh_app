@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:hsh_app/models/student_profile.dart';
+import 'package:hsh_app/models/student_profile_model.dart';
 
 final studentProfileProvider = StateProvider<StudentProfile>(
   (ref) => StudentProfile(

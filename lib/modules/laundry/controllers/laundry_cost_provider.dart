@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/laundry_cost_model.dart';
+import 'package:hsh_app/models/laundry_cost_model.dart';
 
 final laundryCostProvider = StateNotifierProvider<LaundryCostNotifier, LaundryCost>((ref) {
   return LaundryCostNotifier();

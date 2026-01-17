@@ -1,4 +1,4 @@
-import 'package:hsh_app/modules/student/features/chat/models/chat_message.dart';
+import 'package:hsh_app/models/chat_message_model.dart';
 
 class ChatConversation {
   final String id;

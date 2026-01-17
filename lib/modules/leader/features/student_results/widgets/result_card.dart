@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/student_result.dart';
+import 'package:hsh_app/models/student_result_model.dart';
 import 'grade_badge.dart';
 
 class ResultCard extends StatelessWidget {

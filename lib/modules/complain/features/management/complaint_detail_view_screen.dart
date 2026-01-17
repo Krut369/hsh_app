@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../models/complaint_model.dart';
-import '../../../../providers/complaint_provider.dart';
+import 'package:hsh_app/models/complaint_model.dart';
+import '../../providers/complaint_provider.dart';
 import '../../../../widgets/custom_button.dart';
 
 class ComplaintDetailViewScreen extends ConsumerStatefulWidget {

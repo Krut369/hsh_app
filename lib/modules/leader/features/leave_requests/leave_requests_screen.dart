@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../models/leave_request.dart';
+import 'package:hsh_app/models/leave_request_model.dart';
 import 'widgets/leave_request_card.dart';
 import 'widgets/filter_chip_widget.dart';
 import 'leave_detail_screen.dart';

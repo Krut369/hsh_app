@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:hsh_app/modules/student/features/notes/models/note_model.dart';
+import 'package:hsh_app/models/note_model.dart';
 import 'package:hsh_app/modules/student/features/notes/note_editor/note_editor_screen.dart';
 import 'package:hsh_app/providers/notes_provider.dart';
 import 'package:hsh_app/widgets/custom_app_bar.dart';

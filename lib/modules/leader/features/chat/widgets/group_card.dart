@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/chat_group.dart';
+import 'package:hsh_app/models/chat_group_model.dart';
 
 class GroupCard extends StatelessWidget {
   final ChatGroup group;

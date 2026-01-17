@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/leave_request.dart';
+import 'package:hsh_app/models/leave_request_model.dart';
 import 'package:intl/intl.dart';
 
 class LeaveDetailScreen extends StatelessWidget {

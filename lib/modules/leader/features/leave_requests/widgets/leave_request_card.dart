@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/leave_request.dart';
+import 'package:hsh_app/models/leave_request_model.dart';
 
 class LeaveRequestCard extends StatelessWidget {
   final LeaveRequest request;

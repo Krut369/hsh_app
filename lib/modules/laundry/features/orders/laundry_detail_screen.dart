@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../controllers/laundry_filter_provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+
 import '../../../../core/constants/font.dart';
 import '../../../../core/utils/responsive_util.dart';
 import '../../../../core/theme/app_colors.dart';
-import 'package:intl/intl.dart';
-import 'laundry_order_detail_screen.dart';
+import '../../../../models/laundry_order_model.dart';
+import '../../../../providers/laundry_order_provider.dart';
+import '../../controllers/laundry_filter_provider.dart';
+
+import '../home/widgets/laundry_card.dart';
+import '../home/widgets/status_update_sheet.dart';
 
 class LaundryDetailScreen extends ConsumerStatefulWidget {
   const LaundryDetailScreen({super.key});
@@ -32,55 +38,6 @@ class _LaundryDetailScreenState extends ConsumerState<LaundryDetailScreen> {
     _searchController.dispose();
     super.dispose();
   }
-
-  // Mock Data mimicking the image content
-  final List<Map<String, dynamic>> laundryRequests = [
-    {
-      'status': 'In Progress',
-      'time': '10 mins ago',
-      'name': 'John Doe',
-      'room': 'Room 204 • #ORD-9921',
-      'action': 'Update Status',
-      'actionColor': AppColors.primary,
-      'actionTextColor': Colors.white,
-      'statusColor': const Color(0xFFE3F2FD), // Light Blue
-      'statusTextColor': AppColors.primary,
-    },
-    {
-      'status': 'Ready for Pickup',
-      'time': '1 hour ago',
-      'name': 'Jane Smith',
-      'room': 'Room 102 • #ORD-9918',
-      'action': 'Update Status',
-      'actionColor': const Color(0xFFF5F5F5), // Light Grey
-      'actionTextColor': Colors.black,
-      'statusColor': const Color(0xFFFFF3E0), // Light Orange
-      'statusTextColor': AppColors.warningOrange,
-    },
-    {
-      'status': 'Requested',
-      'time': '2 hours ago',
-      'name': 'Mike Ross',
-      'room': 'Room 305 • #ORD-9925',
-      'action': 'Start Washing',
-      'actionColor': const Color(0xFFF5F5F5),
-      'actionTextColor': Colors.black,
-      'statusColor': const Color(0xFFEEEEEE), // Light Grey
-      'statusTextColor': Colors.grey[700],
-    },
-    {
-      'status': 'Delivered',
-      'time': 'Completed',
-      'name': 'Harvey Specter',
-      'room': 'Room 501 • #ORD-9910',
-      'action': 'Finished',
-      'actionColor': const Color(0xFFE8F5E9), // Light Green
-      'actionTextColor': AppColors.successGreen,
-      'statusColor': const Color(0xFFE8F5E9),
-      'statusTextColor': AppColors.successGreen,
-      'isFinished': true,
-    },
-  ];
 
   void _showFilterDialog() {
     showModalBottomSheet(
@@ -190,7 +147,7 @@ class _LaundryDetailScreenState extends ConsumerState<LaundryDetailScreen> {
                     runSpacing: 8,
                     children: [
                       'All',
-                      'Requested',
+                      'Requested', // Assuming 'Requested' maps to 'In Progress' or similar in logic
                       'In Progress',
                       'Ready for Pickup',
                       'Delivered'
@@ -233,7 +190,7 @@ class _LaundryDetailScreenState extends ConsumerState<LaundryDetailScreen> {
     );
   }
 
-  void _showUpdateStatusSheet(Map<String, dynamic> item) {
+  void _showUpdateStatusSheet(LaundryOrder order) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -241,103 +198,15 @@ class _LaundryDetailScreenState extends ConsumerState<LaundryDetailScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Update Status',
-                style: AppFonts.heading3(context)
-                    .copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              _buildStatusTile(
-                  item, 'In Progress', 'In Progress', AppColors.primary),
-              _buildStatusTile(item, 'Ready for Pickup', 'Ready for Pickup',
-                  AppColors.warningOrange),
-              _buildStatusTile(
-                  item, 'Delivered', 'Delivered', AppColors.successGreen),
-            ],
-          ),
+        return StatusUpdateSheet(
+            currentStatus: order.status,
+            onStatusSelected: (newStatus) {
+                final updatedOrder = order.copyWith(status: newStatus);
+                ref.read(laundryOrderListProvider.notifier).updateOrder(updatedOrder);
+            },
         );
       },
     );
-  }
-
-  Widget _buildStatusTile(
-      Map<String, dynamic> item, String label, String statusKey, Color color) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: color, width: 2),
-        ),
-        child: Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: item['status'] == statusKey ? color : Colors.transparent,
-            shape: BoxShape.circle,
-          ),
-        ),
-      ),
-      title: Text(
-        label,
-        style: AppFonts.bodyMedium(context).copyWith(
-          fontWeight: FontWeight.w500,
-          color: AppColors.textPrimary,
-        ),
-      ),
-      onTap: () {
-        _updateStatus(item, statusKey);
-        Navigator.pop(context);
-      },
-    );
-  }
-
-  void _updateStatus(Map<String, dynamic> item, String newStatus) {
-    setState(() {
-      int index = laundryRequests.indexOf(item);
-      if (index != -1) {
-        laundryRequests[index]['status'] = newStatus;
-        if (newStatus == 'In Progress') {
-          laundryRequests[index]['statusColor'] = const Color(0xFFE3F2FD);
-          laundryRequests[index]['statusTextColor'] = AppColors.primary;
-          laundryRequests[index]['action'] = 'Update Status';
-          laundryRequests[index]['actionColor'] = const Color(0xFFF5F5F5);
-          laundryRequests[index]['actionTextColor'] = Colors.black;
-          laundryRequests[index]['isFinished'] = false;
-        } else if (newStatus == 'Ready for Pickup') {
-          laundryRequests[index]['statusColor'] = const Color(0xFFFFF3E0);
-          laundryRequests[index]['statusTextColor'] = AppColors.warningOrange;
-          laundryRequests[index]['action'] = 'Update Status';
-          laundryRequests[index]['actionColor'] = const Color(0xFFF5F5F5);
-          laundryRequests[index]['actionTextColor'] = Colors.black;
-          laundryRequests[index]['isFinished'] = false;
-        } else if (newStatus == 'Delivered') {
-          laundryRequests[index]['statusColor'] = const Color(0xFFE8F5E9);
-          laundryRequests[index]['statusTextColor'] = AppColors.successGreen;
-          laundryRequests[index]['action'] = 'Finished';
-          laundryRequests[index]['actionColor'] = const Color(0xFFE8F5E9);
-          laundryRequests[index]['actionTextColor'] = AppColors.successGreen;
-          laundryRequests[index]['isFinished'] = true;
-        }
-      }
-    });
   }
 
   String _formatDate(DateTime date) {
@@ -349,17 +218,24 @@ class _LaundryDetailScreenState extends ConsumerState<LaundryDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Filter list logic
     final currentFilter = ref.watch(laundryFilterProvider);
     final searchQuery = _searchController.text.toLowerCase();
+    final allOrders = ref.watch(laundryOrderListProvider);
 
-    final filteredRequests = laundryRequests.where((item) {
-      final matchesStatus = currentFilter == 'All' ||
-          item['status'].toString().toUpperCase() ==
-              currentFilter.toUpperCase();
-      final matchesSearch = item['name'].toString().toLowerCase().contains(searchQuery) ||
-          item['room'].toString().toLowerCase().contains(searchQuery);
-      return matchesStatus && matchesSearch;
+    final filteredRequests = allOrders.where((order) {
+      // Status Filter Logic (Simplified matching)
+      bool matchesStatus = true;
+      if (currentFilter != 'All') {
+          if (currentFilter == 'Requested' && order.status != OrderStatus.requested) matchesStatus = false;
+          if (currentFilter == 'In Progress' && order.status != OrderStatus.inProgress) matchesStatus = false;
+          if (currentFilter == 'Ready for Pickup' && order.status != OrderStatus.readyForPickup) matchesStatus = false;
+          if (currentFilter == 'Delivered' && order.status != OrderStatus.completed) matchesStatus = false;
+      }
+
+      final matchesSearch = order.orderId.toLowerCase().contains(searchQuery) ||
+          // order.studentName.toLowerCase().contains(searchQuery) || // If you had student name
+          false; // placeholder
+      return matchesStatus && (searchQuery.isEmpty || matchesSearch); // Search logic
     }).toList();
 
     return Scaffold(
@@ -419,11 +295,11 @@ class _LaundryDetailScreenState extends ConsumerState<LaundryDetailScreen> {
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: 'Search by name, room...',
+                  hintText: 'Search by Order ID...',
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   prefixIcon: const Icon(Icons.search, color: AppColors.primary),
                   filled: true,
-                  fillColor: Colors.white, // AppColors.surface/card
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -446,177 +322,31 @@ class _LaundryDetailScreenState extends ConsumerState<LaundryDetailScreen> {
                 ResponsiveUtil.responsivePadding(context),
                 16,
                 ResponsiveUtil.responsivePadding(context),
-                80, // Bottom padding for FAB
+                80,
               ),
               itemCount: filteredRequests.length,
               itemBuilder: (context, index) {
-                final item = filteredRequests[index];
+                final order = filteredRequests[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: _buildLaundryCard(context, item),
+                  child: LaundryCard(
+                      order: order,
+                      onTap: () {
+                          // Define route for detail
+                          // For now, using direct navigation as in original, 
+                          // but typically this should be GoRouter path like: 
+                          // context.push('/laundry/orders/${order.id}', extra: order);
+                          // But the file structure implies direct import usage for now or GoRouter config update.
+                          // Assuming explicit route not yet set up for ID-based nav in 'app_router.dart', passing object via extra.
+                          context.push('/laundry/order-detail', extra: order);
+                      },
+                      onActionTap: () => _showUpdateStatusSheet(order),
+                  ),
                 );
               },
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLaundryCard(BuildContext context, Map<String, dynamic> item) {
-    return GestureDetector(
-      onTap: () async {
-        final updatedData = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LaundryOrderDetailScreen(requestData: item),
-          ),
-        );
-
-        if (updatedData != null && updatedData is Map<String, dynamic>) {
-          _updateStatus(item, updatedData['status']);
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Header: Name and Status
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item['name'],
-                        style: AppFonts.heading3(context).copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item['room'],
-                        style: AppFonts.bodyMedium(context).copyWith(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: item['statusColor'],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    item['status'],
-                    style: AppFonts.smallText(context).copyWith(
-                      color: item['statusTextColor'],
-                      fontWeight: FontWeight.bold,
-                      fontSize: 11,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-            const Divider(height: 1, color: AppColors.border),
-            const SizedBox(height: 12),
-
-            // Footer: Time and Action
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.access_time_rounded,
-                        size: 16, color: AppColors.textSecondary),
-                    const SizedBox(width: 4),
-                    Text(
-                      item['time'],
-                      style: AppFonts.smallText(context).copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Action Button Logic
-                if (item['isFinished'] == true)
-                  Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: item['actionColor'],
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Icon(Icons.check_circle,
-                            size: 16, color: item['actionTextColor']),
-                        const SizedBox(width: 6),
-                        Text(
-                          item['action'],
-                          style: AppFonts.buttonText(context).copyWith(
-                            color: item['actionTextColor'],
-                            fontSize: 13,
-                          ),
-                        )
-                      ]))
-                else
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => _showUpdateStatusSheet(item),
-                      borderRadius: BorderRadius.circular(30),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(item['action'],
-                                style: AppFonts.buttonText(context).copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                )),
-                            const SizedBox(width: 4),
-                            Icon(Icons.arrow_forward_rounded,
-                                size: 16, color: Colors.white),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            )
-          ],
-        ),
       ),
     );
   }

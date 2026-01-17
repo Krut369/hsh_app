@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hsh_app/models/complaint_model.dart';
-import 'package:hsh_app/providers/complaint_provider.dart';
+import 'package:hsh_app/modules/complain/providers/complaint_provider.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
 
 import 'package:hsh_app/widgets/custom_button.dart';

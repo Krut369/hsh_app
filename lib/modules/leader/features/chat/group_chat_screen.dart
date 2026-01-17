@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/chat_group.dart';
+import 'package:hsh_app/models/chat_group_model.dart';
 import 'widgets/chat_message_bubble.dart';
 
 class GroupChatScreen extends StatefulWidget {

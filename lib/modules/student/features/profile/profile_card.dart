@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:hsh_app/models/student_profile.dart';
+import 'package:hsh_app/models/student_profile_model.dart';
 
 class ProfileCard extends StatelessWidget {
   final StudentProfile profile;

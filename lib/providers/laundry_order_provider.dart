@@ -60,6 +60,50 @@ class LaundryOrderListNotifier extends StateNotifier<List<LaundryOrder>> {
             selectedService: LaundryServiceType.press),
       ],
     ),
+    LaundryOrder(
+      id: '3',
+      orderId: '#ORD20250701',
+      date: DateTime(2025, 7, 1),
+      totalItems: 4,
+      serviceType: 'Wash',
+      status: OrderStatus.requested,
+      items: [
+        LaundryItem(
+            id: 'item6',
+            name: 'Bed Sheets',
+            icon: Icons.bed,
+            quantity: 2,
+            selectedService: LaundryServiceType.wash),
+         LaundryItem(
+            id: 'item7',
+            name: 'Pillow Cases',
+            icon: Icons.bed,
+            quantity: 2,
+            selectedService: LaundryServiceType.wash),
+      ],
+    ),
+    LaundryOrder(
+      id: '4',
+      orderId: '#ORD20250702',
+      date: DateTime(2025, 7, 2),
+      totalItems: 3,
+      serviceType: 'Press',
+      status: OrderStatus.readyForPickup,
+      items: [
+        LaundryItem(
+            id: 'item8',
+            name: 'Blazer',
+            icon: Icons.checkroom,
+            quantity: 1,
+            selectedService: LaundryServiceType.press),
+          LaundryItem(
+            id: 'item9',
+            name: 'Trousers',
+            icon: Icons.checkroom,
+            quantity: 2,
+            selectedService: LaundryServiceType.press),
+      ],
+    ),
   ]);
 
   /// Adds a new laundry order to the list.
