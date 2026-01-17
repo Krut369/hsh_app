@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import '../../../../models/attendance_record_model.dart';
 import 'qr_attendance_screen.dart';
 import 'manual_attendance_screen.dart';
 import 'widgets/event_type_chip.dart';
@@ -14,16 +14,8 @@ class AttendanceMainScreen extends ConsumerStatefulWidget {
 }
 
 class _AttendanceMainScreenState extends ConsumerState<AttendanceMainScreen> {
-  String selectedEvent = 'Lunch';
+  AttendanceEventType selectedEvent = AttendanceEventType.lunch;
   bool isQrView = true;
-
-  final List<String> eventTypes = [
-    'Lunch',
-    'Dinner',
-    'Sabha',
-    'Arti',
-    'Night Attendance'
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -56,11 +48,13 @@ class _AttendanceMainScreenState extends ConsumerState<AttendanceMainScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                children: eventTypes.map((type) {
+                children: AttendanceEventType.values
+                    .where((type) => type != AttendanceEventType.other)
+                    .map((type) {
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: EventTypeChip(
-                      label: type,
+                      label: type.displayName,
                       isSelected: selectedEvent == type,
                       onTap: () => setState(() => selectedEvent = type),
                     ),

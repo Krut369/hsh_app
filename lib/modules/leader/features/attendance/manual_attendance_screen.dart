@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../../models/attendance_record_model.dart';
 import 'widgets/student_detail_card.dart';
 
 class ManualAttendanceScreen extends StatefulWidget {
-  final String selectedEvent;
+  final AttendanceEventType selectedEvent;
 
   const ManualAttendanceScreen({super.key, required this.selectedEvent});
 

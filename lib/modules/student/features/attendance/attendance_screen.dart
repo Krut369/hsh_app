@@ -3,7 +3,7 @@ import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/widgets/custom_card.dart';
 import 'package:hsh_app/modules/student/features/scanner/mobile_scanner_screen.dart';
-
+import '../../../../models/attendance_record_model.dart';
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
 
@@ -12,20 +12,29 @@ class AttendanceScreen extends StatefulWidget {
 }
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
-  String? _selectedAttendanceType;
+  AttendanceEventType? _selectedAttendanceType;
   int _scanCount = 0;
   String? _scanStatus;
 
-  final List<Map<String, dynamic>> _attendanceOptions = [
-    {'name': 'Lunch', 'icon': Icons.fastfood},
-    {'name': 'Dinner', 'icon': Icons.dinner_dining},
-    {'name': 'Sabha', 'icon': Icons.group},
-    {'name': 'Aarti', 'icon': Icons.yard_outlined},
-    {'name': 'Night', 'icon': Icons.king_bed},
-  ];
+  final Map<AttendanceEventType, IconData> _eventIcons = {
+    AttendanceEventType.lunch: Icons.fastfood,
+    AttendanceEventType.dinner: Icons.dinner_dining,
+    AttendanceEventType.sabha: Icons.group,
+    AttendanceEventType.arti: Icons.yard_outlined,
+    AttendanceEventType.nightAttendance: Icons.king_bed,
+    AttendanceEventType.studyHour: Icons.book, 
+    AttendanceEventType.other: Icons.event,
+  };
 
   @override
   Widget build(BuildContext context) {
+    // Filter out 'other' if you don't want it shown, or keep it.
+    // For specific UI order, you can explicitly list them or just use values. 
+    // Here we use values but filter/map to options.
+    final options = AttendanceEventType.values
+        .where((type) => type != AttendanceEventType.other)
+        .toList();
+
     final padding = EdgeInsets.all(ResponsiveUtil.responsivePadding(context));
     final verticalSpacing =
         SizedBox(height: ResponsiveUtil.verticalSpacing(context));
@@ -51,7 +60,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               Text('Select Attendance Type', style: AppFonts.bodyBold(context)),
               verticalSpacing,
               GridView.builder(
-                itemCount: _attendanceOptions.length,
+                itemCount: options.length,
                 shrinkWrap:
                     true, // 👈 Important: makes GridView take only needed space
                 physics:
@@ -62,15 +71,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   mainAxisSpacing: 12,
                 ),
                 itemBuilder: (context, index) {
-                  final option = _attendanceOptions[index];
-                  final isSelected = _selectedAttendanceType == option['name'];
+                  final type = options[index];
+                  final isSelected = _selectedAttendanceType == type;
                   return MyCard(
-                    icon: option['icon'],
-                    text: option['name'],
+                    icon: _eventIcons[type] ?? Icons.event_note,
+                    text: type.displayName,
                     isSelected: isSelected,
                     onTap: () async {
                       setState(() {
-                        _selectedAttendanceType = option['name'];
+                        _selectedAttendanceType = type;
                       });
 
                       final result = await Navigator.push(

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import '../../../../models/attendance_record_model.dart';
 import 'widgets/attendance_stats_card.dart';
 
 class QrAttendanceScreen extends StatefulWidget {
-  final String selectedEvent;
+  final AttendanceEventType selectedEvent;
 
   const QrAttendanceScreen({super.key, required this.selectedEvent});
 
@@ -49,7 +50,7 @@ class _QrAttendanceScreenState extends State<QrAttendanceScreen> {
         children: [
           const SizedBox(height: 20),
           Text(
-            'Scan for ${widget.selectedEvent}',
+            'Scan for ${widget.selectedEvent.displayName}',
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,

@@ -8,9 +8,10 @@ import 'package:hsh_app/widgets/custom_button.dart';
 import 'package:hsh_app/widgets/custom_text_field.dart';
 import 'package:hsh_app/modules/student/features/vehicle/vehicle_dropdown.dart';
 import 'package:hsh_app/modules/student/features/common/upload_container.dart';
-
+import '../../../../models/vehicle_request_model.dart';
 // ignore: depend_on_referenced_packages
 import "package:file_picker/file_picker.dart";
+import 'package:uuid/uuid.dart';
 
 class VehicleRegistrationScreen extends StatefulWidget {
   const VehicleRegistrationScreen({super.key});
@@ -83,6 +84,22 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
         );
         return;
       }
+
+      // Create the model object
+      final request = VehicleRequest(
+        id: const Uuid().v4(),
+        studentId: 'CURRENT_USER_ID', // Replace with actual user ID provider
+        vehicleType: _selectedVehicleType!,
+        plateNumber: _plateNumberController.text,
+        modelMake: _modelController.text,
+        parkingPreference: _selectedParkingPreference ?? 'None',
+        registrationPapersUrl: _pickedFile!.path, // Or upload URL
+        status: VehicleStatus.pending,
+        createdAt: DateTime.now(),
+      );
+
+      // TODO: Call your provider/repo here to save 'request'
+      debugPrint('Submitting Vehicle Request: $request');
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text(AppText.vehicleRegisteredSuccess)),
