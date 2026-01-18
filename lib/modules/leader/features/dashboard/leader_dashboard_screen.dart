@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../leader_main_shell.dart';
 import 'widgets/feature_card.dart';
 import 'widgets/system_status_widget.dart';
+import '../../../../widgets/custom_app_bar.dart';
+import '../../../../providers/auth_provider.dart';
 
 class LeaderDashboardScreen extends ConsumerWidget {
   const LeaderDashboardScreen({super.key});
@@ -14,9 +16,9 @@ class LeaderDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: const Color(0xFFD6ECF7),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF3D5A80),
-        title: Column(
+      appBar: CustomAppBar(
+        title: 'Dashboard', // Fallback title
+        titleWidget: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
@@ -47,12 +49,11 @@ class LeaderDashboardScreen extends ConsumerWidget {
             child: const Icon(Icons.calendar_today, color: Colors.white, size: 24),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
+        showNotificationIcon: true,
+        showLogoutIcon: true,
+        onLogoutTap: () {
+          ref.read(authProvider.notifier).logout();
+        },
       ),
       body: SingleChildScrollView(
         child: Column(

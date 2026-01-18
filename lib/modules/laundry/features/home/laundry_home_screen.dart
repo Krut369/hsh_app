@@ -8,6 +8,8 @@ import '../../../../models/laundry_order_model.dart';
 import '../../../../providers/laundry_order_provider.dart';
 import '../../../laundry/controllers/laundry_filter_provider.dart';
 import '../../../../providers/bottom_nav_provider.dart';
+import '../../../../widgets/custom_app_bar.dart';
+import '../../../../providers/auth_provider.dart';
 
 import 'widgets/stat_card_widget.dart';
 import 'widgets/total_requests_card.dart';
@@ -32,34 +34,13 @@ class LaundryHomeScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        title: Text(
-          'Laundry',
-          style: AppFonts.heading2(context).copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white12,
-                shape: BoxShape.circle,
-              ),
-              padding: const EdgeInsets.all(6),
-              child: const Badge(
-                child: Icon(
-                  Icons.notifications_none,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-            ),
-          ),
-        ],
+      appBar: CustomAppBar(
+        title: 'Laundry',
+        showNotificationIcon: true,
+        showLogoutIcon: true,
+        onLogoutTap: () {
+          ref.read(authProvider.notifier).logout();
+        },
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(padding),
