@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:collection/collection.dart';
 import '../models/user_model.dart';
+import '../services/service_provider.dart';
 
 class AuthState {
   final bool isAuthenticated;
@@ -21,52 +21,112 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   @override
   Future<AuthState> build() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString(_userKey);
+    // Check if user is already logged in
+    if (serviceProvider.auth.isLoggedIn()) {
+      final prefs = await SharedPreferences.getInstance();
+      final userJson = prefs.getString(_userKey);
 
-    if (userJson != null) {
-      try {
-        final user = Student.fromMap(jsonDecode(userJson));
-        return AuthState.authenticated(user);
-      } catch (_) {
-        await prefs.remove(_userKey);
-        return AuthState.unauthenticated();
+      if (userJson != null) {
+        try {
+          final user = Student.fromMap(jsonDecode(userJson));
+          return AuthState.authenticated(user);
+        } catch (_) {
+          await prefs.remove(_userKey);
+          await serviceProvider.auth.logout();
+          return AuthState.unauthenticated();
+        }
       }
     }
     return AuthState.unauthenticated();
   }
 
-  final List<Student> dummyUsers = [
-    Student(username: 'student@gmail.com', password: '123456', name: 'Student User', role: UserRole.student),
-    Student(username: 'laundry@gmail.com', password: '123456', name: 'Laundry Manager', role: UserRole.laundry),
-    Student(username: 'complain@gmail.com', password: '123456', name: 'Complain Handler', role: UserRole.complain),
-    Student(username: 'leader@gmail.com', password: '123456', name: 'Hostel Leader', role: UserRole.leader),
-  ];
-
+  /// Login with backend API
   Future<void> login(String username, String password) async {
     state = const AsyncValue.loading();
-    await Future.delayed(const Duration(milliseconds: 500));
 
-    final matchedUser = dummyUsers.firstWhereOrNull(
-          (u) => u.username == username && u.password == password,
-    );
+    try {
+      print('🔐 Attempting login for: $username');
+      print('🌐 API URL: https://hsh-backend.onrender.com/api/v1/auth/login');
+      
+      // Call backend API
+      final response = await serviceProvider.auth.login(
+        username: username,
+        password: password,
+      );
 
-    if (matchedUser != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_userKey, jsonEncode(matchedUser.toMap()));
-      state = AsyncValue.data(AuthState.authenticated(matchedUser));
-    } else {
-      state = AsyncValue.data(AuthState.error('Invalid credentials'));
+      print('📡 Response received - Success: ${response.success}');
+      print('📡 Response data: ${response.data}');
+      print('📡 Response message: ${response.message}');
+      print('📡 Status code: ${response.statusCode}');
+
+      if (response.success && response.data != null) {
+        // Extract user data from nested response structure
+        // Backend returns: {success: true, data: {user: {...}, token: ...}}
+        final responseData = response.data['data'] ?? response.data;
+        final userData = responseData['user'] ?? responseData;
+        
+        print('✅ Login successful! User data: $userData');
+        
+        // Create Student object from response
+        final user = Student(
+          username: userData['email'] ?? userData['username'] ?? username,
+          password: '', // Don't store password
+          name: userData['name'] ?? 'User',
+          role: _parseUserRole(userData['role'] ?? 'student'),
+          roomNumber: userData['room'] ?? userData['room_number'],
+          hostelBlock: userData['hostel_block'],
+          phone: userData['phone'],
+          profileImage: userData['avatar'] ?? userData['profile_image'],
+        );
+
+        // Save user data locally
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_userKey, jsonEncode(user.toMap()));
+
+        state = AsyncValue.data(AuthState.authenticated(user));
+        print('✅ User authenticated and saved locally');
+        print('✅ User role: ${user.role.name}');
+      } else {
+        // Login failed
+        final errorMsg = response.message ?? 'Invalid credentials';
+        print('❌ Login failed: $errorMsg');
+        state = AsyncValue.data(
+          AuthState.error(errorMsg),
+        );
+      }
+    } catch (e, stackTrace) {
+      // Network or other error
+      print('❌ Login error: $e');
+      print('Stack trace: $stackTrace');
+      state = AsyncValue.data(
+        AuthState.error('Login failed: ${e.toString()}'),
+      );
     }
   }
 
+  /// Logout
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_userKey);
-    await Future.delayed(const Duration(milliseconds: 300)); // optional buffer
+    await serviceProvider.auth.logout();
     state = AsyncValue.data(AuthState.unauthenticated());
   }
 
+  /// Parse user role from string
+  UserRole _parseUserRole(String role) {
+    switch (role.toLowerCase()) {
+      case 'student':
+        return UserRole.student;
+      case 'laundry':
+        return UserRole.laundry;
+      case 'complain':
+        return UserRole.complain;
+      case 'leader':
+        return UserRole.leader;
+      default:
+        return UserRole.student;
+    }
+  }
 }
 
 final authProvider = AsyncNotifierProvider<AuthNotifier, AuthState>(() => AuthNotifier());

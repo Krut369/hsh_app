@@ -43,7 +43,7 @@ final ThemeData appTheme = ThemeData(
     error: Colors.redAccent,
     onError: Colors.white,
   ),
-  cardTheme: CardTheme(
+  cardTheme: CardThemeData(
     color: AppColors.card,
     elevation: 6,
     shadowColor: Colors.black12,
