@@ -36,8 +36,7 @@ class Student {
     username: map['username'] ?? '',
     password: map['password'] ?? '',
     name: map['name'] ?? '',
-    role: UserRole.values
-        .firstWhere((e) => e.name == map['role'], orElse: () => UserRole.student),
+    role: _parseRole(map['role']),
     roomNumber: map['room_number'],
     hostelBlock: map['hostel_block'],
     phone: map['phone'],
@@ -65,6 +64,23 @@ class Student {
       phone: phone ?? this.phone,
       profileImage: profileImage ?? this.profileImage,
     );
+  }
+
+  static UserRole _parseRole(String? role) {
+    if (role == null) return UserRole.student;
+    switch (role.toLowerCase()) {
+      case 'student':
+        return UserRole.student;
+      case 'laundry':
+        return UserRole.laundry;
+      case 'complain':
+      case 'complaint': // Common misspelling/variant
+        return UserRole.complain;
+      case 'leader':
+        return UserRole.leader;
+      default:
+        return UserRole.student;
+    }
   }
 }
 

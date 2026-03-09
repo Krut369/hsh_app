@@ -23,9 +23,14 @@ class AuthService {
 
     // Save token if login successful
     if (response.success && response.data != null) {
-      final token = response.data['token'];
+      // Handle nested data structure: { data: { token: ... } } vs { token: ... }
+      final responseData = response.data['data'] ?? response.data;
+      final token = responseData['token'];
+      
       if (token != null) {
         await _apiClient.setToken(token);
+      } else {
+        print('⚠️ Token not found in login response');
       }
     }
 

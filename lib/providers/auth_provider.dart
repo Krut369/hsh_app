@@ -21,22 +21,32 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   @override
   Future<AuthState> build() async {
-    // Check if user is already logged in
+    final prefs = await SharedPreferences.getInstance();
+    
+    // 1. Try to restore Token
+    final token = prefs.getString('auth_token'); // Using literal or ApiConstants.tokenKey if imported
+    if (token != null && token.isNotEmpty) {
+       await serviceProvider.apiClient.setToken(token);
+    }
+
+    // 2. Check Valid Session
     if (serviceProvider.auth.isLoggedIn()) {
-      final prefs = await SharedPreferences.getInstance();
       final userJson = prefs.getString(_userKey);
 
       if (userJson != null) {
         try {
           final user = Student.fromMap(jsonDecode(userJson));
+          print('✅ Session restored for user: ${user.name} (${user.role})');
           return AuthState.authenticated(user);
-        } catch (_) {
+        } catch (e) {
+          print('❌ Failed to restore session: $e');
           await prefs.remove(_userKey);
           await serviceProvider.auth.logout();
           return AuthState.unauthenticated();
         }
       }
     }
+    
     return AuthState.unauthenticated();
   }
 
@@ -120,6 +130,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       case 'laundry':
         return UserRole.laundry;
       case 'complain':
+      case 'complaint': // Backend sometimes sends 'complaint'
         return UserRole.complain;
       case 'leader':
         return UserRole.leader;

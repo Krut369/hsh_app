@@ -115,7 +115,9 @@ class ApiClient {
 
       // Add body
       if (body != null) {
-        request.write(jsonEncode(body));
+        final jsonBody = jsonEncode(body);
+        print('📤 Request Body ($endpoint): $jsonBody');
+        request.write(jsonBody);
       }
 
       final response = await request.close();
@@ -138,6 +140,37 @@ class ApiClient {
       final url = _buildUrl(endpoint);
       final uri = Uri.parse(url);
       final request = await _httpClient.putUrl(uri);
+
+      // Add headers
+      final headers = _buildHeaders(includeAuth: includeAuth);
+      headers.forEach((key, value) {
+        request.headers.set(key, value);
+      });
+
+      // Add body
+      if (body != null) {
+        request.write(jsonEncode(body));
+      }
+
+      final response = await request.close();
+      return await _handleResponse(response);
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: 'Network error: ${e.toString()}',
+      );
+    }
+  }
+  /// PATCH Request
+  Future<ApiResponse> patch(
+    String endpoint, {
+    Map<String, dynamic>? body,
+    bool includeAuth = true,
+  }) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final uri = Uri.parse(url);
+      final request = await _httpClient.patchUrl(uri);
 
       // Add headers
       final headers = _buildHeaders(includeAuth: includeAuth);

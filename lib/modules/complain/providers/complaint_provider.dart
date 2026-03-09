@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hsh_app/models/complaint_model.dart';
+import 'package:hsh_app/models/complaint_stats_model.dart';
+import 'package:hsh_app/services/service_provider.dart';
 
 // --- State Management for Adding Complaint ---
 
@@ -81,60 +83,43 @@ final addComplaintProvider = NotifierProvider<AddComplaintNotifier, AddComplaint
 
 // --- Global Complaint List ---
 
-// ✅ Updated complaints list using ComplaintStatus enum
-final complaintsProvider = StateProvider<List<Complaint>>((ref) => [
-  Complaint(
-    id: '1',
-    dateTime: DateTime.now().subtract(const Duration(days: 1)),
-    complaintType: 'Electrical',
-    issues: {
-      'Fan': ComplaintIssueData(description: 'Fan not working in room 101'),
-      'Light': ComplaintIssueData(description: 'Light flickering in bathroom'),
-    },
-    status: ComplaintStatus.underReview,
-  ),
-  Complaint(
-    id: '2',
-    dateTime: DateTime.now().subtract(const Duration(days: 2)),
-    complaintType: 'Plumbing',
-    issues: {
-      'Tap': ComplaintIssueData(description: 'Water leakage from tap'),
-    },
-    status: ComplaintStatus.resolved,
-  ),
-  Complaint(
-    id: '3',
-    dateTime: DateTime.now().subtract(const Duration(hours: 5)),
-    complaintType: 'Housekeeping',
-    issues: {
-      'Housekeeping': ComplaintIssueData(description: 'Room cleaning required'),
-    },
-    status: ComplaintStatus.pending,
-  ),
-]);
+// Global provider to fetch complaints list
+final complaintsListProvider = FutureProvider<List<Complaint>>((ref) async {
+  final response = await serviceProvider.complaint.getComplaints();
+  if (response.success && response.data != null) {
+      // Assuming backend returns { data: [...] } or just array in data
+      // Based on API implementation, likely response.data['data'] is the list
+      // Or if data is the list directly.
+      // Standard structure: { success: true, data: [ ... ] }
+      
+      final data = response.data;
+      final List<dynamic> list = (data is Map && data.containsKey('data')) 
+          ? (data['data'] as List<dynamic>)
+          : (data is List ? data : []);
 
-// ✅ Use enum for filter
-final complaintFilterProvider = StateProvider<ComplaintStatus?>((ref) => null); // null = 'All'
+      return list.map((e) => Complaint.fromJson(e)).toList();
+  }
+  return [];
+});
 
-// ✅ Filtered complaints based on selected status
-final filteredComplaintsProvider = Provider<List<Complaint>>((ref) {
+final complaintFilterProvider = StateProvider<ComplaintStatus?>((ref) => null);
+
+final filteredComplaintsProvider = Provider<AsyncValue<List<Complaint>>>((ref) {
+  final complaintsAsync = ref.watch(complaintsListProvider);
   final filter = ref.watch(complaintFilterProvider);
-  final complaints = ref.watch(complaintsProvider);
 
-  if (filter == null) return complaints; // Show all
-  return complaints.where((complaint) => complaint.status == filter).toList();
+  return complaintsAsync.whenData((complaints) {
+    if (filter == null) {
+      return complaints;
+    }
+    return complaints.where((c) => c.status == filter).toList();
+  });
 });
 
-// Total complaint count
-final totalComplaintCountProvider = Provider<int>((ref) {
-  return ref.watch(complaintsProvider).length;
+final complaintStatsProvider = FutureProvider<ComplaintStats>((ref) async {
+  final response = await serviceProvider.complaint.getComplaintStats();
+  if (response.success && response.data != null) {
+      return ComplaintStats.fromJson(response.data);
+  }
+  return ComplaintStats.empty();
 });
-
-// Count per status
-final complaintCountByStatusProvider = Provider.family<int, ComplaintStatus>((ref, status) {
-  return ref
-      .watch(complaintsProvider)
-      .where((complaint) => complaint.status == status)
-      .length;
-});
-

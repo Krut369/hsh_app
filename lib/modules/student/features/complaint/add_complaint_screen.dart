@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hsh_app/models/complaint_model.dart';
 import 'package:hsh_app/modules/complain/providers/complaint_provider.dart';
+import 'package:hsh_app/services/service_provider.dart'; // For creating complaint directly or via provider
 import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
 
 import 'package:hsh_app/widgets/custom_button.dart';
@@ -428,65 +429,126 @@ class AddComplaintScreen extends ConsumerWidget {
 
     if (hasSub) {
       // Must select at least one sub-complaint
-      return state.selectedSubComplaints.isNotEmpty;
+      if (state.selectedSubComplaints.isEmpty) return false;
+      
+      // Check if all selected sub-complaints have valid descriptions
+      for (var sub in state.selectedSubComplaints) {
+        final desc = state.issues[sub.name]?.description ?? '';
+        if (desc.trim().length < 10) return false;
+      }
+      return true;
     } else {
-      // For direct complaints using type name as key
+      // For direct complaints
       final key = state.selectedType!.name;
-      // Require at least some description logic if needed, or if relaxed just type selected
-      // Let's stick to previous logic: description required for general types
-      return state.issues[key]?.description.isNotEmpty == true;
+      final desc = state.issues[key]?.description ?? '';
+      return desc.trim().length >= 10;
     }
   }
 
-  void _submitComplaint(
+  Future<void> _submitComplaint(
     BuildContext context,
     WidgetRef ref,
     AddComplaintState state,
-  ) {
-    final complaints = ref.read(complaintsProvider);
+  ) async {
     final notifier = ref.read(addComplaintProvider.notifier);
+    
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+    );
 
-    // Filter issues map to only include selected sub-complaints (or the main type)
-    final Map<String, ComplaintIssueData> effectiveIssues = {};
-    if (state.selectedType!.subComplaints.isNotEmpty) {
-      for (var sub in state.selectedSubComplaints) {
-        // If data exists, use it. If not (no desc/image), create empty valid data?
-        // Or if logic allows empty, we just store it.
-        // We need to ensure we save what was selected.
-        effectiveIssues[sub.name] =
-            state.issues[sub.name] ?? ComplaintIssueData(description: '');
+    try {
+      final List<Map<String, dynamic>> issuesList = [];
+      
+      // Collect issues
+      if (state.selectedType!.subComplaints.isNotEmpty) {
+        for (var sub in state.selectedSubComplaints) {
+          final issueData = state.issues[sub.name];
+          if (issueData != null && issueData.description.isNotEmpty) {
+            issuesList.add({
+              'sub_category': sub.name,
+              'description': issueData.description,
+              'imagePath': issueData.imagePath, // Service will handle upload
+            });
+          }
+        }
+      } else {
+        // Direct complaint (no sub-category)
+        final key = state.selectedType!.name;
+        final issueData = state.issues[key];
+        if (issueData != null && issueData.description.isNotEmpty) {
+           issuesList.add({
+            'description': issueData.description,
+             'imagePath': issueData.imagePath,
+          });
+        }
       }
-    } else {
-      final key = state.selectedType!.name;
-      effectiveIssues[key] =
-          state.issues[key] ?? ComplaintIssueData(description: '');
-    }
 
-    final newComplaint = Complaint(
-      id: (complaints.length + 1).toString(),
-      dateTime: DateTime.now(),
-      complaintType: state.selectedType!.name,
-      issues: effectiveIssues,
-    );
-    ref.read(complaintsProvider.notifier).state = [newComplaint, ...complaints];
+      if (issuesList.isEmpty) {
+        Navigator.pop(context); // Close loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please add at least one issue description')),
+        );
+        return;
+      }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            SizedBox(width: 12),
-            Text('Complaint submitted successfully!'),
-          ],
+      print('🚀 Submitting Complaint...');
+      print('📦 Payload: Type=${state.selectedType!.name}, Issues=$issuesList');
+
+      final response = await serviceProvider.complaint.createComplaint(
+        complaintType: state.selectedType!.name, 
+        issues: issuesList,
+      );
+
+      print('📡 Response Status: ${response.statusCode}');
+      print('📡 Response Message: ${response.message}');
+      print('📡 Response Data: ${response.data}');
+
+      Navigator.pop(context); // Close loading
+
+      if (response.success) {
+        // Refresh complaints list and stats
+        ref.refresh(complaintsListProvider); 
+        ref.refresh(complaintStatsProvider);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Text('Complaint submitted successfully!'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+
+        notifier.reset();
+        context.pop();
+      } else {
+        print('❌ Submission Failed: ${response.message}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to submit: ${response.message ?? "Unknown error"} \nData: ${response.data}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context); // Close loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
         ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
-
-    notifier.reset();
-    context.pop();
+      );
+    }
   }
 }

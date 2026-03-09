@@ -96,53 +96,64 @@ class ComplaintScreen extends ConsumerWidget {
       body: Column(
         children: [
           Expanded(
-            child: complaints.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                )
-                              ]),
-                          child: Icon(Icons.history_edu,
-                              size: 48, color: Colors.grey[400]),
+            child: complaints.when(
+              data: (complaintsList) {
+                return complaintsList.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    )
+                                  ]),
+                              child: Icon(Icons.history_edu,
+                                  size: 48, color: Colors.grey[400]),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No ${filter?.label.toLowerCase() ?? ''} complaints found',
+                              style: textTheme.titleMedium
+                                  ?.copyWith(color: Colors.grey[600]),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Have an issue? Raise a ticket now.',
+                              style: textTheme.bodySmall
+                                  ?.copyWith(color: Colors.grey[500]),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No ${filter?.label.toLowerCase() ?? ''} complaints found',
-                          style: textTheme.titleMedium
-                              ?.copyWith(color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Have an issue? Raise a ticket now.',
-                          style: textTheme.bodySmall
-                              ?.copyWith(color: Colors.grey[500]),
-                        ),
-                      ],
-                    ),
-                  )
-                  : ListView.builder(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: ResponsiveUtil.responsivePadding(context)),
-                    itemCount: complaints.length,
-                    itemBuilder: (context, index) {
-                      return ComplaintCard(
-                        complaint: complaints[index],
-                        onTap: () =>
-                            _showComplaintDetails(context, complaints[index]),
+                      )
+                    : ListView.builder(
+                        padding: EdgeInsets.symmetric(
+                            horizontal:
+                                ResponsiveUtil.responsivePadding(context)),
+                        itemCount: complaintsList.length,
+                        itemBuilder: (context, index) {
+                          return ComplaintCard(
+                            complaint: complaintsList[index],
+                            onTap: () =>
+                                _showComplaintDetails(context, complaintsList[index]),
+                          );
+                        },
                       );
-                    },
-                  ),
+              },
+              error: (error, stack) => Center(
+                child: Text('Error: $error'),
+              ),
+              loading: () => const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
           ),
         ],
       ),

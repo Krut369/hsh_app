@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/utils/responsive_util.dart';
 import 'package:hsh_app/models/complaint_model.dart';
 import '../../providers/complaint_provider.dart';
+import 'package:hsh_app/services/service_provider.dart';
 import 'complaint_detail_view_screen.dart';
 
 class ComplaintAdminScreen extends ConsumerStatefulWidget {
@@ -129,33 +130,42 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
   }
 
   void _updateComplaintStatus(
-      Complaint complaint, ComplaintStatus newStatus, String notes) {
-    final complaints = ref.read(complaintsProvider);
-    final updatedComplaints = complaints.map((c) {
-      if (c.id == complaint.id) {
-        return Complaint(
-          id: c.id,
-          dateTime: c.dateTime,
-          complaintType: c.complaintType,
-          issues: c.issues,
-          status: newStatus,
-        );
-      }
-      return c;
-    }).toList();
+      Complaint complaint, ComplaintStatus newStatus, String notes) async {
+    // Show loading
+    showDialog(context: context, builder: (_) => const Center(child: CircularProgressIndicator()));
 
-    ref.read(complaintsProvider.notifier).state = updatedComplaints;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Complaint status updated to ${newStatus.label}'),
-        backgroundColor: Colors.green,
-      ),
+    final response = await serviceProvider.complaint.updateComplaintStatus(
+      complaintId: complaint.id, 
+      status: newStatus.toBackendString, 
+      note: notes
     );
+
+    Navigator.pop(context); // Pop loading
+
+    if (response.success) {
+      ref.refresh(complaintsListProvider); // Refresh list from API
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Complaint status updated to ${newStatus.label}'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update: ${response.message}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _showFilterDialog(BuildContext context) {
-    final complaints = ref.read(complaintsProvider);
+    // Use whatever data we have or empty list for unique types
+    final complaintsAsync = ref.watch(complaintsListProvider);
+    final complaints = complaintsAsync.valueOrNull ?? [];
+    
     final uniqueTypes = complaints.map((c) => c.complaintType).toSet().toList();
 
     // Create local variables to track dialog state
@@ -191,9 +201,9 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
                     ),
                     ...ComplaintStatus.values.map((status) {
                       return DropdownMenuItem<ComplaintStatus?>(
-                        value: status,
-                        child: Text(status.label),
-                      );
+                      value: status,
+                      child: Text(status.label),
+                    );
                     }),
                   ],
                 ),
@@ -258,7 +268,8 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
   }
 
   List<Complaint> _getFilteredComplaints() {
-    final complaints = ref.watch(complaintsProvider);
+    final complaintsAsync = ref.watch(complaintsListProvider);
+    final complaints = complaintsAsync.valueOrNull ?? [];
 
     return complaints.where((complaint) {
       final statusMatch = selectedStatusFilter == null ||

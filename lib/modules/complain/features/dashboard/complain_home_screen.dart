@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import 'package:hsh_app/models/complaint_model.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../providers/complaint_provider.dart';
 
@@ -18,11 +17,7 @@ class ComplainHomeScreen extends ConsumerStatefulWidget {
 class _ComplainHomeScreenState extends ConsumerState<ComplainHomeScreen> {
   @override
   Widget build(BuildContext context) {
-    final totalComplaints = ref.watch(totalComplaintCountProvider);
-    final pendingCount =
-        ref.watch(complaintCountByStatusProvider(ComplaintStatus.pending));
-    final resolvedCount =
-        ref.watch(complaintCountByStatusProvider(ComplaintStatus.resolved));
+    final statsAsync = ref.watch(complaintStatsProvider);
     final authNotifier = ref.read(authProvider.notifier);
 
     return Scaffold(
@@ -92,40 +87,43 @@ class _ComplainHomeScreenState extends ConsumerState<ComplainHomeScreen> {
                 ],
               ),
             ),
-            //const SizedBox(height: 10),
             // Stat Cards
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  StatCardWidget(
-                    title: 'TOTAL COMPLAINTS',
-                    value: totalComplaints.toString(),
-                    percentage: '+12%',
-                    isPositive: true,
-                    icon: Icons.bar_chart,
-                    borderColor: const Color(0xFF2196F3),
-                    iconColor: const Color(0xFF2196F3),
-                  ),
-                  StatCardWidget(
-                    title: 'PENDING',
-                    value: pendingCount.toString(),
-                    percentage: '+5%',
-                    isPositive: true,
-                    icon: Icons.pending_actions,
-                    borderColor: const Color(0xFFFF9800),
-                    iconColor: const Color(0xFFFF9800),
-                  ),
-                  StatCardWidget(
-                    title: 'RESOLVED',
-                    value: resolvedCount.toString(),
-                    percentage: '-2%',
-                    isPositive: false,
-                    icon: Icons.check_circle_outline,
-                    borderColor: const Color(0xFF4CAF50),
-                    iconColor: const Color(0xFF4CAF50),
-                  ),
-                ],
+              child: statsAsync.when(
+                data: (stats) => Column(
+                  children: [
+                    StatCardWidget(
+                      title: 'TOTAL COMPLAINTS',
+                      value: stats.total.toString(),
+                      percentage: '', // Percentage change could be calculated if historical data existed
+                      isPositive: true,
+                      icon: Icons.bar_chart,
+                      borderColor: const Color(0xFF2196F3),
+                      iconColor: const Color(0xFF2196F3),
+                    ),
+                    StatCardWidget(
+                      title: 'PENDING',
+                      value: stats.pending.toString(),
+                      percentage: '',
+                      isPositive: true,
+                      icon: Icons.pending_actions,
+                      borderColor: const Color(0xFFFF9800),
+                      iconColor: const Color(0xFFFF9800),
+                    ),
+                    StatCardWidget(
+                      title: 'RESOLVED',
+                      value: stats.resolved.toString(),
+                      percentage: '',
+                      isPositive: false,
+                      icon: Icons.check_circle_outline,
+                      borderColor: const Color(0xFF4CAF50),
+                      iconColor: const Color(0xFF4CAF50),
+                    ),
+                  ],
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Center(child: Text('Error: $err')),
               ),
             ),
             const SizedBox(height: 24),

@@ -9,15 +9,41 @@ class ComplaintService {
   ComplaintService(this._apiClient);
 
   /// Create a new complaint
+  /// Handles uploading images for issues if they exist
   Future<ApiResponse> createComplaint({
     required String complaintType,
     required List<Map<String, dynamic>> issues,
   }) async {
+    final List<Map<String, dynamic>> processedIssues = [];
+
+    for (final issue in issues) {
+      final Map<String, dynamic> issueData = Map.from(issue);
+      
+      // If there is an image path, upload it first
+      if (issueData.containsKey('imagePath') && issueData['imagePath'] != null) {
+        final File imageFile = File(issueData['imagePath']);
+        if (await imageFile.exists()) {
+          final uploadResponse = await uploadImage(imageFile);
+          if (uploadResponse.success && uploadResponse.data != null) {
+             // Assuming backend returns { "url": "..." } or similar
+             // Adjust key 'url' based on actual upload response
+             issueData['image'] = uploadResponse.data['url'] ?? uploadResponse.data['file_url']; 
+          }
+        }
+        // Remove local path before sending to API
+        issueData.remove('imagePath');
+      } else {
+        // Ensure imagePath is removed even if null
+        issueData.remove('imagePath');
+      }
+      processedIssues.add(issueData);
+    }
+
     return await _apiClient.post(
       ApiConstants.complaints,
       body: {
         'complaint_type': complaintType,
-        'issues': issues,
+        'issues': processedIssues,
       },
     );
   }
@@ -40,6 +66,11 @@ class ComplaintService {
     );
   }
 
+  /// Get complaint statistics
+  Future<ApiResponse> getComplaintStats() async {
+    return await _apiClient.get('${ApiConstants.complaints}/stats');
+  }
+
   /// Get single complaint by ID
   Future<ApiResponse> getComplaintById(String complaintId) async {
     return await _apiClient.get('${ApiConstants.complaints}/$complaintId');
@@ -51,7 +82,7 @@ class ComplaintService {
     required String status,
     String? note,
   }) async {
-    return await _apiClient.put(
+    return await _apiClient.patch(
       '${ApiConstants.complaints}/$complaintId/status',
       body: {
         'status': status,

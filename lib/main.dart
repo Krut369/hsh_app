@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hsh_app/providers/theme_provider.dart' show themeProvider;
 import 'router/app_router.dart';
 
-final splashFinishedProvider = StateProvider<bool>((ref) => false);
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

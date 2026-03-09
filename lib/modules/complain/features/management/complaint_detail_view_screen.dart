@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:hsh_app/models/complaint_model.dart';
 import '../../providers/complaint_provider.dart';
+import 'package:hsh_app/services/service_provider.dart';
 import '../../../../widgets/custom_button.dart';
 
 class ComplaintDetailViewScreen extends ConsumerStatefulWidget {
@@ -65,33 +66,38 @@ class _ComplaintDetailViewScreenState
     }
   }
 
-  void _updateComplaintStatus() {
+  void _updateComplaintStatus() async {
     if (selectedStatus == null) return;
 
-    final complaints = ref.read(complaintsProvider);
-    final updatedComplaints = complaints.map((c) {
-      if (c.id == widget.complaint.id) {
-        return Complaint(
-          id: c.id,
-          dateTime: c.dateTime,
-          complaintType: c.complaintType,
-          issues: c.issues,
-          status: selectedStatus!,
-        );
-      }
-      return c;
-    }).toList();
+    // Show loading
+    showDialog(context: context, builder: (_) => const Center(child: CircularProgressIndicator()));
 
-    ref.read(complaintsProvider.notifier).state = updatedComplaints;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Complaint status updated to ${selectedStatus!.label}'),
-        backgroundColor: Colors.green,
-      ),
+    final response = await serviceProvider.complaint.updateComplaintStatus(
+      complaintId: widget.complaint.id, 
+      status: selectedStatus!.toBackendString, 
+      note: remarksController.text
     );
 
-    Navigator.pop(context);
+    Navigator.pop(context); // Pop loading
+
+    if (response.success) {
+      ref.refresh(complaintsListProvider);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Complaint status updated to ${selectedStatus!.label}'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context); // Go back
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update: ${response.message}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _buildCodeStyleDisplay() {

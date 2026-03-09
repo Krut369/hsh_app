@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/theme/app_colors.dart';
+import 'package:hsh_app/providers/auth_provider.dart';
+import 'package:hsh_app/models/user_model.dart';
 
 
-final splashStateProvider = StateProvider<bool>((ref) => false);
+
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -26,7 +28,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   late Animation<double> _textFadeAnimation;
   late Animation<Offset> _textSlideAnimation;
   late AnimationController _bgController;
-  bool _navigated = false;
+
   bool _splashTriggered = false;
 
   @override
@@ -90,23 +92,37 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<bool>(splashStateProvider, (previous, next) {
-      if (next == true && !_navigated) {
-        _navigated = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-             context.go('/login'); 
-          }
-        });
-      }
-    });
-
     // Trigger splash state after 3 seconds (only once)
+    // Trigger splash state after delay
     if (!_splashTriggered) {
       _splashTriggered = true;
-      Future.delayed(const Duration(seconds: 3), () {
+      Future.delayed(const Duration(seconds: 3), () async {
         if (mounted) {
-          ref.read(splashStateProvider.notifier).state = true;
+           try {
+             // Ensure AuthNotifier initialization completes
+             await ref.read(authProvider.future);
+             
+             final authState = ref.read(authProvider); // Now state should be data
+             
+             if (authState.valueOrNull?.isAuthenticated == true) {
+                final role = authState.valueOrNull?.user?.role;
+                // Navigate based on role
+                if (role == UserRole.student) {
+                  context.go('/student/home'); 
+                } else if (role == UserRole.complain) {
+                  context.go('/complain/dashboard');
+                } else if (role == UserRole.laundry) {
+                  context.go('/laundry/dashboard');
+                } else {
+                   context.go('/student/home'); 
+                }
+             } else {
+               context.go('/login');
+             }
+           } catch (e) {
+             print('Splash Auth Check Error: $e');
+             context.go('/login');
+           }
         }
       });
     }
