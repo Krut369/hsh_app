@@ -12,8 +12,10 @@ class AuthState {
   AuthState({required this.isAuthenticated, this.user, this.error});
 
   factory AuthState.unauthenticated() => AuthState(isAuthenticated: false);
-  factory AuthState.authenticated(Student user) => AuthState(isAuthenticated: true, user: user);
-  factory AuthState.error(String message) => AuthState(isAuthenticated: false, error: message);
+  factory AuthState.authenticated(Student user) =>
+      AuthState(isAuthenticated: true, user: user);
+  factory AuthState.error(String message) =>
+      AuthState(isAuthenticated: false, error: message);
 }
 
 class AuthNotifier extends AsyncNotifier<AuthState> {
@@ -47,7 +49,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     try {
       print('🔐 Attempting login for: $username');
       print('🌐 API URL: https://hsh-backend.onrender.com/api/v1/auth/login');
-      
+
       // Call backend API
       final response = await serviceProvider.auth.login(
         username: username,
@@ -64,9 +66,9 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         // Backend returns: {success: true, data: {user: {...}, token: ...}}
         final responseData = response.data['data'] ?? response.data;
         final userData = responseData['user'] ?? responseData;
-        
+
         print('✅ Login successful! User data: $userData');
-        
+
         // Create Student object from response
         final user = Student(
           username: userData['email'] ?? userData['username'] ?? username,
@@ -104,6 +106,11 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     }
   }
 
+  /// Clear current error state (e.g., when the user starts re-typing)
+  void clearError() {
+    state = AsyncValue.data(AuthState.unauthenticated());
+  }
+
   /// Logout
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
@@ -129,6 +136,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 }
 
-final authProvider = AsyncNotifierProvider<AuthNotifier, AuthState>(() => AuthNotifier());
+final authProvider =
+    AsyncNotifierProvider<AuthNotifier, AuthState>(() => AuthNotifier());
 final obscurePasswordProvider = StateProvider<bool>((ref) => true);
 final isLoadingProvider = StateProvider<bool>((ref) => false);
