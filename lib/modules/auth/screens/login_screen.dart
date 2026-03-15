@@ -17,10 +17,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String? _lastError;
   late AnimationController _animController;
   late Animation<double> _cardAnim;
   late Animation<double> _logoAnim;
+  String? _localError;
 
   @override
   void initState() {
@@ -38,6 +38,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
     );
     _animController.forward();
+
+    // Dismiss error banner immediately when the user starts re-typing
+    _emailController.addListener(_clearLocalError);
+    _passwordController.addListener(_clearLocalError);
+  }
+
+  /// Clears ONLY the local error display — never touches authProvider.
+  void _clearLocalError() {
+    if (_localError != null) {
+      setState(() => _localError = null);
+    }
   }
 
   @override
@@ -60,24 +71,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final isLoading = authState.isLoading;
-    final error = authState.valueOrNull?.error;
     final obscurePassword = ref.watch(obscurePasswordProvider);
+    ref.listen<AsyncValue<AuthState>>(authProvider, (previous, next) {
+      final newError = next.valueOrNull?.error;
+      if (newError != null && newError != _localError) {
+        setState(() => _localError = newError);
+      }
+    });
 
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
-
-    // Show error only once
-    if (error != null && error != _lastError) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error), backgroundColor: Colors.red),
-        );
-      });
-      _lastError = error;
-    }
-    if (error == null) {
-      _lastError = null;
-    }
 
     return Scaffold(
       body: Stack(
@@ -144,7 +147,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                         const SizedBox(height: 6),
 
-                        const SizedBox(height: 28),
+                        // ── Inline error banner ──────────────────────────
+                        if (_localError != null) ...[
+                          const SizedBox(height: 12),
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeIn,
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFEBEB),
+                              border: Border.all(
+                                  color: const Color(0xFFFF4D4D), width: 1.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.error_outline,
+                                    color: Color(0xFFCC0000), size: 20),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    _friendlyError(_localError!),
+                                    style: const TextStyle(
+                                      color: Color(0xFFCC0000),
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        // ─────────────────────────────────────────────────
+
+                        const SizedBox(height: 20),
                         //
                         TextField(
                           controller: _emailController,
@@ -231,5 +271,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         ],
       ),
     );
+  }
+
+  /// Convert raw backend/network error into a user-friendly message.
+  String _friendlyError(String error) {
+    final lower = error.toLowerCase();
+    if (lower.contains('invalid') ||
+        lower.contains('incorrect') ||
+        lower.contains('wrong') ||
+        lower.contains('credentials') ||
+        lower.contains('401') ||
+        lower.contains('password') ||
+        lower.contains('not found') ||
+        lower.contains('unauthorized')) {
+      return 'Incorrect email or password. Please try again.';
+    }
+    if (lower.contains('network') ||
+        lower.contains('socket') ||
+        lower.contains('connection') ||
+        lower.contains('timeout')) {
+      return 'Network error. Please check your internet connection.';
+    }
+    return error;
   }
 }

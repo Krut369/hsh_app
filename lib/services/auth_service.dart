@@ -15,7 +15,7 @@ class AuthService {
     final response = await _apiClient.post(
       ApiConstants.login,
       body: {
-        'email': username,  // Backend expects 'email' field
+        'email': username, // Backend expects 'email' field
         'password': password,
       },
       includeAuth: false,
