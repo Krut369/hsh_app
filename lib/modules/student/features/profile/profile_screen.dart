@@ -81,7 +81,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.attendance,
                       subtitle: AppText.viewStatus,
                       iconColor: Colors.blue,
-                      iconBgColor: Colors.blue.withValues(alpha: 0.1),
+                      iconBgColor: Colors.blue.withOpacity(0.1),
                       onTap: () {
                         context.go('/student/attendance');
                       },
@@ -95,7 +95,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.fees,
                       subtitle: AppText.payDue,
                       iconColor: Colors.green,
-                      iconBgColor: Colors.green.withValues(alpha: 0.1),
+                      iconBgColor: Colors.green.withOpacity(0.1),
                       onTap: () {
                         context.push('/student/payment');
                       },
@@ -109,7 +109,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.complaint,
                       subtitle: AppText.raiseTicket,
                       iconColor: Colors.orange,
-                      iconBgColor: Colors.orange.withValues(alpha: 0.1),
+                      iconBgColor: Colors.orange.withOpacity(0.1),
                       onTap: () {
                         context.push('/student/complaint');
                       },
@@ -123,7 +123,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.chat,
                       subtitle: AppText.checkMessages,
                       iconColor: Colors.purple,
-                      iconBgColor: Colors.purple.withValues(alpha: 0.1),
+                      iconBgColor: Colors.purple.withOpacity(0.1),
                       onTap: () {
                         context.push('/student/chat');
                       },
@@ -137,7 +137,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.notes,
                       subtitle: AppText.keepNotes,
                       iconColor: Colors.teal,
-                      iconBgColor: Colors.teal.withValues(alpha: 0.1),
+                      iconBgColor: Colors.teal.withOpacity(0.1),
                       onTap: () {
                         context.push('/student/notes');
                       },
@@ -151,7 +151,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.holiday,
                       subtitle: AppText.applyLeave,
                       iconColor: Colors.pink,
-                      iconBgColor: Colors.pink.withValues(alpha: 0.1),
+                      iconBgColor: Colors.pink.withOpacity(0.1),
                       onTap: () {
                         context.push('/student/holiday');
                       },
@@ -165,7 +165,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: 'Vehicle', // Short title for UI
                       subtitle: 'Register',
                       iconColor: Colors.indigo,
-                      iconBgColor: Colors.indigo.withValues(alpha: 0.1),
+                      iconBgColor: Colors.indigo.withOpacity(0.1),
                       onTap: () {
                         context.push('/student/vehicle-registration');
                       },

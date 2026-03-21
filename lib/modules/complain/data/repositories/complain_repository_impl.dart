@@ -1,0 +1,57 @@
+import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
+import 'package:hsh_app/modules/complain/domain/entities/complaint_stats_model.dart';
+import 'package:hsh_app/modules/complain/domain/repositories/complain_repository.dart';
+import 'package:hsh_app/services/service_provider.dart';
+
+class ComplainRepositoryImpl implements ComplainRepository {
+  final _service = serviceProvider.complaint;
+
+  @override
+  Future<List<Complaint>> getComplaints() async {
+    final response = await _service.getComplaints();
+    if (response.success && response.data != null) {
+      final data = response.data;
+      final List<dynamic> list = (data is Map && data.containsKey('data'))
+          ? (data['data'] as List<dynamic>)
+          : (data is List ? data : []);
+      return list.map((e) => Complaint.fromJson(e)).toList();
+    }
+    return [];
+  }
+
+  @override
+  Future<ComplaintStats> getComplaintStats() async {
+    final response = await _service.getComplaintStats();
+    if (response.success && response.data != null) {
+      return ComplaintStats.fromJson(response.data);
+    }
+    return ComplaintStats.empty();
+  }
+
+  @override
+  Future<void> updateComplaintStatus(String id, ComplaintStatus status) async {
+    await _service.updateComplaintStatus(
+      complaintId: id,
+      status: status.toBackendString,
+    );
+  }
+
+  @override
+  Future<void> createComplaint(Complaint complaint) async {
+    // Map list of issues to the format expected by the API
+    final List<Map<String, dynamic>> processedIssues = [];
+
+    complaint.issues.forEach((subName, issueData) {
+      processedIssues.add({
+        'sub_complaint': subName,
+        'description': issueData.description,
+        'imagePath': issueData.imagePath, // Service will handle the upload
+      });
+    });
+
+    await _service.createComplaint(
+      complaintType: complaint.complaintType,
+      issues: processedIssues,
+    );
+  }
+}

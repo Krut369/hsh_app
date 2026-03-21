@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hsh_app/models/complaint_model.dart';
+import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
 
 class ComplaintStatusChip extends StatelessWidget {
@@ -13,7 +13,7 @@ class ComplaintStatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

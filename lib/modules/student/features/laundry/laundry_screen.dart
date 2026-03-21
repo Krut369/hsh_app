@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:hsh_app/models/laundry_order_model.dart';
-import 'package:hsh_app/providers/laundry_order_provider.dart';
+import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
+import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/modules/student/features/orders/order_details_screen.dart';
 import 'package:hsh_app/modules/student/features/orders/select_items_screen.dart';
 import 'package:hsh_app/widgets/custom_app_bar.dart';
 
-// Local state for filter
-final laundryFilterProvider = StateProvider<OrderStatus?>((ref) => null);
-
-class LaundryScreen extends ConsumerWidget {
+class LaundryScreen extends StatelessWidget {
   const LaundryScreen({super.key});
+
+  LaundryController get controller => Get.find<LaundryController>();
 
   void _openSelectItemsScreen(BuildContext context) {
     // Generate order ID and Date
@@ -32,55 +31,45 @@ class LaundryScreen extends ConsumerWidget {
     );
   }
 
-  void _showFilterDialog(BuildContext context, WidgetRef ref) {
+  void _showFilterDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => Consumer(
-        builder: (context, ref, child) {
-          final currentFilter = ref.watch(laundryFilterProvider);
-          return AlertDialog(
-            title: const Text('Filter Orders'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RadioListTile<OrderStatus?>(
-                  title: const Text('All'),
-                  value: null,
-                  groupValue: currentFilter,
-                  onChanged: (value) {
-                    ref.read(laundryFilterProvider.notifier).state = value;
-                    Navigator.of(context).pop();
-                  },
-                ),
-                ...OrderStatus.values
-                    .map((status) => RadioListTile<OrderStatus?>(
-                          title: Text(status.label),
-                          value: status,
-                          groupValue: currentFilter,
-                          onChanged: (value) {
-                            ref.read(laundryFilterProvider.notifier).state =
-                                value;
-                            Navigator.of(context).pop();
-                          },
-                        )),
-              ],
-            ),
-          );
-        },
-      ),
+      builder: (context) => Obx(() {
+        final currentFilter = controller.filter.value;
+        return AlertDialog(
+          title: const Text('Filter Orders'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<String>(
+                title: const Text('All'),
+                value: 'All',
+                groupValue: currentFilter,
+                onChanged: (value) {
+                  if (value != null) controller.setFilter(value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ...OrderStatus.values.map((status) => RadioListTile<String>(
+                    title: Text(status.label),
+                    value: status.label,
+                    groupValue: currentFilter,
+                    onChanged: (value) {
+                      if (value != null) controller.setFilter(value);
+                      Navigator.of(context).pop();
+                    },
+                  )),
+            ],
+          ),
+        );
+      }),
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final allOrders = ref.watch(laundryOrderListProvider);
-    final filter = ref.watch(laundryFilterProvider);
+  Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
-    final orders = filter == null
-        ? allOrders
-        : allOrders.where((o) => o.status == filter).toList();
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -89,36 +78,48 @@ class LaundryScreen extends ConsumerWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: ActionChip(
-              avatar: Icon(Icons.filter_list, size: 16, color: scheme.primary),
-              label: Text(
-                filter?.label ?? 'All',
-                style: TextStyle(
-                  color: scheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              backgroundColor: Colors.white,
-              side: BorderSide.none,
-              onPressed: () => _showFilterDialog(context, ref),
-            ),
+            child: Obx(() => ActionChip(
+                  avatar:
+                      Icon(Icons.filter_list, size: 16, color: scheme.primary),
+                  label: Text(
+                    controller.filter.value,
+                    style: TextStyle(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  backgroundColor: Colors.white,
+                  side: BorderSide.none,
+                  onPressed: () => _showFilterDialog(context),
+                )),
           ),
         ],
       ),
-      body: orders.isEmpty
-          ? _buildEmptyState(context, scheme, textTheme)
-          : ListView.builder(
-              padding:
-                  EdgeInsets.all(ResponsiveUtil.responsivePadding(context)),
-              itemCount: orders.length,
-              itemBuilder: (context, index) {
-                final order = orders[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: _buildOrderCard(context, order),
-                );
-              },
-            ),
+      body: Obx(() {
+        final currentFilter = controller.filter.value;
+        final allOrders = controller.orders;
+
+        final orders = allOrders.where((o) {
+          if (currentFilter == 'All') return true;
+          return o.status.label == currentFilter;
+        }).toList();
+
+        if (orders.isEmpty) {
+          return _buildEmptyState(context, scheme, textTheme);
+        }
+
+        return ListView.builder(
+          padding: EdgeInsets.all(ResponsiveUtil.responsivePadding(context)),
+          itemCount: orders.length,
+          itemBuilder: (context, index) {
+            final order = orders[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: _buildOrderCard(context, order),
+            );
+          },
+        );
+      }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openSelectItemsScreen(context),
         backgroundColor: scheme.primary,
@@ -127,7 +128,7 @@ class LaundryScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildOrderCard(BuildContext context, LaundryOrder order) {
+  Widget _buildOrderCard(BuildContext context, LaundryOrderEntity order) {
     return InkWell(
       onTap: () {
         Navigator.of(context).push(
@@ -143,7 +144,7 @@ class LaundryScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withOpacity(0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -159,7 +160,7 @@ class LaundryScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      order.serviceType, // "Wash & Press"
+                      order.serviceType,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -221,7 +222,7 @@ class LaundryScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: status.backgroundColor.withValues(alpha: 0.15),
+        color: status.backgroundColor.withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -244,20 +245,20 @@ class LaundryScreen extends ConsumerWidget {
           Icon(
             Icons.local_laundry_service_outlined,
             size: ResponsiveUtil.responsiveIconSize(context, 80),
-            color: scheme.onSurface.withValues(alpha: 0.1),
+            color: scheme.onSurface.withOpacity(0.1),
           ),
           const SizedBox(height: 16),
           Text(
             'No laundry orders yet!',
             style: textTheme.titleMedium?.copyWith(
-              color: scheme.onSurface.withValues(alpha: 0.5),
+              color: scheme.onSurface.withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Tap the + button to place a new order.',
             style: textTheme.bodySmall?.copyWith(
-              color: scheme.onSurface.withValues(alpha: 0.4),
+              color: scheme.onSurface.withOpacity(0.4),
             ),
           ),
         ],

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../domain/entities/user_entity.dart';
@@ -57,7 +58,12 @@ class AuthController extends GetxController {
         isAuthenticated.value = false;
       }
     } catch (e) {
-      error.value = e.toString();
+      if (e is DioException) {
+        final message = e.response?.data?['message'] ?? e.message;
+        error.value = message.toString();
+      } else {
+        error.value = e.toString();
+      }
       isAuthenticated.value = false;
     } finally {
       isLoading.value = false;

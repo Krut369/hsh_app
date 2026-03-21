@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../sources/auth_api_service.dart';
 import '../models/auth_user_model.dart';
 
@@ -23,6 +24,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<AuthUserModel> login(String email, String password) async {
+    debugPrint('AuthRemoteDataSourceImpl.login: attempting with email: $email');
     final response = await _apiService.login({
       'email': email,
       'password': password,

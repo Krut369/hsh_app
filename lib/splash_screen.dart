@@ -1,5 +1,4 @@
 import "package:hsh_app/core/enums/user_role.dart";
-// Requires flutter_riverpod in pubspec.yaml
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:get/get.dart';
@@ -7,134 +6,23 @@ import 'package:go_router/go_router.dart';
 
 import 'core/theme/app_colors.dart';
 import 'modules/auth/presentation/controllers/auth_controller.dart';
+import 'modules/auth/presentation/controllers/splash_controller.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _logoController;
-  late Animation<double> _logoFadeAnimation;
-  late Animation<Offset> _logoSlideAnimation;
-  late AnimationController _shineController;
-  late AnimationController _textController;
-  late Animation<double> _textFadeAnimation;
-  late Animation<Offset> _textSlideAnimation;
-  late AnimationController _bgController;
-
-  bool _splashTriggered = false;
-
-  @override
-  void dispose() {
-    _logoController.dispose();
-    _shineController.dispose();
-    _textController.dispose();
-    _bgController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _logoController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-    _logoFadeAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _logoController, curve: Curves.easeIn));
-    _logoSlideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _logoController, curve: Curves.easeOutBack),
-    );
-    _logoController.forward();
-
-    _shineController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..repeat();
-
-    _textController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-    _textFadeAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _textController, curve: Curves.easeIn));
-    _textSlideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.2),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _textController, curve: Curves.easeOutBack),
-    );
-    Future.delayed(const Duration(milliseconds: 900), () {
-      if (mounted) {
-        _textController.forward();
-      }
-    });
-
-    _bgController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 8),
-    )..repeat(reverse: true);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Trigger splash state after 3 seconds (only once)
-    // Trigger splash state after delay
-    if (!_splashTriggered) {
-      _splashTriggered = true;
-      Future.delayed(const Duration(seconds: 3), () async {
-        if (mounted) {
-          try {
-            final authController = Get.find<AuthController>();
-
-            if (authController.isAuthenticated.value &&
-                authController.user.value != null) {
-              final role = authController.user.value!.role;
-              if (!mounted) return;
-              if (context.mounted) {
-                if (role == UserRole.student) {
-                  context.go('/student/home');
-                } else if (role == UserRole.complain) {
-                  context.go('/complain/dashboard');
-                } else if (role == UserRole.laundry) {
-                  context.go('/laundry/dashboard');
-                } else {
-                  context.go('/student/home');
-                }
-              }
-            } else {
-              if (context.mounted) {
-                context.go('/login');
-              }
-            }
-          } catch (e) {
-            debugPrint('Splash Auth Check Error: $e');
-            if (context.mounted) {
-              context.go('/login');
-            }
-          }
-        }
-      });
-    }
-
+    // Initialize controller and pass context for go_router
+    final controller = Get.put(SplashController(context));
     final size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: Stack(
         children: [
           // Animated vertical gradient background
           AnimatedBuilder(
-            animation: _bgController,
+            animation: controller.bgController,
             builder: (context, child) {
               return Container(
                 decoration: BoxDecoration(
@@ -154,18 +42,18 @@ class _SplashScreenState extends State<SplashScreen>
             },
           ),
           // Animated geometric waves/curves
-          _buildAnimatedWaves(size),
+          _buildAnimatedWaves(size, controller),
           // Main content
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildLogo(),
+                _buildLogo(controller),
                 const SizedBox(height: 40),
                 SlideTransition(
-                  position: _textSlideAnimation,
+                  position: controller.textSlideAnimation,
                   child: FadeTransition(
-                    opacity: _textFadeAnimation,
+                    opacity: controller.textFadeAnimation,
                     child: Text(
                       'Atmiya Vidhya Dham',
                       style: TextStyle(
@@ -175,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen>
                         letterSpacing: 1.2,
                         shadows: [
                           Shadow(
-                            color: AppColors.secondary.withValues(alpha: 0.18),
+                            color: AppColors.secondary.withOpacity(0.18),
                             blurRadius: 16,
                             offset: const Offset(0, 2),
                           ),
@@ -198,12 +86,11 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Widget _buildAnimatedWaves(Size size) {
-    // Two animated geometric waves/curves using brand colors
+  Widget _buildAnimatedWaves(Size size, SplashController controller) {
     return AnimatedBuilder(
-      animation: _bgController,
+      animation: controller.bgController,
       builder: (context, child) {
-        final t = _bgController.value;
+        final t = controller.bgController.value;
         return Stack(
           children: [
             Positioned(
@@ -212,8 +99,8 @@ class _SplashScreenState extends State<SplashScreen>
               top: size.height * 0.62 + 30 * math.sin(t * 2 * math.pi),
               child: CustomPaint(
                 size: Size(size.width, 120),
-                painter: _WavePainter(
-                  color: AppColors.secondary.withValues(alpha: 0.18),
+                painter: WavePainter(
+                  color: AppColors.secondary.withOpacity(0.18),
                   amplitude: 24 + 12 * math.sin(t * 2 * math.pi),
                   yOffset: 60,
                 ),
@@ -225,8 +112,8 @@ class _SplashScreenState extends State<SplashScreen>
               top: size.height * 0.68 + 20 * math.cos(t * 2 * math.pi),
               child: CustomPaint(
                 size: Size(size.width, 100),
-                painter: _WavePainter(
-                  color: AppColors.primary.withValues(alpha: 0.13),
+                painter: WavePainter(
+                  color: AppColors.primary.withOpacity(0.13),
                   amplitude: 18 + 8 * math.cos(t * 2 * math.pi),
                   yOffset: 40,
                 ),
@@ -238,35 +125,35 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Widget _buildLogo() {
+  Widget _buildLogo(SplashController controller) {
     return SlideTransition(
-      position: _logoSlideAnimation,
+      position: controller.logoSlideAnimation,
       child: FadeTransition(
-        opacity: _logoFadeAnimation,
+        opacity: controller.logoFadeAnimation,
         child: Transform(
           alignment: Alignment.center,
           transform: Matrix4.diagonal3Values(1.08, 1.08, 1.0)
             ..setEntry(3, 2, 0.001)
-            ..rotateY(-0.10), // slight 3D tilt
+            ..rotateY(-0.10),
           child: Container(
             width: 380,
             height: 380,
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.22),
+                  color: AppColors.primary.withOpacity(0.22),
                   blurRadius: 64,
                   spreadRadius: 16,
                   offset: const Offset(0, 32),
                 ),
                 BoxShadow(
-                  color: AppColors.secondary.withValues(alpha: 0.18),
+                  color: AppColors.secondary.withOpacity(0.18),
                   blurRadius: 32,
                   spreadRadius: 8,
                   offset: const Offset(-16, 16),
                 ),
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.10),
+                  color: Colors.black.withOpacity(0.10),
                   blurRadius: 24,
                   spreadRadius: 2,
                   offset: const Offset(0, 8),
@@ -281,13 +168,12 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 360,
                   fit: BoxFit.contain,
                 ),
-                // Animated diagonal shine sweep
                 Positioned.fill(
                   child: AnimatedBuilder(
-                    animation: _shineController,
+                    animation: controller.shineController,
                     builder: (context, _) {
-                      final shinePos = _shineController.value;
-                      return CustomPaint(painter: _ShinePainter(shinePos));
+                      final shinePos = controller.shineController.value;
+                      return CustomPaint(painter: ShinePainter(shinePos));
                     },
                   ),
                 ),
@@ -300,11 +186,11 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-class _WavePainter extends CustomPainter {
+class WavePainter extends CustomPainter {
   final Color color;
   final double amplitude;
   final double yOffset;
-  _WavePainter({
+  WavePainter({
     required this.color,
     required this.amplitude,
     required this.yOffset,
@@ -330,16 +216,16 @@ class _WavePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _WavePainter oldDelegate) {
+  bool shouldRepaint(covariant WavePainter oldDelegate) {
     return oldDelegate.color != color ||
         oldDelegate.amplitude != amplitude ||
         oldDelegate.yOffset != yOffset;
   }
 }
 
-class _ShinePainter extends CustomPainter {
+class ShinePainter extends CustomPainter {
   final double shinePos;
-  _ShinePainter(this.shinePos);
+  ShinePainter(this.shinePos);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -348,9 +234,9 @@ class _ShinePainter extends CustomPainter {
         begin: Alignment(-1.0 + 2 * shinePos, -1.0),
         end: Alignment(1.0 + 2 * shinePos, 1.0),
         colors: [
-          Colors.white.withValues(alpha: 0.0),
-          AppColors.surface.withValues(alpha: 0.18),
-          Colors.white.withValues(alpha: 0.0),
+          Colors.white.withOpacity(0.0),
+          AppColors.surface.withOpacity(0.18),
+          Colors.white.withOpacity(0.0),
         ],
         stops: const [0.35, 0.5, 0.65],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
@@ -358,7 +244,7 @@ class _ShinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ShinePainter oldDelegate) {
+  bool shouldRepaint(covariant ShinePainter oldDelegate) {
     return oldDelegate.shinePos != shinePos;
   }
 }

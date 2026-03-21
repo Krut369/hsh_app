@@ -1,25 +1,25 @@
+import 'package:flutter/foundation.dart';
 import "package:hsh_app/core/enums/user_role.dart";
+
 enum UserRole {
   student,
   laundry,
   complain,
   leader;
 
-  static UserRole parse(String? role) {
-    if (role == null) return UserRole.student;
-    switch (role.toLowerCase()) {
-      case 'student':
-        return UserRole.student;
-      case 'laundry':
-        return UserRole.laundry;
-      case 'complain':
-      case 'complaint':
-        return UserRole.complain;
-      case 'leader':
-        return UserRole.leader;
-      default:
-        return UserRole.student;
-    }
+  static UserRole parse(dynamic role) {
+    final roleStr = role?.toString();
+    debugPrint('Parsing UserRole from: $roleStr');
+    if (roleStr == null) return UserRole.student;
+
+    final normalized = roleStr.toLowerCase();
+    if (normalized.contains('student')) return UserRole.student;
+    if (normalized.contains('laundry')) return UserRole.laundry;
+    if (normalized.contains('complain')) return UserRole.complain;
+    if (normalized.contains('leader')) return UserRole.leader;
+
+    debugPrint('Unknown role string: $roleStr, defaulting to student');
+    return UserRole.student;
   }
 
   String get toBackendString {

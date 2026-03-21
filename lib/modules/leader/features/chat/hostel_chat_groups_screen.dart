@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:hsh_app/models/chat_group_model.dart';
 import 'widgets/group_card.dart';
 
-// Demo data provider
-final chatGroupsProvider = StateProvider<List<ChatGroup>>((ref) => [
+class HostelChatGroupsController extends GetxController {
+  final chatGroups = <ChatGroup>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadDemoData();
+  }
+
+  void _loadDemoData() {
+    chatGroups.assignAll([
       ChatGroup(
         id: '1',
         name: 'Pavitra Group',
@@ -72,13 +80,15 @@ final chatGroupsProvider = StateProvider<List<ChatGroup>>((ref) => [
         ),
       ),
     ]);
+  }
+}
 
-class HostelChatGroupsScreen extends ConsumerWidget {
+class HostelChatGroupsScreen extends StatelessWidget {
   const HostelChatGroupsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final groups = ref.watch(chatGroupsProvider);
+  Widget build(BuildContext context) {
+    final controller = Get.put(HostelChatGroupsController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFD6ECF7),
@@ -92,16 +102,14 @@ class HostelChatGroupsScreen extends ConsumerWidget {
         title: const Text(
           'Hostel Chat Groups',
           style: TextStyle(
-            color: Color(0xFF1D3557),
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+              color: Color(0xFF1D3557),
+              fontSize: 20,
+              fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: Color(0xFF2D507B)),
-            onPressed: () {},
-          ),
+              icon: const Icon(Icons.search, color: Color(0xFF2D507B)),
+              onPressed: () {}),
         ],
       ),
       body: Column(
@@ -112,53 +120,40 @@ class HostelChatGroupsScreen extends ConsumerWidget {
             child: Text(
               'ACTIVE GROUPS',
               style: TextStyle(
-                color: Color(0xFF2D507B),
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                letterSpacing: 1.2,
-              ),
+                  color: Color(0xFF2D507B),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  letterSpacing: 1.2),
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: groups.length,
-              itemBuilder: (context, index) {
-                final group = groups[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: GroupCard(
-                    group: group,
-                    onTap: () => context.push('/leader/chat/messages', extra: group),
-                  ),
-                );
-              },
-            ),
+            child: Obx(() => ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: controller.chatGroups.length,
+                  itemBuilder: (context, index) {
+                    final group = controller.chatGroups[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: GroupCard(
+                        group: group,
+                        onTap: () =>
+                            context.push('/leader/chat/messages', extra: group),
+                      ),
+                    );
+                  },
+                )),
           ),
-          
-          // Create New Group section
           Container(
             padding: const EdgeInsets.all(24),
             child: Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: const Color(0xFF2D507B).withValues(alpha: 0.2),
-                  style: BorderStyle.none, // We'll use a dashed border in real app if needed
-                ),
-              ),
               child: Column(
                 children: [
-                  const Text(
-                    'Need another group?',
-                    style: TextStyle(
-                      color: Color(0xFF1D3557),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                  const Text('Need another group?',
+                      style: TextStyle(
+                          color: Color(0xFF1D3557),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16)),
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
@@ -169,13 +164,11 @@ class HostelChatGroupsScreen extends ConsumerWidget {
                         backgroundColor: const Color(0xFF1D6EB7),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
+                            borderRadius: BorderRadius.circular(15)),
                       ),
-                      child: const Text(
-                        'Create New Group',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
+                      child: const Text('Create New Group',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   ),
                 ],

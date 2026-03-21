@@ -28,7 +28,7 @@ class AllServicesScreen extends StatelessWidget {
             title: AppText.attendance,
             subtitle: AppText.viewStatus,
             iconColor: Colors.blue,
-            iconBgColor: Colors.blue.withValues(alpha: 0.1),
+            iconBgColor: Colors.blue.withOpacity(0.1),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AttendanceScreen())),
           ),
           QuickActionCard(
@@ -36,7 +36,7 @@ class AllServicesScreen extends StatelessWidget {
             title: 'Fees',
             subtitle: AppText.payDue,
             iconColor: Colors.green,
-            iconBgColor: Colors.green.withValues(alpha: 0.1),
+            iconBgColor: Colors.green.withOpacity(0.1),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentScreen())),
           ),
           QuickActionCard(
@@ -44,7 +44,7 @@ class AllServicesScreen extends StatelessWidget {
             title: AppText.complaint,
             subtitle: AppText.raiseTicket,
             iconColor: Colors.orange,
-            iconBgColor: Colors.orange.withValues(alpha: 0.1),
+            iconBgColor: Colors.orange.withOpacity(0.1),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComplaintScreen())),
           ),
           QuickActionCard(
@@ -52,7 +52,7 @@ class AllServicesScreen extends StatelessWidget {
             title: AppText.chat,
             subtitle: AppText.checkMessages,
             iconColor: Colors.purple,
-            iconBgColor: Colors.purple.withValues(alpha: 0.1),
+            iconBgColor: Colors.purple.withOpacity(0.1),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatScreen())),
           ),
           QuickActionCard(
@@ -60,7 +60,7 @@ class AllServicesScreen extends StatelessWidget {
             title: AppText.notes,
             subtitle: AppText.keepNotes,
             iconColor: Colors.teal,
-            iconBgColor: Colors.teal.withValues(alpha: 0.1),
+            iconBgColor: Colors.teal.withOpacity(0.1),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotesScreen())),
           ),
         ],

@@ -1,13 +1,14 @@
-import '../core/network/api_client.dart';
-import 'student_service.dart';
-import 'laundry_service.dart';
-import 'complaint_service.dart';
-import 'attendance_service.dart';
-import 'vehicle_service.dart';
-import 'holiday_service.dart';
-import 'notes_service.dart';
-import 'payment_service.dart';
-import 'chat_service.dart';
+import 'package:hsh_app/core/network/api_client.dart';
+import 'package:hsh_app/core/constants/api_constants.dart';
+import 'package:hsh_app/modules/laundry/data/sources/laundry_service.dart';
+import 'package:hsh_app/modules/complain/data/sources/complaint_service.dart';
+import 'package:hsh_app/modules/student/features/attendance/data/sources/attendance_service.dart';
+import 'package:hsh_app/modules/student/features/vehicle/data/sources/vehicle_service.dart';
+import 'package:hsh_app/modules/student/features/holiday/data/sources/holiday_service.dart';
+import 'package:hsh_app/modules/student/features/notes/data/sources/notes_service.dart';
+import 'package:hsh_app/modules/student/features/payment/data/sources/payment_service.dart';
+import 'package:hsh_app/modules/chat/data/sources/chat_service.dart';
+import 'package:hsh_app/modules/student/data/sources/student_service.dart';
 
 /// Service Provider - Centralized access to all API services
 class ServiceProvider {

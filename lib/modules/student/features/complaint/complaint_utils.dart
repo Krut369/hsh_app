@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hsh_app/models/complaint_model.dart';
+import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 
 class ComplaintUtils {
   static IconData getComplaintTypeIcon(String typeName) {

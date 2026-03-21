@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import 'package:hsh_app/models/laundry_order_model.dart';
-import 'package:hsh_app/models/laundry_item_model.dart';
+import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/widgets/custom_app_bar.dart';
 
-class OrderDetailsScreen extends ConsumerWidget {
-  final LaundryOrder order;
+class OrderDetailsScreen extends StatelessWidget {
+  final LaundryOrderEntity order;
 
   const OrderDetailsScreen({super.key, required this.order});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50], // Light background for contrast
+      backgroundColor: Colors.grey[50],
       appBar: CustomAppBar(
         title: 'Order Details',
         leading: IconButton(
@@ -36,7 +34,6 @@ class OrderDetailsScreen extends ConsumerWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Removed Order ID display
                     Text(
                       DateFormat('MMM dd, yyyy • hh:mm a').format(order.date),
                       style: textTheme.bodyMedium?.copyWith(
@@ -71,10 +68,10 @@ class OrderDetailsScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.amber.withValues(alpha: 0.1),
+                  color: Colors.amber.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                   border:
-                      Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                      Border.all(color: Colors.amber.withOpacity(0.3)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +100,7 @@ class OrderDetailsScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
                   ),
@@ -113,7 +110,8 @@ class OrderDetailsScreen extends ConsumerWidget {
                 children: [
                   _buildSummaryRow('Service Type', order.serviceType),
                   const Divider(height: 24),
-                  // Placeholder for total cost if data existed
+                  _buildSummaryRow('Order ID', order.orderId),
+                  const Divider(height: 24),
                   _buildSummaryRow('Estimated Cost',
                       '\$${(order.totalItems * 1.5).toStringAsFixed(2)}'),
                 ],
@@ -130,10 +128,10 @@ class OrderDetailsScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: status.backgroundColor.withValues(alpha: 0.2),
+        color: status.backgroundColor.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
         border:
-            Border.all(color: status.backgroundColor.withValues(alpha: 0.5)),
+            Border.all(color: status.backgroundColor.withOpacity(0.5)),
       ),
       child: Text(
         status.label,
@@ -146,8 +144,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildItemCard(BuildContext context, LaundryItem item) {
-    // Determine color based on service type
+  Widget _buildItemCard(BuildContext context, LaundryItemEntity item) {
     Color serviceColor;
     switch (item.selectedService) {
       case LaundryServiceType.wash:
@@ -169,7 +166,7 @@ class OrderDetailsScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -177,17 +174,15 @@ class OrderDetailsScreen extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          // Icon Container
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: serviceColor.withValues(alpha: 0.1),
+              color: serviceColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(item.icon, color: serviceColor, size: 24),
           ),
           const SizedBox(width: 16),
-          // Details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,7 +200,7 @@ class OrderDetailsScreen extends ConsumerWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: serviceColor.withValues(alpha: 0.1),
+                    color: serviceColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -220,7 +215,6 @@ class OrderDetailsScreen extends ConsumerWidget {
               ],
             ),
           ),
-          // Quantity Badge
           Container(
             width: 32,
             height: 32,
