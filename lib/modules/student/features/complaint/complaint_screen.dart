@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-
+import 'package:get/get.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
-
 import 'package:hsh_app/widgets/custom_app_bar.dart';
-import 'package:hsh_app/models/complaint_model.dart';
-import 'package:hsh_app/modules/complain/providers/complaint_provider.dart';
+import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
+import 'package:hsh_app/modules/complain/presentation/controllers/complain_controller.dart';
 import 'package:hsh_app/modules/student/features/complaint/widgets/complaint_card.dart';
 import 'package:hsh_app/modules/student/features/complaint/widgets/complaint_details_sheet.dart';
 
-class ComplaintScreen extends ConsumerWidget {
+class ComplaintScreen extends GetView<ComplainController> {
   const ComplaintScreen({super.key});
 
-  void _showFilterDialog(BuildContext context, WidgetRef ref) {
-    final currentFilter = ref.read(complaintFilterProvider);
-
+  void _showFilterDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -25,31 +20,31 @@ class ComplaintScreen extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            RadioListTile<ComplaintStatus?>(
-              title: const Text('All'),
-              value: null,
-              groupValue: currentFilter,
-              onChanged: (value) {
-                ref.read(complaintFilterProvider.notifier).state = value;
-                context.pop();
-              },
-            ),
+            Obx(() => RadioListTile<ComplaintStatus?>(
+                  title: const Text('All'),
+                  value: null,
+                  groupValue: controller.filter.value,
+                  onChanged: (value) {
+                    controller.setFilter(value);
+                    Get.back();
+                  },
+                )),
             ...ComplaintStatus.values.map((status) {
-              return RadioListTile<ComplaintStatus?>(
-                title: Text(status.label),
-                value: status,
-                groupValue: currentFilter,
-                onChanged: (value) {
-                  ref.read(complaintFilterProvider.notifier).state = value;
-                  context.pop();
-                },
-              );
+              return Obx(() => RadioListTile<ComplaintStatus?>(
+                    title: Text(status.label),
+                    value: status,
+                    groupValue: controller.filter.value,
+                    onChanged: (value) {
+                      controller.setFilter(value);
+                      Get.back();
+                    },
+                  ));
             }),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => context.pop(),
+            onPressed: () => Get.back(),
             child: const Text(AppText.cancel),
           ),
         ],
@@ -58,9 +53,7 @@ class ComplaintScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final complaints = ref.watch(filteredComplaintsProvider);
-    final filter = ref.watch(complaintFilterProvider);
+  Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -72,93 +65,92 @@ class ComplaintScreen extends ConsumerWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: ActionChip(
-              avatar: Icon(Icons.filter_list, size: 16, color: scheme.primary),
-              label: Text(
-                filter?.label ?? 'All',
-                style: TextStyle(
-                    color: scheme.primary, fontWeight: FontWeight.bold),
-              ),
-              backgroundColor: Colors.white,
-              side: BorderSide.none,
-              onPressed: () => _showFilterDialog(context, ref),
-            ),
+            child: Obx(() => ActionChip(
+                  avatar:
+                      Icon(Icons.filter_list, size: 16, color: scheme.primary),
+                  label: Text(
+                    controller.filter.value?.label ?? 'All',
+                    style: TextStyle(
+                        color: scheme.primary, fontWeight: FontWeight.bold),
+                  ),
+                  backgroundColor: Colors.white,
+                  side: BorderSide.none,
+                  onPressed: () => _showFilterDialog(context),
+                )),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push('/student/complaint/add');
-        },
+        onPressed: () => Get.toNamed('/student/complaint/add'),
         backgroundColor: scheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: complaints.when(
-              data: (complaintsList) {
-                return complaintsList.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.05),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    )
-                                  ]),
-                              child: Icon(Icons.history_edu,
-                                  size: 48, color: Colors.grey[400]),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No ${filter?.label.toLowerCase() ?? ''} complaints found',
-                              style: textTheme.titleMedium
-                                  ?.copyWith(color: Colors.grey[600]),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Have an issue? Raise a ticket now.',
-                              style: textTheme.bodySmall
-                                  ?.copyWith(color: Colors.grey[500]),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: EdgeInsets.symmetric(
-                            horizontal:
-                                ResponsiveUtil.responsivePadding(context)),
-                        itemCount: complaintsList.length,
-                        itemBuilder: (context, index) {
-                          return ComplaintCard(
-                            complaint: complaintsList[index],
-                            onTap: () =>
-                                _showComplaintDetails(context, complaintsList[index]),
-                          );
-                        },
-                      );
-              },
-              error: (error, stack) => Center(
-                child: Text('Error: $error'),
-              ),
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+      body: Obx(() {
+        if (controller.isLoading.value && controller.complaints.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final complaintsList = controller.filteredComplaints;
+
+        if (complaintsList.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        )
+                      ]),
+                  child: Icon(Icons.history_edu,
+                      size: 48, color: Colors.grey[400]),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No ${controller.filter.value?.label.toLowerCase() ?? ''} complaints found',
+                  style:
+                      textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Have an issue? Raise a ticket now.',
+                  style: textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+                ),
+              ],
             ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            controller.fetchComplaints();
+            controller.fetchStats();
+          },
+          child: ListView.builder(
+            padding: EdgeInsets.symmetric(
+                horizontal: ResponsiveUtil.responsivePadding(context),
+                vertical: 16),
+            itemCount: complaintsList.length,
+            itemBuilder: (context, index) {
+              return ComplaintCard(
+                complaint: complaintsList[index],
+                onTap: () =>
+                    _showComplaintDetails(context, complaintsList[index]),
+              );
+            },
           ),
-        ],
-      ),
+        );
+      }),
     );
   }
+
   void _showComplaintDetails(BuildContext context, Complaint complaint) {
     showModalBottomSheet(
       context: context,
@@ -168,12 +160,11 @@ class ComplaintScreen extends ConsumerWidget {
         initialChildSize: 0.65,
         minChildSize: 0.5,
         maxChildSize: 0.95,
-        builder: (_, controller) => ComplaintDetailsSheet(
+        builder: (_, scrollController) => ComplaintDetailsSheet(
           complaint: complaint,
-          scrollController: controller,
+          scrollController: scrollController,
         ),
       ),
     );
   }
 }
-

@@ -91,7 +91,7 @@ class LeaveDetailScreen extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         decoration: BoxDecoration(
-                          color: request.status == LeaveStatus.approved ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+                          color: request.status == LeaveStatus.approved ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Text(

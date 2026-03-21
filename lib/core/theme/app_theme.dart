@@ -80,7 +80,7 @@ final ThemeData appTheme = ThemeData(
     filled: true,
     fillColor: AppColors.surface,
     labelStyle: const TextStyle(color: AppColors.primary),
-    hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.7)),
+    hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.7)),
     contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
@@ -139,11 +139,11 @@ final ThemeData appTheme = ThemeData(
     bodyLarge: TextStyle(color: AppColors.textPrimary, fontSize: 16),
     bodyMedium: TextStyle(color: AppColors.textSecondary, fontSize: 14),
     bodySmall: TextStyle(
-        color: AppColors.textSecondary.withValues(alpha: 0.8), fontSize: 12),
+        color: AppColors.textSecondary.withOpacity(0.8), fontSize: 12),
     labelLarge: const TextStyle(
         color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
     labelMedium: TextStyle(color: AppColors.textSecondary, fontSize: 12),
     labelSmall: TextStyle(
-        color: AppColors.textSecondary.withValues(alpha: 0.6), fontSize: 11),
+        color: AppColors.textSecondary.withOpacity(0.6), fontSize: 11),
   ),
 );

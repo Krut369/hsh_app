@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:hsh_app/models/complaint_model.dart';
+import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
 import 'package:hsh_app/modules/student/features/complaint/widgets/complaint_status_chip.dart';
 
@@ -46,7 +46,7 @@ class ComplaintDetailsSheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: scheme.primary.withValues(alpha: 0.1),
+                        color: scheme.primary.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(

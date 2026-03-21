@@ -27,7 +27,7 @@ class ActivityTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-             color: Colors.grey.withValues(alpha: 0.05),
+             color: Colors.grey.withOpacity(0.05),
              blurRadius: 5,
              offset: const Offset(0, 2),
              spreadRadius: 0

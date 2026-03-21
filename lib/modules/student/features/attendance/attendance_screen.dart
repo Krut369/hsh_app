@@ -126,8 +126,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor.withValues(
-                                  alpha: 0.1), // Light background for the count
+                              color: Theme.of(context).primaryColor.withOpacity(0.1), // Light background for the count
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(

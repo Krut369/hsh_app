@@ -45,7 +45,7 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final labelStyle = theme.textTheme.titleSmall?.copyWith(
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+      color: theme.colorScheme.onSurface.withOpacity(0.8),
     );
 
     return Column(
@@ -71,7 +71,7 @@ class CustomTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              color: theme.colorScheme.onSurface.withOpacity(0.4),
             ),
             filled: true,
             fillColor: theme.colorScheme.surface,

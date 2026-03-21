@@ -157,12 +157,12 @@ class ChatGridTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
              BoxShadow(
-               color: Colors.grey.withValues(alpha: 0.1),
+               color: Colors.grey.withOpacity(0.1),
                blurRadius: 8,
                offset: const Offset(0, 2),
              )
           ],
-           border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+           border: Border.all(color: Colors.grey.withOpacity(0.1)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -330,7 +330,7 @@ class ChatBubble extends StatelessWidget {
                     borderRadius: borderRadius,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
+                        color: Colors.black.withOpacity(0.03),
                         blurRadius: 2,
                         offset: const Offset(0, 1),
                       ),
@@ -419,7 +419,7 @@ class _ChatInputState extends State<ChatInput> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.08),
+            color: Colors.grey.withOpacity(0.08),
             blurRadius: 10,
             offset: const Offset(0, -4),
           )

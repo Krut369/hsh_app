@@ -1,30 +1,14 @@
 import "package:hsh_app/core/enums/user_role.dart";
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:get/get.dart';
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
-import 'package:hsh_app/models/laundry_order_model.dart';
-import 'package:hsh_app/models/complaint_model.dart';
 import 'package:hsh_app/splash_screen.dart';
-
 import 'package:hsh_app/modules/auth/screens/login_screen.dart';
-import 'package:hsh_app/modules/complain/complain_main_shell.dart';
 import 'package:hsh_app/modules/student/student_main_shell.dart';
-
-import 'package:hsh_app/modules/complain/features/management/complain_admin_screen.dart';
-import 'package:hsh_app/modules/complain/features/feedback/complain_feedback_screen.dart';
-import 'package:hsh_app/modules/complain/features/management/complaint_detail_view_screen.dart';
-import 'package:hsh_app/modules/laundry/laundry_main_shell.dart';
-import 'package:hsh_app/modules/laundry/features/chat/laundry_chat_details_screen.dart';
-import 'package:hsh_app/modules/laundry/features/orders/laundry_order_detail_screen.dart';
-import 'package:hsh_app/modules/leader/leader_main_shell.dart';
-import 'package:hsh_app/modules/leader/features/attendance/attendance_main_screen.dart';
-import 'package:hsh_app/modules/leader/features/chat/group_chat_screen.dart';
-import 'package:hsh_app/modules/leader/features/chat/create_new_group_screen.dart';
-import 'package:hsh_app/modules/leader/features/chat/finalize_group_screen.dart';
-import 'package:hsh_app/models/chat_group_model.dart';
+import 'package:hsh_app/modules/complain/presentation/complain_routes.dart';
+import 'package:hsh_app/modules/laundry/presentation/laundry_routes.dart';
+import 'package:hsh_app/modules/leader/presentation/leader_routes.dart';
 
 // Feature screens
 import 'package:hsh_app/modules/student/features/attendance/attendance_screen.dart';
@@ -38,274 +22,196 @@ import 'package:hsh_app/modules/student/features/vehicle/vehicle_registration_sc
 import 'package:hsh_app/modules/student/features/orders/order_details_screen.dart';
 import 'package:hsh_app/modules/student/features/profile/profile_screen.dart';
 import 'package:hsh_app/modules/student/features/laundry/laundry_screen.dart';
-
 import 'package:hsh_app/modules/student/features/complaint/add_complaint_screen.dart';
 import 'package:hsh_app/modules/student/features/holiday/holiday_form.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_details_screen.dart';
+import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 
 // ---------------------------------------------------------------------------
 // RouterNotifier
 // ---------------------------------------------------------------------------
-// Extends ChangeNotifier so GoRouter can use it as refreshListenable.
-// It watches AuthController and calls notifyListeners() when it changes,
-// which tells GoRouter to re-evaluate its redirect — WITHOUT recreating the
-// GoRouter instance or destroying any widget state.
-// ---------------------------------------------------------------------------
 class RouterNotifier extends ChangeNotifier {
   RouterNotifier() {
-    // Listen to AuthController observables via GetX
     final authController = Get.find<AuthController>();
-
-    // Listen to observables and notify GoRouter
     authController.isAuthenticated.listen((_) => notifyListeners());
+    authController.user.listen((_) => notifyListeners());
     authController.isLoading.listen((_) => notifyListeners());
     authController.error.listen((_) => notifyListeners());
   }
 
-  /// Called by GoRouter's redirect callback — reads (not watches) auth state.
   String? redirect(BuildContext context, GoRouterState state) {
     final authController = Get.find<AuthController>();
     final isLoggingIn = state.uri.toString() == '/login';
     final isSplash = state.uri.toString() == '/';
 
-    // While the auth state is loading (initial check), stay on splash.
     if (authController.isLoading.value) return null;
 
     final isAuthenticated = authController.isAuthenticated.value;
     final hasError = authController.error.value != null;
 
-    // Unauthenticated user
     if (!isAuthenticated) {
       if (hasError && isSplash) return '/login';
       if (isLoggingIn || isSplash) return null;
       return '/login';
     }
 
-    // Authenticated user — redirect away from splash / login.
-    if (isLoggingIn || isSplash) {
-      final role = authController.user.value?.role;
-      switch (role) {
-        case UserRole.laundry:
-          return '/laundry';
-        case UserRole.complain:
-          return '/complain';
-        case UserRole.leader:
-          return '/leader';
-        case UserRole.student:
-          return '/student/profile';
-        default:
-          return '/student/profile';
+    final user = authController.user.value;
+    final role = user?.role;
+    final currentPath = state.uri.toString();
+
+    if (isLoggingIn) {
+      return _getDashboardForRole(role);
+    }
+
+    if (currentPath != '/') {
+      if (role == UserRole.laundry && !currentPath.startsWith('/laundry')) {
+        return '/laundry';
+      }
+      if (role == UserRole.complain && !currentPath.startsWith('/complain')) {
+        return '/complain';
+      }
+      if (role == UserRole.leader && !currentPath.startsWith('/leader')) {
+        return '/leader';
+      }
+      if (role == UserRole.student && !currentPath.startsWith('/student')) {
+        return '/student/profile';
       }
     }
 
-    // If accessing /student directly, redirect to profile.
-    if (state.uri.toString() == '/student') return '/student/profile';
+    if (currentPath == '/student') return '/student/profile';
 
     return null;
+  }
+
+  String _getDashboardForRole(UserRole? role) {
+    switch (role) {
+      case UserRole.laundry:
+        return '/laundry';
+      case UserRole.complain:
+        return '/complain';
+      case UserRole.leader:
+        return '/leader';
+      case UserRole.student:
+      default:
+        return '/student/profile';
+    }
   }
 }
 
 // ---------------------------------------------------------------------------
-// Providers
+// Global GoRouter instance
 // ---------------------------------------------------------------------------
+final routerNotifier = RouterNotifier();
 
-/// Provides the RouterNotifier singleton — created once, never recreated.
-final routerNotifierProvider = Provider<RouterNotifier>(
-  (ref) => RouterNotifier(),
+final goRouter = GoRouter(
+  initialLocation: '/',
+  refreshListenable: routerNotifier,
+  redirect: routerNotifier.redirect,
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginScreen(),
+    ),
+
+    // Student Shell
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) {
+        return StudentMainShell(navigationShell: navigationShell);
+      },
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/student/profile',
+              builder: (context, state) => ProfileScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/student/complaint',
+              builder: (context, state) => const ComplaintScreen(),
+              routes: [
+                GoRoute(
+                  path: 'add',
+                  builder: (context, state) => const AddComplaintScreen(),
+                ),
+              ],
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/student/laundry',
+              builder: (context, state) => const LaundryScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/student/attendance',
+              builder: (context, state) => const AttendanceScreen(),
+            ),
+          ],
+        ),
+      ],
+    ),
+
+    // Standalone Student Routes
+    GoRoute(
+      path: '/student/chat',
+      builder: (context, state) => const ChatScreen(),
+      routes: [
+        GoRoute(
+          path: 'details',
+          builder: (context, state) => const ChatDetailsScreen(),
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/student/notes',
+      builder: (context, state) => const NotesScreen(),
+    ),
+    GoRoute(
+      path: '/student/holiday',
+      builder: (context, state) => const HolidayScreen(),
+      routes: [
+        GoRoute(
+          path: 'add',
+          builder: (context, state) => const HolidayForm(),
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/student/payment',
+      builder: (context, state) => const PaymentScreen(),
+    ),
+    GoRoute(
+      path: '/student/services-all',
+      builder: (context, state) => const AllServicesScreen(),
+    ),
+    GoRoute(
+      path: '/student/vehicle-registration',
+      builder: (context, state) => const VehicleRegistrationScreen(),
+    ),
+    GoRoute(
+      path: '/student/orders',
+      builder: (context, state) {
+        final order = state.extra as LaundryOrderEntity;
+        return OrderDetailsScreen(order: order);
+      },
+    ),
+
+    // Other Roles
+    ...LaundryRoutes.routes,
+    ...ComplainRoutes.routes,
+    ...LeaderRoutes.routes,
+  ],
 );
-
-/// Provides the GoRouter singleton — created ONCE for the lifetime of the app.
-///
-/// KEY POINT: uses ref.read (not ref.watch) so the GoRouter is never recreated
-/// when AuthController changes. Auth changes flow through RouterNotifier →
-/// notifyListeners() → GoRouter re-evaluates redirect only.
-final goRouterProvider = Provider<GoRouter>((ref) {
-  final notifier = ref.read(routerNotifierProvider);
-
-  return GoRouter(
-    initialLocation: '/',
-    refreshListenable: notifier, // GoRouter re-checks redirect on auth change
-    redirect: notifier.redirect, // Delegate to RouterNotifier
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const SplashScreen(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-
-      // Student Shell
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return StudentMainShell(navigationShell: navigationShell);
-        },
-        branches: [
-          // Branch 1: Profile
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/student/profile',
-                builder: (context, state) => ProfileScreen(),
-              ),
-            ],
-          ),
-
-          // Branch 2: Complaint
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/student/complaint',
-                builder: (context, state) => const ComplaintScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'add',
-                    builder: (context, state) => const AddComplaintScreen(),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          // Branch 3: Laundry
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/student/laundry',
-                builder: (context, state) => const LaundryScreen(),
-              ),
-            ],
-          ),
-
-          // Branch 4: Attendance
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/student/attendance',
-                builder: (context, state) => const AttendanceScreen(),
-              ),
-            ],
-          ),
-        ],
-      ),
-
-      // Standalone Student Routes (hides bottom nav)
-      GoRoute(
-        path: '/student/chat',
-        builder: (context, state) => const ChatScreen(),
-        routes: [
-          GoRoute(
-            path: 'details',
-            builder: (context, state) => const ChatDetailsScreen(),
-          ),
-        ],
-      ),
-
-      GoRoute(
-        path: '/student/notes',
-        builder: (context, state) => const NotesScreen(),
-      ),
-      GoRoute(
-        path: '/student/holiday',
-        builder: (context, state) => const HolidayScreen(),
-        routes: [
-          GoRoute(
-            path: 'add',
-            builder: (context, state) => const HolidayForm(),
-          ),
-        ],
-      ),
-      GoRoute(
-        path: '/student/payment',
-        builder: (context, state) => const PaymentScreen(),
-      ),
-      GoRoute(
-        path:
-            '/student/services-all', // Renamed to avoid conflict if needed, or just keep unique
-        builder: (context, state) => const AllServicesScreen(),
-      ),
-      GoRoute(
-        path: '/student/vehicle-registration',
-        builder: (context, state) => const VehicleRegistrationScreen(),
-      ),
-      GoRoute(
-        path: '/student/orders',
-        builder: (context, state) {
-          final order = state.extra as LaundryOrder;
-          return OrderDetailsScreen(order: order);
-        },
-      ),
-
-      // Other Roles
-      GoRoute(
-        path: '/laundry',
-        builder: (context, state) => const LaundryMainShell(),
-        routes: [
-          GoRoute(
-            path: 'chat/details',
-            builder: (context, state) {
-              final convId = state.extra as String?;
-              return LaundryChatDetailsScreen(conversationId: convId);
-            },
-          ),
-          GoRoute(
-            path: 'order-detail',
-            builder: (context, state) {
-              final order = state.extra as LaundryOrder;
-              return LaundryOrderDetailScreen(order: order);
-            },
-          ),
-        ],
-      ),
-      GoRoute(
-        path: '/complain',
-        builder: (context, state) => const ComplainMainShell(),
-        routes: [
-          GoRoute(
-            path: 'feedback',
-            builder: (context, state) => const ComplainFeedbackScreen(),
-          ),
-          GoRoute(
-            path: 'admin',
-            builder: (context, state) => const ComplaintAdminScreen(),
-          ),
-          GoRoute(
-            path: 'detail',
-            builder: (context, state) {
-              final complaint = state.extra as Complaint;
-              return ComplaintDetailViewScreen(complaint: complaint);
-            },
-          ),
-        ],
-      ),
-
-      // Leader Routes
-      GoRoute(
-        path: '/leader',
-        builder: (context, state) => const LeaderMainShell(),
-        routes: [
-          GoRoute(
-            path: 'attendance',
-            builder: (context, state) => const AttendanceMainScreen(),
-          ),
-          GoRoute(
-            path: 'chat/messages',
-            builder: (context, state) {
-              final group = state.extra as ChatGroup;
-              return GroupChatScreen(group: group);
-            },
-          ),
-          GoRoute(
-            path: 'chat/create',
-            builder: (context, state) => const CreateNewGroupScreen(),
-          ),
-          GoRoute(
-            path: 'chat/finalize',
-            builder: (context, state) => const FinalizeGroupScreen(),
-          ),
-        ],
-      ),
-    ],
-  );
-});

@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:hsh_app/models/student_result_model.dart';
 import 'widgets/result_card.dart';
 import 'student_result_detail_screen.dart';
 
-// Demo data provider
-final studentResultsProvider = StateProvider<List<StudentResult>>((ref) => [
+class StudentResultsController extends GetxController {
+  final studentResults = <StudentResult>[].obs;
+  final searchQuery = ''.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadDemoData();
+  }
+
+  void _loadDemoData() {
+    studentResults.assignAll([
       StudentResult(
         id: '204405',
         studentName: 'Alexander Wright',
@@ -49,26 +58,28 @@ final studentResultsProvider = StateProvider<List<StudentResult>>((ref) => [
         subjects: {},
       ),
     ]);
+  }
 
-class StudentResultsScreen extends ConsumerStatefulWidget {
+  List<StudentResult> get filteredResults {
+    if (searchQuery.value.isEmpty) return studentResults;
+    return studentResults
+        .where((r) => r.studentName
+            .toLowerCase()
+            .contains(searchQuery.value.toLowerCase()))
+        .toList();
+  }
+
+  void updateSearch(String query) {
+    searchQuery.value = query;
+  }
+}
+
+class StudentResultsScreen extends StatelessWidget {
   const StudentResultsScreen({super.key});
 
   @override
-  ConsumerState<StudentResultsScreen> createState() => _StudentResultsScreenState();
-}
-
-class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen> {
-  final TextEditingController _searchController = TextEditingController();
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final results = ref.watch(studentResultsProvider);
+    final controller = Get.put(StudentResultsController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFD6ECF7),
@@ -79,23 +90,18 @@ class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF1D3557)),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'Student Results',
-          style: TextStyle(
-            color: Color(0xFF1D3557),
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const Text('Student Results',
+            style: TextStyle(
+                color: Color(0xFF1D3557),
+                fontSize: 20,
+                fontWeight: FontWeight.bold)),
       ),
       body: Column(
         children: [
-          // Search Bar
           Container(
             color: Colors.white,
             padding: const EdgeInsets.all(16),
             child: TextField(
-              controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search by name...',
                 hintStyle: const TextStyle(color: Color(0xFF5D90B3)),
@@ -103,15 +109,13 @@ class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen> {
                 filled: true,
                 fillColor: const Color(0xFFF6FAFD),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none),
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
+              onChanged: controller.updateSearch,
             ),
           ),
-
-          // Filter Chips
           Container(
             color: Colors.white,
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
@@ -125,27 +129,23 @@ class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen> {
               ],
             ),
           ),
-
-          // Results List
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: results.length,
-              itemBuilder: (context, index) {
-                final result = results[index];
-                return ResultCard(
-                  result: result,
-                  onViewReport: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => StudentResultDetailScreen(result: result),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+            child: Obx(() {
+              final results = controller.filteredResults;
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: results.length,
+                itemBuilder: (context, index) {
+                  final result = results[index];
+                  return ResultCard(
+                    result: result,
+                    onViewReport: () {
+                      Get.to(() => StudentResultDetailScreen(result: result));
+                    },
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),
@@ -156,20 +156,16 @@ class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF2D507B),
-        borderRadius: BorderRadius.circular(8),
-      ),
+          color: const Color(0xFF2D507B),
+          borderRadius: BorderRadius.circular(8)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text(label,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold)),
           const SizedBox(width: 4),
           const Icon(Icons.arrow_drop_down, color: Colors.white, size: 20),
         ],

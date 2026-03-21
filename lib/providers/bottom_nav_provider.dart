@@ -1,7 +1,17 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
-// Bottom navigation index
-final bottomNavIndexProvider = StateProvider<int>((ref) => 0);
+class BottomNavController extends GetxController {
+  // Bottom navigation index
+  final currentIndex = 0.obs;
 
-// Controls FAB visibility on "More" tab
-final showMoreOptionsProvider = StateProvider<bool>((ref) => false);
+  // Controls FAB visibility on "More" tab
+  final showMoreOptions = false.obs;
+
+  void changeIndex(int index) {
+    currentIndex.value = index;
+  }
+
+  void toggleMoreOptions(bool show) {
+    showMoreOptions.value = show;
+  }
+}

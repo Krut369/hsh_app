@@ -1,17 +1,13 @@
 // lib/modules/student/screens/student_main_shell.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../core/constants/app_text.dart';
 import '../../../core/constants/font.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/responsive_util.dart';
-
-
 import '../../../widgets/custom_bottom_nav_bar.dart';
 
-class StudentMainShell extends ConsumerWidget {
+class StudentMainShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   const StudentMainShell({
@@ -20,7 +16,7 @@ class StudentMainShell extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // Current index is managed by the shell
     final currentIndex = navigationShell.currentIndex;
 
@@ -42,8 +38,6 @@ class StudentMainShell extends ConsumerWidget {
           // Use navigationShell to switch branches
           navigationShell.goBranch(
             index,
-            // A common pattern when switching tabs, to support
-            // popping to the first route of the stack on re-tap
             initialLocation: index == navigationShell.currentIndex,
           );
         },

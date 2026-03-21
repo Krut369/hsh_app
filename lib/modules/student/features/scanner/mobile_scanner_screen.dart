@@ -243,7 +243,7 @@ class ScannerOverlayPainter extends CustomPainter {
     // Paint for the overlay
     final Paint overlayPaint = Paint()
       ..color = Colors.black
-          .withValues(alpha: 0.6); // Adjust opacity for desired "blur" effect
+          .withOpacity(0.6); // Adjust opacity for desired "blur" effect
 
     // Create a path that covers the entire canvas
     final Path fullPath = Path()

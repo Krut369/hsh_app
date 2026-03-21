@@ -41,7 +41,7 @@ class CustomButton extends StatelessWidget {
         foregroundColor: textColor ?? theme.colorScheme.onPrimary,
         padding: padding,
         elevation: elevation,
-        shadowColor: Colors.black.withValues(alpha: 0.2),
+        shadowColor: Colors.black.withOpacity(0.2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius),
         ),

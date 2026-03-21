@@ -1,0 +1,177 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
+import 'package:hsh_app/modules/complain/domain/entities/complaint_stats_model.dart';
+import 'package:hsh_app/modules/complain/domain/usecases/get_complaints_usecase.dart';
+import 'package:hsh_app/modules/complain/domain/repositories/complain_repository.dart';
+
+class ComplainController extends GetxController {
+  final GetComplaintsUseCase _getComplaintsUseCase;
+  final ComplainRepository
+      _repository; // Simple for secondary operations or use cases
+
+  ComplainController({
+    required GetComplaintsUseCase getComplaintsUseCase,
+    required ComplainRepository repository,
+  })  : _getComplaintsUseCase = getComplaintsUseCase,
+        _repository = repository;
+
+  // Observables
+  final complaints = <Complaint>[].obs;
+  final stats = ComplaintStats.empty().obs;
+  final isLoading = false.obs;
+  final error = RxnString();
+  final filter = Rxn<ComplaintStatus>();
+  final tabIndex = 0.obs;
+
+  // Selection/Draft State (for Add Complaint)
+  final selectedType = Rxn<ComplaintType>();
+  final selectedSubComplaints = <SubComplaint>[].obs;
+  final issues = <String, ComplaintIssueData>{}.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchComplaints();
+    fetchStats();
+  }
+
+  Future<void> fetchComplaints() async {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      final fetchedList = await _getComplaintsUseCase.execute();
+      complaints.assignAll(fetchedList);
+    } catch (e) {
+      error.value = e.toString();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchStats() async {
+    try {
+      final fetchedStats = await _repository.getComplaintStats();
+      stats.value = fetchedStats;
+    } catch (e) {
+      print('Error fetching stats: $e');
+    }
+  }
+
+  void setFilter(ComplaintStatus? newFilter) {
+    filter.value = newFilter;
+  }
+
+  List<Complaint> get filteredComplaints {
+    if (filter.value == null) return complaints;
+    return complaints.where((c) => c.status == filter.value).toList();
+  }
+
+  // --- Add Complaint Logic ---
+
+  void selectType(ComplaintType type) {
+    selectedType.value = type;
+    selectedSubComplaints.clear();
+    issues.clear();
+  }
+
+  void toggleSubComplaint(SubComplaint sub) {
+    if (selectedSubComplaints.contains(sub)) {
+      selectedSubComplaints.remove(sub);
+      issues.remove(sub.name);
+    } else {
+      selectedSubComplaints.add(sub);
+    }
+  }
+
+  void updateIssueDescription(String key, String description) {
+    final existing = issues[key] ?? ComplaintIssueData(description: '');
+    issues[key] = ComplaintIssueData(
+      description: description,
+      imagePath: existing.imagePath,
+    );
+  }
+
+  void updateIssueImage(String key, String? imagePath) {
+    final existing = issues[key] ?? ComplaintIssueData(description: '');
+    issues[key] = ComplaintIssueData(
+      description: existing.description,
+      imagePath: imagePath,
+    );
+  }
+
+  Future<void> submitComplaint() async {
+    if (selectedType.value == null) return;
+
+    isLoading.value = true;
+    try {
+      // Collect issues
+      final List<Map<String, dynamic>> issuesData = [];
+      final hasSub = selectedType.value!.subComplaints.isNotEmpty;
+
+      if (hasSub) {
+        for (var sub in selectedSubComplaints) {
+          final issue = issues[sub.name];
+          if (issue != null) {
+            issuesData.add({
+              'sub_complaint': sub.name,
+              'description': issue.description,
+              'imagePath': issue.imagePath,
+            });
+          }
+        }
+      } else {
+        final key = selectedType.value!.name;
+        final issue = issues[key];
+        if (issue != null) {
+          issuesData.add({
+            'description': issue.description,
+            'imagePath': issue.imagePath,
+          });
+        }
+      }
+
+      final complaint = Complaint(
+        id: '', // Backend generates ID
+        dateTime: DateTime.now(),
+        complaintType: selectedType.value!.name,
+        issues: issues, // The repository will map this properly
+        status: ComplaintStatus.pending,
+      );
+
+      await _repository.createComplaint(complaint);
+
+      Get.snackbar('Success', 'Complaint submitted successfully!',
+          backgroundColor: Get.theme.colorScheme.primary.withOpacity(0.1));
+      fetchComplaints();
+      fetchStats();
+      resetAddDraft();
+      Get.back(); // Return from add screen
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to submit complaint: $e',
+          backgroundColor: Colors.red.withOpacity(0.1));
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void resetAddDraft() {
+    selectedType.value = null;
+    selectedSubComplaints.clear();
+    issues.clear();
+  }
+
+  Future<void> updateStatus(String id, ComplaintStatus status) async {
+    try {
+      await _repository.updateComplaintStatus(id, status);
+      fetchComplaints(); // Refresh
+      fetchStats();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update status: $e');
+    }
+  }
+
+  void changeTab(int index) {
+    tabIndex.value = index;
+  }
+}

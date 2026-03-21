@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:hsh_app/models/laundry_item_model.dart';
-import 'package:hsh_app/models/laundry_order_model.dart';
-import 'package:hsh_app/providers/laundry_order_provider.dart';
+import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
+import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
 import 'package:hsh_app/widgets/custom_app_bar.dart';
 import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
 
-class SelectItemsScreen extends ConsumerStatefulWidget {
+class SelectItemsScreen extends StatefulWidget {
   final String orderId;
   final DateTime orderDate;
 
@@ -20,10 +19,11 @@ class SelectItemsScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SelectItemsScreen> createState() => _SelectItemsScreenState();
+  State<SelectItemsScreen> createState() => _SelectItemsScreenState();
 }
 
-class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
+class _SelectItemsScreenState extends State<SelectItemsScreen> {
+  final LaundryController controller = Get.find<LaundryController>();
   final Uuid _uuid = const Uuid();
   final TextEditingController _noteController = TextEditingController();
 
@@ -31,7 +31,6 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
   int _selectedIndex = 0;
 
   // Basket state: ItemID -> { ServiceType -> Quantity }
-  // Example: 's1' -> { wash: 2, press: 1 }
   final Map<String, Map<LaundryServiceType, int>> _basket = {};
 
   @override
@@ -40,12 +39,10 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
     super.dispose();
   }
 
-  // Get quantity for a specific item and service
   int _getQuantity(String itemId, LaundryServiceType type) {
     return _basket[itemId]?[type] ?? 0;
   }
 
-  // Update quantity for a specific item and service
   void _updateQuantity(String itemId, LaundryServiceType type, int delta) {
     setState(() {
       final itemMap = _basket.putIfAbsent(itemId, () => {});
@@ -63,14 +60,12 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
     });
   }
 
-  // Calculate total items for a specific item ID (across all services)
   int _getTotalForItem(String itemId) {
     final itemMap = _basket[itemId];
     if (itemMap == null) return 0;
     return itemMap.values.fold(0, (sum, qty) => sum + qty);
   }
 
-  // Calculate total items in entire basket
   int _getBasketTotal() {
     int total = 0;
     for (var itemMap in _basket.values) {
@@ -101,16 +96,13 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
 
   void _placeOrder() {
     if (_basket.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one item.')),
-      );
+      Get.snackbar('Error', 'Please select at least one item.',
+          snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
-    // Flatten basket into List<LaundryItem>
-    final List<LaundryItem> orderItems = [];
-    final allItems = ref.read(
-        selectableLaundryItemsProvider); // Source of truth for names/icons
+    final List<LaundryItemEntity> orderItems = [];
+    final allItems = controller.selectableItems;
 
     _basket.forEach((itemId, serviceMap) {
       final originalItem = allItems.firstWhere((i) => i.id == itemId,
@@ -118,7 +110,6 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
 
       serviceMap.forEach((serviceType, qty) {
         if (qty > 0) {
-          // Create a new item entry for this specific service type
           orderItems.add(originalItem.copyWith(
             quantity: qty,
             selectedService: serviceType,
@@ -130,252 +121,253 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
     final totalItems = _getBasketTotal();
     final serviceTypeStr = _getCombinedServiceTypeString();
 
-    final newOrder = LaundryOrder(
+    final newOrder = LaundryOrderEntity(
       id: _uuid.v4(),
       orderId: widget.orderId,
       date: widget.orderDate,
       totalItems: totalItems,
       serviceType: serviceTypeStr,
-      status: OrderStatus.inProgress,
+      status: OrderStatus.requested,
       items: orderItems,
       note: _noteController.text.trim().isEmpty
           ? null
           : _noteController.text.trim(),
     );
 
-    ref.read(laundryOrderListProvider.notifier).addOrder(newOrder);
+    controller.addOrder(newOrder);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Order placed successfully!')),
-    );
+    Get.snackbar('Success', 'Order placed successfully!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white);
 
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   @override
   Widget build(BuildContext context) {
+    return Obx(() {
+      final items = controller.selectableItems;
 
-    final items = ref.watch(selectableLaundryItemsProvider);
+      if (items.isEmpty) {
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      }
 
-    // Safety check in case items list is empty
-    if (items.isEmpty) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+      final selectedItem = items[_selectedIndex];
+      final totalInBasket = _getTotalForItem(selectedItem.id);
 
-    final selectedItem = items[_selectedIndex];
-    final totalInBasket = _getTotalForItem(selectedItem.id);
-
-    return Scaffold(
-      backgroundColor: AppColors.surface, // Light background
-      appBar: CustomAppBar(
-        title: 'Select Items',
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+      return Scaffold(
+        backgroundColor: AppColors.surface,
+        appBar: CustomAppBar(
+          title: 'Select Items',
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ),
-      ),
-      body: Column(
-        children: [
-          // 1. Categories Tabs
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: List.generate(items.length, (index) {
-                  final item = items[index];
-                  final isSelected = index == _selectedIndex;
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedIndex = index),
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 16),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 16), // Bigger touch area
+        body: Column(
+          children: [
+            // 1. Categories Tabs
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: List.generate(items.length, (index) {
+                    final item = items[index];
+                    final isSelected = index == _selectedIndex;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedIndex = index),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 16),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          border: isSelected
+                              ? const Border(
+                                  bottom: BorderSide(
+                                      color: AppColors.primary, width: 2))
+                              : null,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: AppColors.border),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                            color: AppColors.primary
+                                                .withOpacity(0.4),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4))
+                                      ]
+                                    : [],
+                              ),
+                              child: Icon(item.icon,
+                                  color:
+                                      isSelected ? Colors.white : Colors.grey,
+                                  size: 24),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(item.name,
+                                style: TextStyle(
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : Colors.grey,
+                                    fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // 2. Main Item Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        border: isSelected
-                            ? const Border(
-                                bottom:
-                                    BorderSide(color: AppColors.primary, width: 2))
-                            : null,
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10))
+                        ],
                       ),
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Using icon as placeholder for category image
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: isSelected ? AppColors.primary : Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.border),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                          color: AppColors.primary.withValues(alpha: 0.4),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4))
-                                    ]
-                                  : [],
-                            ),
-                            child: Icon(item.icon,
-                                color: isSelected ? Colors.white : Colors.grey,
-                                size: 24),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  color: AppColors.secondary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: const Icon(Icons.dry_cleaning,
+                                    size: 40, color: AppColors.secondary),
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      selectedItem.name,
+                                      style: AppFonts.heading2(context),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Total in basket: $totalInBasket Items',
+                                      style: AppFonts.bodyRegular(context)
+                                          .copyWith(
+                                              color: AppColors.textSecondary),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(item.name,
-                              style: TextStyle(
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                  color: isSelected ? AppColors.primary : Colors.grey,
-                                  fontSize: 12)),
+                          const SizedBox(height: 32),
+
+                          // 3. Service Options Rows
+                          Obx(() => Column(
+                                children: [
+                                  _buildServiceRow(
+                                      selectedItem,
+                                      LaundryServiceType.wash,
+                                      'Wash Only',
+                                      '₹${controller.washPrice.value.toStringAsFixed(0)} per unit',
+                                      AppColors.primary,
+                                      Icons.water_drop),
+                                  const SizedBox(height: 20),
+                                  _buildServiceRow(
+                                      selectedItem,
+                                      LaundryServiceType.press,
+                                      'Press Only',
+                                      '₹${controller.pressPrice.value.toStringAsFixed(0)} per unit',
+                                      AppColors.primary,
+                                      Icons.iron),
+                                  const SizedBox(height: 20),
+                                  _buildServiceRow(
+                                      selectedItem,
+                                      LaundryServiceType.both,
+                                      'Wash & Press',
+                                      '₹${controller.bothPrice.value.toStringAsFixed(0)} per unit',
+                                      AppColors.primary,
+                                      Icons.dry_cleaning),
+                                ],
+                              )),
                         ],
                       ),
                     ),
-                  );
-                }),
-              ),
-            ),
-          ),
 
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // 2. Main Item Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10))
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Image Placeholder
-                            Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                color: AppColors.secondary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(16),
-                                image: const DecorationImage(
-                                  image: AssetImage(
-                                      'assets/laundry_placeholder.png'), // Need to ensure user handles assets
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              // Fallback icon if image fails (implied by container color/child not shown if image works, but good for dev)
-                              child: const Icon(Icons.dry_cleaning,
-                                  size: 40, color: AppColors.secondary),
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    selectedItem.name, // e.g. "Cotton Shirts"
-                                    style: AppFonts.heading2(context),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Total in basket: $totalInBasket Items',
-                                    style: AppFonts.bodyRegular(context).copyWith(
-                                        color: AppColors.textSecondary),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
-                        // 3. Service Options Rows
-                        _buildServiceRow(
-                            selectedItem,
-                            LaundryServiceType.wash,
-                            'Wash Only',
-                            '\$1.25 per unit',
-                            AppColors.primary,
-                            Icons.water_drop),
-                        const SizedBox(height: 20),
-                        _buildServiceRow(
-                            selectedItem,
-                            LaundryServiceType.press,
-                            'Press Only',
-                            '\$1.75 per unit',
-                            AppColors.primary,
-                            Icons.iron),
-                        const SizedBox(height: 20),
-                        _buildServiceRow(
-                            selectedItem,
-                            LaundryServiceType.both,
-                            'Wash & Press',
-                            '\$2.50 per unit',
-                            AppColors.primary,
-                            Icons.dry_cleaning), // Using generic icon
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Note Field
-                  TextField(
-                    controller: _noteController,
-                    decoration: InputDecoration(
-                      hintText: 'Add a note (e.g. starch levels)',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none),
-                      contentPadding: const EdgeInsets.all(16),
-                      prefixIcon:
-                          const Icon(Icons.edit_note, color: Colors.grey),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // 4. Floating-like Action Button
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.white,
-            child: SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_getBasketTotal() > 0)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Text(
-                        '${_getBasketTotal()} items selected',
-                        style: TextStyle(
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w600),
+                    TextField(
+                      controller: _noteController,
+                      decoration: InputDecoration(
+                        hintText: 'Add a note (e.g. starch levels)',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none),
+                        contentPadding: const EdgeInsets.all(16),
+                        prefixIcon:
+                            const Icon(Icons.edit_note, color: Colors.grey),
                       ),
                     ),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
+                  ],
+                ),
+              ),
+            ),
+
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: Colors.white,
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_getBasketTotal() > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Text(
+                          '${_getBasketTotal()} items selected',
+                          style: TextStyle(
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
                       child: ElevatedButton(
                         onPressed: _placeOrder,
                         style: ElevatedButton.styleFrom(
@@ -386,47 +378,44 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
                         ),
                         child: Text('Add Laundry',
                             style: AppFonts.buttonText(context)),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          )
-        ],
-      ),
-    );
+            )
+          ],
+        ),
+      );
+    });
   }
 
-  Widget _buildServiceRow(LaundryItem item, LaundryServiceType type,
+  Widget _buildServiceRow(LaundryItemEntity item, LaundryServiceType type,
       String title, String subtitle, Color color, IconData icon) {
     final qty = _getQuantity(item.id, type);
 
     return Row(
       children: [
-        // Icon Box
         Container(
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: color, size: 24),
         ),
         const SizedBox(width: 16),
-        // Text
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: AppFonts.bodyBold(context)),
+              Text(title, style: AppFonts.bodyBold(context)),
               Text(subtitle,
                   style: TextStyle(color: Colors.grey[500], fontSize: 12)),
             ],
           ),
         ),
-        // Stepper
         Row(
           children: [
             _buildStepperButton(
