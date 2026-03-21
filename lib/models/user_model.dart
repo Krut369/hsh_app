@@ -1,4 +1,5 @@
-enum UserRole { student, laundry, complain, leader }
+import "package:hsh_app/core/enums/user_role.dart";
+import '../core/enums/user_role.dart';
 
 class Student {
   final String username;
@@ -22,26 +23,26 @@ class Student {
   });
 
   Map<String, dynamic> toMap() => {
-    'username': username,
-    'password': password,
-    'name': name,
-    'role': role.name,
-    if (roomNumber != null) 'room_number': roomNumber,
-    if (hostelBlock != null) 'hostel_block': hostelBlock,
-    if (phone != null) 'phone': phone,
-    if (profileImage != null) 'profile_image': profileImage,
-  };
+        'username': username,
+        'password': password,
+        'name': name,
+        'role': role.name,
+        if (roomNumber != null) 'room_number': roomNumber,
+        if (hostelBlock != null) 'hostel_block': hostelBlock,
+        if (phone != null) 'phone': phone,
+        if (profileImage != null) 'profile_image': profileImage,
+      };
 
   factory Student.fromMap(Map<String, dynamic> map) => Student(
-    username: map['username'] ?? '',
-    password: map['password'] ?? '',
-    name: map['name'] ?? '',
-    role: _parseRole(map['role']),
-    roomNumber: map['room_number'],
-    hostelBlock: map['hostel_block'],
-    phone: map['phone'],
-    profileImage: map['profile_image'],
-  );
+        username: map['username'] ?? '',
+        password: map['password'] ?? '',
+        name: map['name'] ?? '',
+        role: _parseRole(map['role']),
+        roomNumber: map['room_number'],
+        hostelBlock: map['hostel_block'],
+        phone: map['phone'],
+        profileImage: map['profile_image'],
+      );
 
   /// Create a copy with updated fields
   Student copyWith({
@@ -83,4 +84,3 @@ class Student {
     }
   }
 }
-

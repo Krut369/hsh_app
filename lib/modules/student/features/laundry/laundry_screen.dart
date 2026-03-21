@@ -143,7 +143,7 @@ class LaundryScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -221,7 +221,7 @@ class LaundryScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: status.backgroundColor.withOpacity(0.15),
+        color: status.backgroundColor.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -244,20 +244,20 @@ class LaundryScreen extends ConsumerWidget {
           Icon(
             Icons.local_laundry_service_outlined,
             size: ResponsiveUtil.responsiveIconSize(context, 80),
-            color: scheme.onSurface.withOpacity(0.1),
+            color: scheme.onSurface.withValues(alpha: 0.1),
           ),
           const SizedBox(height: 16),
           Text(
             'No laundry orders yet!',
             style: textTheme.titleMedium?.copyWith(
-              color: scheme.onSurface.withOpacity(0.5),
+              color: scheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Tap the + button to place a new order.',
             style: textTheme.bodySmall?.copyWith(
-              color: scheme.onSurface.withOpacity(0.4),
+              color: scheme.onSurface.withValues(alpha: 0.4),
             ),
           ),
         ],

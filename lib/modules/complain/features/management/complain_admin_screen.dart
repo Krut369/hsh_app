@@ -132,19 +132,20 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
   void _updateComplaintStatus(
       Complaint complaint, ComplaintStatus newStatus, String notes) async {
     // Show loading
-    showDialog(context: context, builder: (_) => const Center(child: CircularProgressIndicator()));
+    showDialog(
+        context: context,
+        builder: (_) => const Center(child: CircularProgressIndicator()));
 
     final response = await serviceProvider.complaint.updateComplaintStatus(
-      complaintId: complaint.id, 
-      status: newStatus.toBackendString, 
-      note: notes
-    );
+        complaintId: complaint.id,
+        status: newStatus.toBackendString,
+        note: notes);
 
     Navigator.pop(context); // Pop loading
 
     if (response.success) {
-      ref.refresh(complaintsListProvider); // Refresh list from API
-      
+      ref.invalidate(complaintsListProvider); // Refresh list from API
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Complaint status updated to ${newStatus.label}'),
@@ -165,7 +166,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
     // Use whatever data we have or empty list for unique types
     final complaintsAsync = ref.watch(complaintsListProvider);
     final complaints = complaintsAsync.valueOrNull ?? [];
-    
+
     final uniqueTypes = complaints.map((c) => c.complaintType).toSet().toList();
 
     // Create local variables to track dialog state
@@ -201,9 +202,9 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
                     ),
                     ...ComplaintStatus.values.map((status) {
                       return DropdownMenuItem<ComplaintStatus?>(
-                      value: status,
-                      child: Text(status.label),
-                    );
+                        value: status,
+                        child: Text(status.label),
+                      );
                     }),
                   ],
                 ),
@@ -318,7 +319,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
                         Text(
                           'ID: ${complaint.id}',
                           style: textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurface.withOpacity(0.6),
+                            color: scheme.onSurface.withValues(alpha: 0.6),
                             fontSize:
                                 ResponsiveUtil.responsiveFontSize(context, 12),
                           ),
@@ -333,7 +334,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
               Text(
                 DateFormat('MMM dd, yyyy hh:mm a').format(complaint.dateTime),
                 style: textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurface.withOpacity(0.6),
+                  color: scheme.onSurface.withValues(alpha: 0.6),
                   fontSize: ResponsiveUtil.responsiveFontSize(context, 12),
                 ),
               ),
@@ -344,7 +345,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurface.withOpacity(0.7),
+                    color: scheme.onSurface.withValues(alpha: 0.7),
                     fontSize: ResponsiveUtil.responsiveFontSize(context, 14),
                   ),
                 ),
@@ -352,7 +353,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
                   Text(
                     '+${complaint.issues.length - 1} more issues',
                     style: textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurface.withOpacity(0.5),
+                      color: scheme.onSurface.withValues(alpha: 0.5),
                       fontSize: ResponsiveUtil.responsiveFontSize(context, 12),
                     ),
                   ),
@@ -431,7 +432,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
               Text(
                 'ID: ${complaint.id}',
                 style: textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurface.withOpacity(0.6),
+                  color: scheme.onSurface.withValues(alpha: 0.6),
                   fontSize: ResponsiveUtil.responsiveFontSize(context, 12),
                 ),
                 maxLines: 1,
@@ -441,7 +442,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
               Text(
                 DateFormat('MMM dd, yyyy').format(complaint.dateTime),
                 style: textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurface.withOpacity(0.6),
+                  color: scheme.onSurface.withValues(alpha: 0.6),
                   fontSize: ResponsiveUtil.responsiveFontSize(context, 12),
                 ),
               ),
@@ -488,7 +489,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
         vertical: 6,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -524,9 +525,8 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
         title: Text(
           'Complaint Management',
           style: TextStyle(
-            fontSize: ResponsiveUtil.responsiveFontSize(context, 20),
-            fontWeight: FontWeight.bold
-          ),
+              fontSize: ResponsiveUtil.responsiveFontSize(context, 20),
+              fontWeight: FontWeight.bold),
         ),
         backgroundColor: scheme.primary,
         foregroundColor: scheme.onPrimary,
@@ -568,7 +568,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
                   Text(
                     'Filtered: ${selectedStatusFilter?.label ?? 'All Statuses'}${selectedTypeFilter != null ? ' • $selectedTypeFilter' : ''}',
                     style: textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurface.withOpacity(0.6),
+                      color: scheme.onSurface.withValues(alpha: 0.6),
                       fontSize: ResponsiveUtil.responsiveFontSize(context, 12),
                     ),
                   ),
@@ -601,14 +601,14 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
                         Icon(
                           Icons.inbox_rounded,
                           size: ResponsiveUtil.responsiveIconSize(context, 64),
-                          color: scheme.onSurface.withOpacity(0.2),
+                          color: scheme.onSurface.withValues(alpha: 0.2),
                         ),
                         SizedBox(
                             height: ResponsiveUtil.verticalSpacing(context)),
                         Text(
                           'No complaints found',
                           style: textTheme.titleMedium?.copyWith(
-                            color: scheme.onSurface.withOpacity(0.6),
+                            color: scheme.onSurface.withValues(alpha: 0.6),
                             fontSize:
                                 ResponsiveUtil.responsiveFontSize(context, 16),
                           ),
@@ -618,7 +618,7 @@ class _ComplaintAdminScreenState extends ConsumerState<ComplaintAdminScreen> {
                         Text(
                           'Try adjusting your filters',
                           style: textTheme.bodyMedium?.copyWith(
-                            color: scheme.onSurface.withOpacity(0.4),
+                            color: scheme.onSurface.withValues(alpha: 0.4),
                             fontSize:
                                 ResponsiveUtil.responsiveFontSize(context, 14),
                           ),

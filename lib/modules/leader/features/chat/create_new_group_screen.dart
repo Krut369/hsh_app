@@ -179,7 +179,7 @@ class _CreateNewGroupScreenState extends State<CreateNewGroupScreen> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: Colors.grey, style: BorderStyle.none), // Dashed in real app
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
           ),
           child: const Icon(Icons.person_add_alt_1, color: Colors.grey),
         ),

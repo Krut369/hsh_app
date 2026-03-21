@@ -20,7 +20,7 @@ class FileUploadCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: DashedBorderPainter(
-        color: AppColors.primary.withOpacity(0.3),
+        color: AppColors.primary.withValues(alpha: 0.3),
         strokeWidth: 1.5,
         gap: 6,
         dash: 6,
@@ -32,7 +32,7 @@ class FileUploadCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
-          splashColor: AppColors.primary.withOpacity(0.05),
+          splashColor: AppColors.primary.withValues(alpha: 0.05),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
@@ -41,7 +41,7 @@ class FileUploadCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, color: AppColors.primary, size: 32),

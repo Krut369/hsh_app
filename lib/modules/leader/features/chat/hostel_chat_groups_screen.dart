@@ -145,7 +145,7 @@ class HostelChatGroupsScreen extends ConsumerWidget {
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: const Color(0xFF2D507B).withOpacity(0.2),
+                  color: const Color(0xFF2D507B).withValues(alpha: 0.2),
                   style: BorderStyle.none, // We'll use a dashed border in real app if needed
                 ),
               ),

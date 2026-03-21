@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../providers/auth_provider.dart';
+import 'package:get/get.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../providers/complaint_provider.dart';
 
 import 'stat_card_widget.dart';
@@ -18,7 +19,7 @@ class _ComplainHomeScreenState extends ConsumerState<ComplainHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final statsAsync = ref.watch(complaintStatsProvider);
-    final authNotifier = ref.read(authProvider.notifier);
+    final authController = Get.find<AuthController>();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -48,7 +49,7 @@ class _ComplainHomeScreenState extends ConsumerState<ComplainHomeScreen> {
                 icon: const Icon(Icons.logout),
                 tooltip: 'Logout',
                 onPressed: () {
-                  authNotifier.logout();
+                  authController.logout();
                 },
               ),
             ],
@@ -96,7 +97,8 @@ class _ComplainHomeScreenState extends ConsumerState<ComplainHomeScreen> {
                     StatCardWidget(
                       title: 'TOTAL COMPLAINTS',
                       value: stats.total.toString(),
-                      percentage: '', // Percentage change could be calculated if historical data existed
+                      percentage:
+                          '', // Percentage change could be calculated if historical data existed
                       isPositive: true,
                       icon: Icons.bar_chart,
                       borderColor: const Color(0xFF2196F3),

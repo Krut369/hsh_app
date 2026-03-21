@@ -1,5 +1,4 @@
 import '../core/network/api_client.dart';
-import 'auth_service.dart';
 import 'student_service.dart';
 import 'laundry_service.dart';
 import 'complaint_service.dart';
@@ -20,7 +19,6 @@ class ServiceProvider {
   final ApiClient _apiClient = ApiClient();
 
   // Services
-  late final AuthService auth = AuthService(_apiClient);
   late final StudentService student = StudentService(_apiClient);
   late final LaundryService laundry = LaundryService(_apiClient);
   late final ComplaintService complaint = ComplaintService(_apiClient);

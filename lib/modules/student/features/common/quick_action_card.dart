@@ -24,12 +24,12 @@ class QuickActionCard extends StatelessWidget {
       color: Colors.white,
       borderRadius: BorderRadius.circular(20),
       elevation: 2, // Slight shadow for premium feel
-      shadowColor: Colors.black.withOpacity(0.05),
+      shadowColor: Colors.black.withValues(alpha: 0.05),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
-        splashColor: iconColor.withOpacity(0.1),
-        highlightColor: iconColor.withOpacity(0.05),
+        splashColor: iconColor.withValues(alpha: 0.1),
+        highlightColor: iconColor.withValues(alpha: 0.05),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

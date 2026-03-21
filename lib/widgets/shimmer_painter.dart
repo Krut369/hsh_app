@@ -9,9 +9,9 @@ class ShimmerPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final gradient = LinearGradient(
       colors: [
-        Colors.white.withOpacity(0.0),
-        Colors.white.withOpacity(0.18),
-        Colors.white.withOpacity(0.0),
+        Colors.white.withValues(alpha: 0.0),
+        Colors.white.withValues(alpha: 0.18),
+        Colors.white.withValues(alpha: 0.0),
       ],
       stops: const [0.25, 0.5, 0.75],
       begin: Alignment(-1.0 + 2 * shimmer, -1.0),

@@ -7,7 +7,8 @@ import '../../leader_main_shell.dart';
 import 'widgets/feature_card.dart';
 import 'widgets/system_status_widget.dart';
 import '../../../../widgets/custom_app_bar.dart';
-import '../../../../providers/auth_provider.dart';
+import 'package:get/get.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class LeaderDashboardScreen extends ConsumerWidget {
   const LeaderDashboardScreen({super.key});
@@ -43,16 +44,17 @@ class LeaderDashboardScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.calendar_today, color: Colors.white, size: 24),
+            child:
+                const Icon(Icons.calendar_today, color: Colors.white, size: 24),
           ),
         ),
         showNotificationIcon: true,
         showLogoutIcon: true,
         onLogoutTap: () {
-          ref.read(authProvider.notifier).logout();
+          Get.find<AuthController>().logout();
         },
       ),
       body: SingleChildScrollView(
@@ -178,5 +180,3 @@ class LeaderDashboardScreen extends ConsumerWidget {
     );
   }
 }
-
-

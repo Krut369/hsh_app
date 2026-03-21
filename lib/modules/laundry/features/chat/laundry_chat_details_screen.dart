@@ -73,7 +73,7 @@ class _LaundryChatDetailsScreenState extends ConsumerState<LaundryChatDetailsScr
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: Icon(Icons.person, color: AppColors.primary, size: 24),
                 ),
                 if (conversation.isOnline)

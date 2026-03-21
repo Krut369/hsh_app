@@ -1,325 +1,212 @@
-import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/api_constants.dart';
 
-/// HTTP Client for API calls
+/// Dio-powered API Client maintaining compatibility with legacy methods
 class ApiClient {
-  final HttpClient _httpClient;
-  String? _authToken;
+  final Dio dio;
 
-  ApiClient() : _httpClient = HttpClient() {
-    _httpClient.connectionTimeout = ApiConstants.connectionTimeout;
-    _loadToken();
+  ApiClient() : dio = Dio() {
+    _initDio();
   }
 
-  /// Load auth token from storage
-  Future<void> _loadToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    _authToken = prefs.getString(ApiConstants.tokenKey);
+  void _initDio() {
+    dio.options = BaseOptions(
+      baseUrl: ApiConstants.apiBaseUrl,
+      connectTimeout: ApiConstants.connectionTimeout,
+      receiveTimeout: ApiConstants.receiveTimeout,
+      headers: {
+        'Content-Type': ApiConstants.contentTypeJson,
+        'Accept': ApiConstants.contentTypeJson,
+      },
+    );
+
+    // Add Auth Interceptor
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString(ApiConstants.tokenKey);
+        if (token != null) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        return handler.next(options);
+      },
+      onError: (e, handler) {
+        // Handle 401 locally if needed or just pass through
+        return handler.next(e);
+      },
+    ));
+
+    // Optional: Add Logger
+    dio.interceptors.add(LogInterceptor(
+      requestBody: true,
+      responseBody: true,
+    ));
   }
 
-  /// Set auth token
-  Future<void> setToken(String token) async {
-    _authToken = token;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(ApiConstants.tokenKey, token);
-  }
-
-  /// Clear auth token
-  Future<void> clearToken() async {
-    _authToken = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(ApiConstants.tokenKey);
-  }
-
-  /// Get auth token
-  String? get token => _authToken;
-
-  /// Build full URL
-  String _buildUrl(String endpoint) {
-    return '${ApiConstants.apiBaseUrl}$endpoint';
-  }
-
-  /// Add common headers
-  Map<String, String> _buildHeaders({
-    Map<String, String>? additionalHeaders,
-    bool includeAuth = true,
-  }) {
-    final headers = <String, String>{
-      HttpHeaders.contentTypeHeader: ApiConstants.contentTypeJson,
-      HttpHeaders.acceptHeader: ApiConstants.contentTypeJson,
-    };
-
-    if (includeAuth && _authToken != null) {
-      headers[HttpHeaders.authorizationHeader] = 'Bearer $_authToken';
-    }
-
-    if (additionalHeaders != null) {
-      headers.addAll(additionalHeaders);
-    }
-
-    return headers;
-  }
-
-  /// GET Request
+  /// REST GET Request (legacy compatible)
   Future<ApiResponse> get(
     String endpoint, {
     Map<String, dynamic>? queryParameters,
     bool includeAuth = true,
   }) async {
     try {
-      var url = _buildUrl(endpoint);
-      if (queryParameters != null && queryParameters.isNotEmpty) {
-        final queryString = queryParameters.entries
-            .map((e) => '${e.key}=${Uri.encodeComponent(e.value.toString())}')
-            .join('&');
-        url = '$url?$queryString';
-      }
-
-      final uri = Uri.parse(url);
-      final request = await _httpClient.getUrl(uri);
-
-      // Add headers
-      final headers = _buildHeaders(includeAuth: includeAuth);
-      headers.forEach((key, value) {
-        request.headers.set(key, value);
-      });
-
-      final response = await request.close();
-      return await _handleResponse(response);
-    } catch (e) {
-      return ApiResponse(
-        success: false,
-        message: 'Network error: ${e.toString()}',
+      final response = await dio.get(
+        endpoint,
+        queryParameters: queryParameters,
+        options: Options(
+          extra: {'includeAuth': includeAuth},
+        ),
       );
+      return _handleResponse(response);
+    } on DioException catch (e) {
+      return _handleDioError(e);
     }
   }
 
-  /// POST Request
+  /// REST POST Request (legacy compatible)
   Future<ApiResponse> post(
     String endpoint, {
-    Map<String, dynamic>? body,
+    dynamic body,
     bool includeAuth = true,
   }) async {
     try {
-      final url = _buildUrl(endpoint);
-      final uri = Uri.parse(url);
-      final request = await _httpClient.postUrl(uri);
-
-      // Add headers
-      final headers = _buildHeaders(includeAuth: includeAuth);
-      headers.forEach((key, value) {
-        request.headers.set(key, value);
-      });
-
-      // Add body
-      if (body != null) {
-        final jsonBody = jsonEncode(body);
-        print('📤 Request Body ($endpoint): $jsonBody');
-        request.write(jsonBody);
-      }
-
-      final response = await request.close();
-      return await _handleResponse(response);
-    } catch (e) {
-      return ApiResponse(
-        success: false,
-        message: 'Network error: ${e.toString()}',
+      final response = await dio.post(
+        endpoint,
+        data: body,
       );
+      return _handleResponse(response);
+    } on DioException catch (e) {
+      return _handleDioError(e);
     }
   }
 
-  /// PUT Request
+  /// REST PUT Request (legacy compatible)
   Future<ApiResponse> put(
     String endpoint, {
-    Map<String, dynamic>? body,
+    dynamic body,
     bool includeAuth = true,
   }) async {
     try {
-      final url = _buildUrl(endpoint);
-      final uri = Uri.parse(url);
-      final request = await _httpClient.putUrl(uri);
-
-      // Add headers
-      final headers = _buildHeaders(includeAuth: includeAuth);
-      headers.forEach((key, value) {
-        request.headers.set(key, value);
-      });
-
-      // Add body
-      if (body != null) {
-        request.write(jsonEncode(body));
-      }
-
-      final response = await request.close();
-      return await _handleResponse(response);
-    } catch (e) {
-      return ApiResponse(
-        success: false,
-        message: 'Network error: ${e.toString()}',
+      final response = await dio.put(
+        endpoint,
+        data: body,
       );
+      return _handleResponse(response);
+    } on DioException catch (e) {
+      return _handleDioError(e);
     }
   }
-  /// PATCH Request
+
+  /// REST PATCH Request (legacy compatible)
   Future<ApiResponse> patch(
     String endpoint, {
-    Map<String, dynamic>? body,
+    dynamic body,
     bool includeAuth = true,
   }) async {
     try {
-      final url = _buildUrl(endpoint);
-      final uri = Uri.parse(url);
-      final request = await _httpClient.patchUrl(uri);
-
-      // Add headers
-      final headers = _buildHeaders(includeAuth: includeAuth);
-      headers.forEach((key, value) {
-        request.headers.set(key, value);
-      });
-
-      // Add body
-      if (body != null) {
-        request.write(jsonEncode(body));
-      }
-
-      final response = await request.close();
-      return await _handleResponse(response);
-    } catch (e) {
-      return ApiResponse(
-        success: false,
-        message: 'Network error: ${e.toString()}',
+      final response = await dio.patch(
+        endpoint,
+        data: body,
       );
+      return _handleResponse(response);
+    } on DioException catch (e) {
+      return _handleDioError(e);
     }
   }
 
-  /// DELETE Request
+  /// REST DELETE Request (legacy compatible)
   Future<ApiResponse> delete(
     String endpoint, {
     bool includeAuth = true,
   }) async {
     try {
-      final url = _buildUrl(endpoint);
-      final uri = Uri.parse(url);
-      final request = await _httpClient.deleteUrl(uri);
-
-      // Add headers
-      final headers = _buildHeaders(includeAuth: includeAuth);
-      headers.forEach((key, value) {
-        request.headers.set(key, value);
-      });
-
-      final response = await request.close();
-      return await _handleResponse(response);
-    } catch (e) {
-      return ApiResponse(
-        success: false,
-        message: 'Network error: ${e.toString()}',
-      );
+      final response = await dio.delete(endpoint);
+      return _handleResponse(response);
+    } on DioException catch (e) {
+      return _handleDioError(e);
     }
   }
 
-  /// Handle HTTP Response
-  Future<ApiResponse> _handleResponse(HttpClientResponse response) async {
-    final responseBody = await response.transform(utf8.decoder).join();
-    final statusCode = response.statusCode;
-
-    try {
-      final jsonData = jsonDecode(responseBody);
-
-      if (statusCode >= 200 && statusCode < 300) {
-        return ApiResponse(
-          success: true,
-          data: jsonData,
-          statusCode: statusCode,
-        );
-      } else {
-        return ApiResponse(
-          success: false,
-          message: jsonData['message'] ?? 'Request failed',
-          statusCode: statusCode,
-          data: jsonData,
-        );
-      }
-    } catch (e) {
-      return ApiResponse(
-        success: false,
-        message: 'Failed to parse response: ${e.toString()}',
-        statusCode: statusCode,
-      );
-    }
-  }
-
-  /// Upload file with multipart
+  /// File Upload (legacy compatible)
   Future<ApiResponse> uploadFile(
     String endpoint,
-    File file, {
+    dynamic fileData, // Can be File or byte list
+    {
     String fieldName = 'file',
+    String? fileName,
     Map<String, String>? additionalFields,
     bool includeAuth = true,
   }) async {
     try {
-      final url = _buildUrl(endpoint);
-      final uri = Uri.parse(url);
-      final request = await _httpClient.postUrl(uri);
-
-      // Set multipart boundary
-      final boundary = '----WebKitFormBoundary${DateTime.now().millisecondsSinceEpoch}';
-      request.headers.set(
-        HttpHeaders.contentTypeHeader,
-        'multipart/form-data; boundary=$boundary',
-      );
-
-      if (includeAuth && _authToken != null) {
-        request.headers.set(
-          HttpHeaders.authorizationHeader,
-          'Bearer $_authToken',
-        );
+      dynamic uploadData;
+      if (fileData is File) {
+        uploadData =
+            await MultipartFile.fromFile(fileData.path, filename: fileName);
+      } else if (fileData is List<int>) {
+        uploadData =
+            MultipartFile.fromBytes(fileData, filename: fileName ?? 'file');
+      } else {
+        throw Exception('Invalid file data for upload');
       }
 
-      // Build multipart body
-      final fileBytes = await file.readAsBytes();
-      final fileName = file.path.split('/').last;
+      final formData = FormData.fromMap({
+        fieldName: uploadData,
+        if (additionalFields != null) ...additionalFields,
+      });
 
-      final multipartBody = StringBuffer();
-
-      // Add additional fields
-      if (additionalFields != null) {
-        additionalFields.forEach((key, value) {
-          multipartBody.write('--$boundary\r\n');
-          multipartBody.write('Content-Disposition: form-data; name="$key"\r\n\r\n');
-          multipartBody.write('$value\r\n');
-        });
-      }
-
-      // Add file
-      multipartBody.write('--$boundary\r\n');
-      multipartBody.write(
-        'Content-Disposition: form-data; name="$fieldName"; filename="$fileName"\r\n',
+      final response = await dio.post(
+        endpoint,
+        data: formData,
+        options: Options(
+          contentType: ApiConstants.contentTypeMultipart,
+        ),
       );
-      multipartBody.write('Content-Type: application/octet-stream\r\n\r\n');
-
-      request.write(multipartBody.toString());
-      request.add(fileBytes);
-      request.write('\r\n--$boundary--\r\n');
-
-      final response = await request.close();
-      return await _handleResponse(response);
-    } catch (e) {
-      return ApiResponse(
-        success: false,
-        message: 'File upload error: ${e.toString()}',
-      );
+      return _handleResponse(response);
+    } on DioException catch (e) {
+      return _handleDioError(e);
     }
   }
 
-  /// Close the client
+  /// Handle Dio Response -> Legacy ApiResponse
+  ApiResponse _handleResponse(Response response) {
+    return ApiResponse(
+      success:
+          (response.statusCode ?? 0) >= 200 && (response.statusCode ?? 0) < 300,
+      data: response.data,
+      statusCode: response.statusCode,
+      message: response.statusMessage,
+    );
+  }
+
+  /// Handle Dio Error -> Legacy ApiResponse
+  ApiResponse _handleDioError(DioException error) {
+    final response = error.response;
+    return ApiResponse(
+      success: false,
+      data: response?.data,
+      statusCode: response?.statusCode,
+      message: error.message ?? 'Unknown error',
+    );
+  }
+
+  Future<void> setToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(ApiConstants.tokenKey, token);
+  }
+
+  Future<void> clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(ApiConstants.tokenKey);
+  }
+
   void close() {
-    _httpClient.close();
+    dio.close();
   }
 }
 
-/// API Response Model
+/// Legacy API Response Model for app compatibility
 class ApiResponse {
   final bool success;
   final dynamic data;
@@ -337,4 +224,17 @@ class ApiResponse {
   String toString() {
     return 'ApiResponse(success: $success, message: $message, statusCode: $statusCode)';
   }
+}
+
+/// Generic wrapper for Retrofit calls (not strictly required by old services)
+class ApiResponseWrapper<T> {
+  final bool success;
+  final T? data;
+  final String? message;
+
+  ApiResponseWrapper({
+    this.success = true,
+    this.data,
+    this.message,
+  });
 }

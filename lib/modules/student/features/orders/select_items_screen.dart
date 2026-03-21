@@ -214,7 +214,7 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
                               boxShadow: isSelected
                                   ? [
                                       BoxShadow(
-                                          color: AppColors.primary.withOpacity(0.4),
+                                          color: AppColors.primary.withValues(alpha: 0.4),
                                           blurRadius: 8,
                                           offset: const Offset(0, 4))
                                     ]
@@ -255,7 +255,7 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 20,
                             offset: const Offset(0, 10))
                       ],
@@ -271,7 +271,7 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
                               width: 100,
                               height: 100,
                               decoration: BoxDecoration(
-                                color: AppColors.secondary.withOpacity(0.1),
+                                color: AppColors.secondary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(16),
                                 image: const DecorationImage(
                                   image: AssetImage(
@@ -408,7 +408,7 @@ class _SelectItemsScreenState extends ConsumerState<SelectItemsScreen> {
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: color, size: 24),

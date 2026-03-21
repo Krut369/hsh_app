@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
+import '../presentation/controllers/auth_controller.dart';
 
-import '../../../providers/auth_provider.dart';
-
-final obscurePasswordProvider = StateProvider<bool>((ref) => true);
-final rememberMeProvider = StateProvider<bool>((ref) => false);
-
-class LoginScreen extends ConsumerStatefulWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen>
+class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   late AnimationController _animController;
   late Animation<double> _cardAnim;
   late Animation<double> _logoAnim;
-  String? _localError;
+
+  // Use Get.find to access the Controller
+  AuthController get authController => Get.find<AuthController>();
+
+  // Local UI-only state (could also be in GetxController)
+  final RxBool _obscurePassword = true.obs;
 
   @override
   void initState() {
@@ -39,15 +40,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     );
     _animController.forward();
 
-    // Dismiss error banner immediately when the user starts re-typing
     _emailController.addListener(_clearLocalError);
     _passwordController.addListener(_clearLocalError);
   }
 
-  /// Clears ONLY the local error display — never touches authProvider.
   void _clearLocalError() {
-    if (_localError != null) {
-      setState(() => _localError = null);
+    if (authController.error.value != null) {
+      authController.error.value = null;
     }
   }
 
@@ -60,25 +59,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   Future<void> _onLogin() async {
-    final notifier = ref.read(authProvider.notifier);
-    await notifier.login(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-    );
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      authController.error.value = 'Please enter both email and password.';
+      return;
+    }
+
+    await authController.login(email, password);
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-    final isLoading = authState.isLoading;
-    final obscurePassword = ref.watch(obscurePasswordProvider);
-    ref.listen<AsyncValue<AuthState>>(authProvider, (previous, next) {
-      final newError = next.valueOrNull?.error;
-      if (newError != null && newError != _localError) {
-        setState(() => _localError = newError);
-      }
-    });
-
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
 
@@ -99,7 +92,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               ),
             ),
           ),
-          // Centered content
           Center(
             child: SingleChildScrollView(
               child: FadeTransition(
@@ -111,11 +103,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 28, vertical: 32),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.95),
+                      color: Colors.white.withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.08),
                           blurRadius: 32,
                           offset: const Offset(0, 12),
                         ),
@@ -124,7 +116,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Logo/avatar
                         FadeTransition(
                           opacity: _logoAnim,
                           child: ScaleTransition(
@@ -147,45 +138,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                         const SizedBox(height: 6),
 
-                        // ── Inline error banner ──────────────────────────
-                        if (_localError != null) ...[
-                          const SizedBox(height: 12),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeIn,
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFEBEB),
-                              border: Border.all(
-                                  color: const Color(0xFFFF4D4D), width: 1.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        // Error Banner Reactive
+                        Obx(() {
+                          final error = authController.error.value;
+                          if (error != null) {
+                            return Column(
                               children: [
-                                const Icon(Icons.error_outline,
-                                    color: Color(0xFFCC0000), size: 20),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    _friendlyError(_localError!),
-                                    style: const TextStyle(
-                                      color: Color(0xFFCC0000),
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
+                                const SizedBox(height: 12),
+                                _ErrorBanner(message: _friendlyError(error)),
+                                const SizedBox(height: 20),
                               ],
-                            ),
-                          ),
-                        ],
-                        // ─────────────────────────────────────────────────
+                            );
+                          }
+                          return const SizedBox(height: 20);
+                        }),
 
-                        const SizedBox(height: 20),
-                        //
                         TextField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
@@ -201,66 +168,65 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           ),
                         ),
                         const SizedBox(height: 18),
-                        // Password
-                        TextField(
-                          controller: _passwordController,
-                          obscureText: obscurePassword,
-                          autofillHints: const [AutofillHints.password],
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+                        Obx(() => TextField(
+                              controller: _passwordController,
+                              obscureText: _obscurePassword.value,
+                              autofillHints: const [AutofillHints.password],
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                                prefixIcon: const Icon(Icons.lock_outline),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword.value
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
+                                  onPressed: () {
+                                    _obscurePassword.toggle();
+                                  },
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey[100],
                               ),
-                              onPressed: () {
-                                ref
-                                    .read(obscurePasswordProvider.notifier)
-                                    .state = !obscurePassword;
-                              },
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[100],
-                          ),
-                        ),
+                            )),
                         const SizedBox(height: 28),
 
-                        // Login Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                        // Login Button Reactive
+                        Obx(() {
+                          final isLoading = authController.isLoading.value;
+                          return SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: theme.primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 2,
                               ),
-                              elevation: 2,
-                            ),
-                            onPressed: isLoading ? null : _onLogin,
-                            child: isLoading
-                                ? const SizedBox(
-                                    width: 26,
-                                    height: 26,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.5,
+                              onPressed: isLoading ? null : _onLogin,
+                              child: isLoading
+                                  ? const SizedBox(
+                                      width: 26,
+                                      height: 26,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2.5,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Log In',
+                                      style: TextStyle(
+                                          fontSize: 17, color: Colors.white),
                                     ),
-                                  )
-                                : const Text(
-                                    'Log In',
-                                    style: TextStyle(
-                                        fontSize: 17, color: Colors.white),
-                                  ),
-                          ),
-                        ),
+                            ),
+                          );
+                        }),
                         const SizedBox(height: 22),
-                        // Divider
                       ],
                     ),
                   ),
@@ -273,25 +239,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     );
   }
 
-  /// Convert raw backend/network error into a user-friendly message.
   String _friendlyError(String error) {
+    if (error.isEmpty) return 'An error occurred. Please try again.';
     final lower = error.toLowerCase();
     if (lower.contains('invalid') ||
         lower.contains('incorrect') ||
         lower.contains('wrong') ||
         lower.contains('credentials') ||
-        lower.contains('401') ||
-        lower.contains('password') ||
-        lower.contains('not found') ||
-        lower.contains('unauthorized')) {
-      return 'Incorrect email or password. Please try again.';
+        lower.contains('401')) {
+      return 'Incorrect email or password.';
     }
     if (lower.contains('network') ||
         lower.contains('socket') ||
-        lower.contains('connection') ||
-        lower.contains('timeout')) {
-      return 'Network error. Please check your internet connection.';
+        lower.contains('connection')) {
+      return 'Network error. Please check your connection.';
     }
     return error;
+  }
+}
+
+class _ErrorBanner extends StatelessWidget {
+  final String message;
+  const _ErrorBanner({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFEBEB),
+        border: Border.all(color: const Color(0xFFFF4D4D), width: 1.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline, color: Color(0xFFCC0000), size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Color(0xFFCC0000),
+                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

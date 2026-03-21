@@ -98,7 +98,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text('TODAY', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),

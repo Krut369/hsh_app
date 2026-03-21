@@ -4,6 +4,7 @@ import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/widgets/custom_card.dart';
 import 'package:hsh_app/modules/student/features/scanner/mobile_scanner_screen.dart';
 import '../../../../models/attendance_record_model.dart';
+
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
 
@@ -22,14 +23,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     AttendanceEventType.sabha: Icons.group,
     AttendanceEventType.arti: Icons.yard_outlined,
     AttendanceEventType.nightAttendance: Icons.king_bed,
-    AttendanceEventType.studyHour: Icons.book, 
+    AttendanceEventType.studyHour: Icons.book,
     AttendanceEventType.other: Icons.event,
   };
 
   @override
   Widget build(BuildContext context) {
     // Filter out 'other' if you don't want it shown, or keep it.
-    // For specific UI order, you can explicitly list them or just use values. 
+    // For specific UI order, you can explicitly list them or just use values.
     // Here we use values but filter/map to options.
     final options = AttendanceEventType.values
         .where((type) => type != AttendanceEventType.other)
@@ -46,8 +47,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),
-            onPressed: () {
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -126,8 +126,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor.withOpacity(
-                                  0.1), // Light background for the count
+                              color: Theme.of(context).primaryColor.withValues(
+                                  alpha: 0.1), // Light background for the count
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(

@@ -19,7 +19,7 @@ class EventTypeChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2D507B).withOpacity(0.1) : Colors.transparent,
+          color: isSelected ? const Color(0xFF2D507B).withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? const Color(0xFF2D507B) : Colors.grey.shade300,

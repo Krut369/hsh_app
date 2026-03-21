@@ -9,7 +9,8 @@ import '../../../../providers/laundry_order_provider.dart';
 import '../../../laundry/controllers/laundry_filter_provider.dart';
 import '../../../../providers/bottom_nav_provider.dart';
 import '../../../../widgets/custom_app_bar.dart';
-import '../../../../providers/auth_provider.dart';
+import 'package:get/get.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
 import 'widgets/stat_card_widget.dart';
 import 'widgets/total_requests_card.dart';
@@ -25,8 +26,10 @@ class LaundryHomeScreen extends ConsumerWidget {
 
     // Calculate stats
     final totalRequests = orders.length;
-    final pendingPickups = orders.where((o) => o.status == OrderStatus.inProgress).length;
-    final completedCount = orders.where((o) => o.status == OrderStatus.completed).length;
+    final pendingPickups =
+        orders.where((o) => o.status == OrderStatus.inProgress).length;
+    final completedCount =
+        orders.where((o) => o.status == OrderStatus.completed).length;
 
     // Using specific colors
     const successGreen = Color(0xFF10B981);
@@ -38,8 +41,8 @@ class LaundryHomeScreen extends ConsumerWidget {
         title: 'Laundry',
         showNotificationIcon: true,
         showLogoutIcon: true,
-        onLogoutTap: () {
-          ref.read(authProvider.notifier).logout();
+        onLogoutTap: () async {
+          await Get.find<AuthController>().logout();
         },
       ),
       body: SingleChildScrollView(
@@ -104,7 +107,8 @@ class LaundryHomeScreen extends ConsumerWidget {
               icon: Icons.list,
               onPressed: () {
                 ref.read(laundryFilterProvider.notifier).state = 'All';
-                ref.read(bottomNavIndexProvider.notifier).state = 1; // Switch to Detail Tab
+                ref.read(bottomNavIndexProvider.notifier).state =
+                    1; // Switch to Detail Tab
               },
               isPrimary: true,
             ),
@@ -115,13 +119,15 @@ class LaundryHomeScreen extends ConsumerWidget {
               title: 'Pending Pickups',
               icon: Icons.access_time,
               onPressed: () {
-                 ref.read(laundryFilterProvider.notifier).state = 'Ready for Pickup';
-                 ref.read(bottomNavIndexProvider.notifier).state = 1; // Switch to Detail Tab
+                ref.read(laundryFilterProvider.notifier).state =
+                    'Ready for Pickup';
+                ref.read(bottomNavIndexProvider.notifier).state =
+                    1; // Switch to Detail Tab
               },
               isPrimary: false,
               badgeCount: pendingPickups > 0 ? pendingPickups.toString() : null,
             ),
-            
+
             const SizedBox(height: 32),
           ],
         ),
@@ -129,4 +135,3 @@ class LaundryHomeScreen extends ConsumerWidget {
     );
   }
 }
-

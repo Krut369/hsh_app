@@ -4,24 +4,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_text.dart';
 import '../../../../core/constants/font.dart';
 import '../../../../core/utils/responsive_util.dart';
-import '../../../../providers/auth_provider.dart';
+import 'package:get/get.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class ComplainFeedbackScreen extends ConsumerStatefulWidget {
   const ComplainFeedbackScreen({super.key});
 
   @override
-  ConsumerState<ComplainFeedbackScreen> createState() => _ComplainFeedbackScreenState();
+  ConsumerState<ComplainFeedbackScreen> createState() =>
+      _ComplainFeedbackScreenState();
 }
 
-class _ComplainFeedbackScreenState extends ConsumerState<ComplainFeedbackScreen> {
+class _ComplainFeedbackScreenState
+    extends ConsumerState<ComplainFeedbackScreen> {
   final _feedbackController = TextEditingController();
   double _rating = 3;
 
   @override
   Widget build(BuildContext context) {
     final padding = EdgeInsets.all(ResponsiveUtil.responsivePadding(context));
-    final verticalSpacing = SizedBox(height: ResponsiveUtil.verticalSpacing(context));
-    final authNotifier = ref.read(authProvider.notifier);
+    final verticalSpacing =
+        SizedBox(height: ResponsiveUtil.verticalSpacing(context));
+    final authController = Get.find<AuthController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -37,7 +41,7 @@ class _ComplainFeedbackScreenState extends ConsumerState<ComplainFeedbackScreen>
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
             onPressed: () {
-              authNotifier.logout();
+              authController.logout();
             },
           ),
         ],
@@ -56,7 +60,10 @@ class _ComplainFeedbackScreenState extends ConsumerState<ComplainFeedbackScreen>
               max: 5,
               label: _rating.toStringAsFixed(0),
               activeColor: Theme.of(context).colorScheme.primary,
-              inactiveColor: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+              inactiveColor: Theme.of(context)
+                  .colorScheme
+                  .secondary
+                  .withValues(alpha: 0.3),
             ),
             verticalSpacing,
             TextField(
@@ -66,8 +73,10 @@ class _ComplainFeedbackScreenState extends ConsumerState<ComplainFeedbackScreen>
                 filled: true,
                 fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                 border: Theme.of(context).inputDecorationTheme.border,
-                focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
-                enabledBorder: Theme.of(context).inputDecorationTheme.enabledBorder,
+                focusedBorder:
+                    Theme.of(context).inputDecorationTheme.focusedBorder,
+                enabledBorder:
+                    Theme.of(context).inputDecorationTheme.enabledBorder,
                 labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
               ),
               style: AppFonts.bodyRegular(context),
@@ -79,10 +88,12 @@ class _ComplainFeedbackScreenState extends ConsumerState<ComplainFeedbackScreen>
               child: ElevatedButton(
                 onPressed: () {
                   // Save feedback logic here
-                  Navigator.popUntil(context, ModalRoute.withName('/complain/home'));
+                  Navigator.popUntil(
+                      context, ModalRoute.withName('/complain/home'));
                 },
                 style: Theme.of(context).elevatedButtonTheme.style,
-                child: Text(AppText.submit, style: AppFonts.buttonText(context)),
+                child:
+                    Text(AppText.submit, style: AppFonts.buttonText(context)),
               ),
             ),
           ],

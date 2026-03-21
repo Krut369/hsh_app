@@ -72,7 +72,7 @@ class _AttendanceMainScreenState extends ConsumerState<AttendanceMainScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF2D507B).withOpacity(0.2)),
+                border: Border.all(color: const Color(0xFF2D507B).withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [

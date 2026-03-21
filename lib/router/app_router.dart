@@ -1,9 +1,10 @@
+import "package:hsh_app/core/enums/user_role.dart";
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:hsh_app/providers/auth_provider.dart';
-import 'package:hsh_app/models/user_model.dart';
+import 'package:get/get.dart';
+import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
 import 'package:hsh_app/models/laundry_order_model.dart';
 import 'package:hsh_app/models/complaint_model.dart';
 import 'package:hsh_app/splash_screen.dart';
@@ -46,46 +47,43 @@ import 'package:hsh_app/modules/student/features/chat/chat_details_screen.dart';
 // RouterNotifier
 // ---------------------------------------------------------------------------
 // Extends ChangeNotifier so GoRouter can use it as refreshListenable.
-// It watches authProvider and calls notifyListeners() when it changes,
+// It watches AuthController and calls notifyListeners() when it changes,
 // which tells GoRouter to re-evaluate its redirect — WITHOUT recreating the
 // GoRouter instance or destroying any widget state.
 // ---------------------------------------------------------------------------
 class RouterNotifier extends ChangeNotifier {
-  final Ref _ref;
+  RouterNotifier() {
+    // Listen to AuthController observables via GetX
+    final authController = Get.find<AuthController>();
 
-  RouterNotifier(this._ref) {
-    // Listen to authProvider changes and notify GoRouter to re-check redirects.
-    _ref.listen<AsyncValue<AuthState>>(
-      authProvider,
-      (_, __) => notifyListeners(),
-    );
+    // Listen to observables and notify GoRouter
+    authController.isAuthenticated.listen((_) => notifyListeners());
+    authController.isLoading.listen((_) => notifyListeners());
+    authController.error.listen((_) => notifyListeners());
   }
 
   /// Called by GoRouter's redirect callback — reads (not watches) auth state.
   String? redirect(BuildContext context, GoRouterState state) {
-    final authState = _ref.read(authProvider);
+    final authController = Get.find<AuthController>();
     final isLoggingIn = state.uri.toString() == '/login';
     final isSplash = state.uri.toString() == '/';
 
     // While the auth state is loading (initial check), stay on splash.
-    if (authState.isLoading) return null;
+    if (authController.isLoading.value) return null;
 
-    final authData = authState.value;
-    final isAuthenticated = authData?.isAuthenticated ?? false;
-    final hasError = authData?.error != null;
+    final isAuthenticated = authController.isAuthenticated.value;
+    final hasError = authController.error.value != null;
 
     // Unauthenticated user
     if (!isAuthenticated) {
-      // If a login error occurred while on the splash screen, push to login
-      // so the LoginScreen can display the error banner.
       if (hasError && isSplash) return '/login';
-      if (isLoggingIn || isSplash) return null; // Allow splash / login
+      if (isLoggingIn || isSplash) return null;
       return '/login';
     }
 
     // Authenticated user — redirect away from splash / login.
     if (isLoggingIn || isSplash) {
-      final role = authData?.user?.role;
+      final role = authController.user.value?.role;
       switch (role) {
         case UserRole.laundry:
           return '/laundry';
@@ -113,13 +111,13 @@ class RouterNotifier extends ChangeNotifier {
 
 /// Provides the RouterNotifier singleton — created once, never recreated.
 final routerNotifierProvider = Provider<RouterNotifier>(
-  (ref) => RouterNotifier(ref),
+  (ref) => RouterNotifier(),
 );
 
 /// Provides the GoRouter singleton — created ONCE for the lifetime of the app.
 ///
 /// KEY POINT: uses ref.read (not ref.watch) so the GoRouter is never recreated
-/// when authProvider changes. Auth changes flow through RouterNotifier →
+/// when AuthController changes. Auth changes flow through RouterNotifier →
 /// notifyListeners() → GoRouter re-evaluates redirect only.
 final goRouterProvider = Provider<GoRouter>((ref) {
   final notifier = ref.read(routerNotifierProvider);

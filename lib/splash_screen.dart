@@ -1,24 +1,21 @@
+import "package:hsh_app/core/enums/user_role.dart";
 // Requires flutter_riverpod in pubspec.yaml
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/theme/app_colors.dart';
-import 'package:hsh_app/providers/auth_provider.dart';
-import 'package:hsh_app/models/user_model.dart';
+import 'modules/auth/presentation/controllers/auth_controller.dart';
 
-
-
-
-class SplashScreen extends ConsumerStatefulWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen>
+class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   late AnimationController _logoController;
   late Animation<double> _logoFadeAnimation;
@@ -98,31 +95,35 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       _splashTriggered = true;
       Future.delayed(const Duration(seconds: 3), () async {
         if (mounted) {
-           try {
-             // Ensure AuthNotifier initialization completes
-             await ref.read(authProvider.future);
-             
-             final authState = ref.read(authProvider); // Now state should be data
-             
-             if (authState.valueOrNull?.isAuthenticated == true) {
-                final role = authState.valueOrNull?.user?.role;
-                // Navigate based on role
+          try {
+            final authController = Get.find<AuthController>();
+
+            if (authController.isAuthenticated.value &&
+                authController.user.value != null) {
+              final role = authController.user.value!.role;
+              if (!mounted) return;
+              if (context.mounted) {
                 if (role == UserRole.student) {
-                  context.go('/student/home'); 
+                  context.go('/student/home');
                 } else if (role == UserRole.complain) {
                   context.go('/complain/dashboard');
                 } else if (role == UserRole.laundry) {
                   context.go('/laundry/dashboard');
                 } else {
-                   context.go('/student/home'); 
+                  context.go('/student/home');
                 }
-             } else {
-               context.go('/login');
-             }
-           } catch (e) {
-             print('Splash Auth Check Error: $e');
-             context.go('/login');
-           }
+              }
+            } else {
+              if (context.mounted) {
+                context.go('/login');
+              }
+            }
+          } catch (e) {
+            debugPrint('Splash Auth Check Error: $e');
+            if (context.mounted) {
+              context.go('/login');
+            }
+          }
         }
       });
     }
@@ -174,7 +175,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         letterSpacing: 1.2,
                         shadows: [
                           Shadow(
-                            color: AppColors.secondary.withOpacity(0.18),
+                            color: AppColors.secondary.withValues(alpha: 0.18),
                             blurRadius: 16,
                             offset: const Offset(0, 2),
                           ),
@@ -212,7 +213,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               child: CustomPaint(
                 size: Size(size.width, 120),
                 painter: _WavePainter(
-                  color: AppColors.secondary.withOpacity(0.18),
+                  color: AppColors.secondary.withValues(alpha: 0.18),
                   amplitude: 24 + 12 * math.sin(t * 2 * math.pi),
                   yOffset: 60,
                 ),
@@ -225,7 +226,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               child: CustomPaint(
                 size: Size(size.width, 100),
                 painter: _WavePainter(
-                  color: AppColors.primary.withOpacity(0.13),
+                  color: AppColors.primary.withValues(alpha: 0.13),
                   amplitude: 18 + 8 * math.cos(t * 2 * math.pi),
                   yOffset: 40,
                 ),
@@ -244,8 +245,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         opacity: _logoFadeAnimation,
         child: Transform(
           alignment: Alignment.center,
-          transform: Matrix4.identity()
-            ..scale(1.08)
+          transform: Matrix4.diagonal3Values(1.08, 1.08, 1.0)
             ..setEntry(3, 2, 0.001)
             ..rotateY(-0.10), // slight 3D tilt
           child: Container(
@@ -254,19 +254,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.22),
+                  color: AppColors.primary.withValues(alpha: 0.22),
                   blurRadius: 64,
                   spreadRadius: 16,
                   offset: const Offset(0, 32),
                 ),
                 BoxShadow(
-                  color: AppColors.secondary.withOpacity(0.18),
+                  color: AppColors.secondary.withValues(alpha: 0.18),
                   blurRadius: 32,
                   spreadRadius: 8,
                   offset: const Offset(-16, 16),
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.10),
+                  color: Colors.black.withValues(alpha: 0.10),
                   blurRadius: 24,
                   spreadRadius: 2,
                   offset: const Offset(0, 8),
@@ -348,9 +348,9 @@ class _ShinePainter extends CustomPainter {
         begin: Alignment(-1.0 + 2 * shinePos, -1.0),
         end: Alignment(1.0 + 2 * shinePos, 1.0),
         colors: [
-          Colors.white.withOpacity(0.0),
-          AppColors.surface.withOpacity(0.18),
-          Colors.white.withOpacity(0.0),
+          Colors.white.withValues(alpha: 0.0),
+          AppColors.surface.withValues(alpha: 0.18),
+          Colors.white.withValues(alpha: 0.0),
         ],
         stops: const [0.35, 0.5, 0.65],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));

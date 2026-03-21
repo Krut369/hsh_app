@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/providers/student_profile_provider.dart';
-import 'package:hsh_app/providers/auth_provider.dart';
+import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
 import 'package:hsh_app/modules/student/features/profile/profile_card.dart';
 import 'package:hsh_app/modules/student/features/common/quick_action_card.dart';
 import 'package:hsh_app/modules/student/features/common/activity_tile.dart';
@@ -30,7 +31,7 @@ class ProfileScreen extends ConsumerWidget {
         title: AppText.hostelHub,
         showLogoutIcon: true,
         onLogoutTap: () {
-          ref.read(authProvider.notifier).logout();
+          Get.find<AuthController>().logout();
           context.go('/login');
         },
       ),
@@ -80,7 +81,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.attendance,
                       subtitle: AppText.viewStatus,
                       iconColor: Colors.blue,
-                      iconBgColor: Colors.blue.withOpacity(0.1),
+                      iconBgColor: Colors.blue.withValues(alpha: 0.1),
                       onTap: () {
                         context.go('/student/attendance');
                       },
@@ -94,7 +95,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.fees,
                       subtitle: AppText.payDue,
                       iconColor: Colors.green,
-                      iconBgColor: Colors.green.withOpacity(0.1),
+                      iconBgColor: Colors.green.withValues(alpha: 0.1),
                       onTap: () {
                         context.push('/student/payment');
                       },
@@ -108,7 +109,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.complaint,
                       subtitle: AppText.raiseTicket,
                       iconColor: Colors.orange,
-                      iconBgColor: Colors.orange.withOpacity(0.1),
+                      iconBgColor: Colors.orange.withValues(alpha: 0.1),
                       onTap: () {
                         context.push('/student/complaint');
                       },
@@ -122,7 +123,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.chat,
                       subtitle: AppText.checkMessages,
                       iconColor: Colors.purple,
-                      iconBgColor: Colors.purple.withOpacity(0.1),
+                      iconBgColor: Colors.purple.withValues(alpha: 0.1),
                       onTap: () {
                         context.push('/student/chat');
                       },
@@ -136,7 +137,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.notes,
                       subtitle: AppText.keepNotes,
                       iconColor: Colors.teal,
-                      iconBgColor: Colors.teal.withOpacity(0.1),
+                      iconBgColor: Colors.teal.withValues(alpha: 0.1),
                       onTap: () {
                         context.push('/student/notes');
                       },
@@ -150,7 +151,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: AppText.holiday,
                       subtitle: AppText.applyLeave,
                       iconColor: Colors.pink,
-                      iconBgColor: Colors.pink.withOpacity(0.1),
+                      iconBgColor: Colors.pink.withValues(alpha: 0.1),
                       onTap: () {
                         context.push('/student/holiday');
                       },
@@ -164,7 +165,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: 'Vehicle', // Short title for UI
                       subtitle: 'Register',
                       iconColor: Colors.indigo,
-                      iconBgColor: Colors.indigo.withOpacity(0.1),
+                      iconBgColor: Colors.indigo.withValues(alpha: 0.1),
                       onTap: () {
                         context.push('/student/vehicle-registration');
                       },

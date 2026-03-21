@@ -119,7 +119,7 @@ class AddComplaintScreen extends ConsumerWidget {
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                  color: scheme.primary.withOpacity(0.3),
+                                  color: scheme.primary.withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4))
                             ]
@@ -218,7 +218,7 @@ class AddComplaintScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                     color: isSelected
-                        ? scheme.primary.withOpacity(0.5)
+                        ? scheme.primary.withValues(alpha: 0.5)
                         : Colors.grey[200]!)),
             child: Column(
               children: [
@@ -232,7 +232,7 @@ class AddComplaintScreen extends ConsumerWidget {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? scheme.primary.withOpacity(0.1)
+                              ? scheme.primary.withValues(alpha: 0.1)
                               : Colors.grey[100],
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -404,7 +404,7 @@ class AddComplaintScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: CircleAvatar(
-              backgroundColor: Colors.black.withOpacity(0.5),
+              backgroundColor: Colors.black.withValues(alpha: 0.5),
               radius: 14,
               child: IconButton(
                 padding: EdgeInsets.zero,
@@ -430,7 +430,7 @@ class AddComplaintScreen extends ConsumerWidget {
     if (hasSub) {
       // Must select at least one sub-complaint
       if (state.selectedSubComplaints.isEmpty) return false;
-      
+
       // Check if all selected sub-complaints have valid descriptions
       for (var sub in state.selectedSubComplaints) {
         final desc = state.issues[sub.name]?.description ?? '';
@@ -451,7 +451,7 @@ class AddComplaintScreen extends ConsumerWidget {
     AddComplaintState state,
   ) async {
     final notifier = ref.read(addComplaintProvider.notifier);
-    
+
     // Show loading indicator
     showDialog(
       context: context,
@@ -461,7 +461,7 @@ class AddComplaintScreen extends ConsumerWidget {
 
     try {
       final List<Map<String, dynamic>> issuesList = [];
-      
+
       // Collect issues
       if (state.selectedType!.subComplaints.isNotEmpty) {
         for (var sub in state.selectedSubComplaints) {
@@ -479,9 +479,9 @@ class AddComplaintScreen extends ConsumerWidget {
         final key = state.selectedType!.name;
         final issueData = state.issues[key];
         if (issueData != null && issueData.description.isNotEmpty) {
-           issuesList.add({
+          issuesList.add({
             'description': issueData.description,
-             'imagePath': issueData.imagePath,
+            'imagePath': issueData.imagePath,
           });
         }
       }
@@ -489,7 +489,8 @@ class AddComplaintScreen extends ConsumerWidget {
       if (issuesList.isEmpty) {
         Navigator.pop(context); // Close loading
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please add at least one issue description')),
+          const SnackBar(
+              content: Text('Please add at least one issue description')),
         );
         return;
       }
@@ -498,7 +499,7 @@ class AddComplaintScreen extends ConsumerWidget {
       print('📦 Payload: Type=${state.selectedType!.name}, Issues=$issuesList');
 
       final response = await serviceProvider.complaint.createComplaint(
-        complaintType: state.selectedType!.name, 
+        complaintType: state.selectedType!.name,
         issues: issuesList,
       );
 
@@ -510,9 +511,9 @@ class AddComplaintScreen extends ConsumerWidget {
 
       if (response.success) {
         // Refresh complaints list and stats
-        ref.refresh(complaintsListProvider); 
-        ref.refresh(complaintStatsProvider);
-        
+        ref.invalidate(complaintsListProvider);
+        ref.invalidate(complaintStatsProvider);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Row(
@@ -524,7 +525,8 @@ class AddComplaintScreen extends ConsumerWidget {
             ),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             margin: const EdgeInsets.all(16),
           ),
         );
@@ -535,7 +537,8 @@ class AddComplaintScreen extends ConsumerWidget {
         print('❌ Submission Failed: ${response.message}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to submit: ${response.message ?? "Unknown error"} \nData: ${response.data}'),
+            content: Text(
+                'Failed to submit: ${response.message ?? "Unknown error"} \nData: ${response.data}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),

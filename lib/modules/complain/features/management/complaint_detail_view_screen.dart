@@ -70,19 +70,20 @@ class _ComplaintDetailViewScreenState
     if (selectedStatus == null) return;
 
     // Show loading
-    showDialog(context: context, builder: (_) => const Center(child: CircularProgressIndicator()));
+    showDialog(
+        context: context,
+        builder: (_) => const Center(child: CircularProgressIndicator()));
 
     final response = await serviceProvider.complaint.updateComplaintStatus(
-      complaintId: widget.complaint.id, 
-      status: selectedStatus!.toBackendString, 
-      note: remarksController.text
-    );
+        complaintId: widget.complaint.id,
+        status: selectedStatus!.toBackendString,
+        note: remarksController.text);
 
     Navigator.pop(context); // Pop loading
 
     if (response.success) {
-      ref.refresh(complaintsListProvider);
-      
+      ref.invalidate(complaintsListProvider);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Complaint status updated to ${selectedStatus!.label}'),
@@ -263,7 +264,7 @@ class _ComplaintDetailViewScreenState
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.15),
+                          color: statusColor.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -279,11 +280,15 @@ class _ComplaintDetailViewScreenState
                   ),
                   const SizedBox(height: 16),
                   // Image or Code-like display box
-                  (widget.complaint.issues.isNotEmpty && widget.complaint.issues.entries.first.value.imagePath != null)
+                  (widget.complaint.issues.isNotEmpty &&
+                          widget.complaint.issues.entries.first.value
+                                  .imagePath !=
+                              null)
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.file(
-                            File(widget.complaint.issues.entries.first.value.imagePath!),
+                            File(widget.complaint.issues.entries.first.value
+                                .imagePath!),
                             width: double.infinity,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
@@ -296,7 +301,9 @@ class _ComplaintDetailViewScreenState
                   const SizedBox(height: 20),
                   // Issue Title
                   Text(
-                    widget.complaint.issues.isNotEmpty ? widget.complaint.issues.entries.first.key : '',
+                    widget.complaint.issues.isNotEmpty
+                        ? widget.complaint.issues.entries.first.key
+                        : '',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -306,7 +313,10 @@ class _ComplaintDetailViewScreenState
                   const SizedBox(height: 12),
                   // Issue Description
                   Text(
-                    widget.complaint.issues.isNotEmpty ? widget.complaint.issues.entries.first.value.description : '',
+                    widget.complaint.issues.isNotEmpty
+                        ? widget
+                            .complaint.issues.entries.first.value.description
+                        : '',
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,

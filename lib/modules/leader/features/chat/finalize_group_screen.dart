@@ -36,7 +36,7 @@ class _FinalizeGroupScreenState extends State<FinalizeGroupScreen> {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 2), // Mock dashed
                     ),
@@ -128,7 +128,7 @@ class _FinalizeGroupScreenState extends State<FinalizeGroupScreen> {
                     children: [
                       CircleAvatar(
                         radius: 28,
-                        backgroundColor: Colors.white.withOpacity(0.5),
+                        backgroundColor: Colors.white.withValues(alpha: 0.5),
                         child: const Text('+5', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF3D5A80))),
                       ),
                       const SizedBox(height: 4),

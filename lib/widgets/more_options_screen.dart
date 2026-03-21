@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_colors.dart';
-import '../../providers/auth_provider.dart';
+import 'package:get/get.dart';
+import '../modules/auth/presentation/controllers/auth_controller.dart';
 
 class MoreOptionsBottomSheet extends ConsumerWidget {
   const MoreOptionsBottomSheet({super.key});
@@ -31,8 +32,6 @@ class MoreOptionsBottomSheet extends ConsumerWidget {
             },
           ),
 
-
-
           const SizedBox(height: 16),
 
           // 🔒 Logout Button
@@ -47,10 +46,10 @@ class MoreOptionsBottomSheet extends ConsumerWidget {
             onPressed: () async {
               context.pop(); // Close the bottom sheet
 
-              await ref.read(authProvider.notifier).logout();
+              await Get.find<AuthController>().logout();
 
               if (context.mounted) {
-                 context.go('/login');
+                context.go('/login');
               }
             },
           ),
