@@ -4,6 +4,7 @@ import 'package:hsh_app/modules/complain/presentation/bindings/complain_binding.
 import 'package:hsh_app/modules/leader/presentation/bindings/leader_binding.dart';
 import 'package:hsh_app/modules/auth/presentation/bindings/auth_binding.dart';
 import 'package:hsh_app/modules/laundry/presentation/bindings/laundry_binding.dart';
+import 'package:hsh_app/modules/student/features/profile/bindings/profile_binding.dart';
 import 'package:hsh_app/controllers/chat_controller.dart';
 import 'package:hsh_app/controllers/theme_controller.dart';
 import 'package:hsh_app/providers/bottom_nav_provider.dart';
@@ -23,6 +24,7 @@ void main() async {
   LaundryBinding().dependencies();
   ComplainBinding().dependencies();
   LeaderBinding().dependencies();
+  ProfileBinding().dependencies();
   Get.put(ChatController());
   Get.put(ThemeController());
   Get.put(BottomNavController());

@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
-import 'package:hsh_app/providers/student_profile_provider.dart';
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
+import 'package:hsh_app/modules/student/features/profile/controllers/profile_controller.dart';
 import 'package:hsh_app/modules/student/features/profile/profile_card.dart';
 import 'package:hsh_app/modules/student/features/common/quick_action_card.dart';
 import 'package:hsh_app/modules/student/features/common/activity_tile.dart';
 
 import 'package:hsh_app/widgets/custom_app_bar.dart';
+import 'package:uitoolkit/uitoolkit.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends GetView<ProfileController> {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(studentProfileProvider);
+  Widget build(BuildContext context) {
     final padding = ResponsiveUtil.responsivePadding(context);
     final vertical = ResponsiveUtil.verticalSpacing(context);
 
@@ -42,8 +41,10 @@ class ProfileScreen extends ConsumerWidget {
           children: [
             // Profile Card (Reverted to simple style)
             Center(
-              child: ProfileCard(
-                profile: profile,
+              child: Obx(
+                () => ProfileCard(
+                  profile: controller.profile.value,
+                ),
               ),
             ),
             SizedBox(height: vertical * 2),
@@ -74,28 +75,30 @@ class ProfileScreen extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
+
                   SizedBox(
-                    width: 110,
-                    child: QuickActionCard(
+                    child: ModernStatCard(
+                      layout: StatCardLayout.metric,
+                      title: AppText.viewStatus,
                       icon: Icons.person_outline,
-                      title: AppText.attendance,
-                      subtitle: AppText.viewStatus,
-                      iconColor: Colors.blue,
-                      iconBgColor: Colors.blue.withOpacity(0.1),
+                      accentColor: Colors.blue,
                       onTap: () {
                         context.go('/student/attendance');
                       },
+                      value: AppText.attendance,
                     ),
+                    width: 110,
                   ),
                   const SizedBox(width: 12),
                   SizedBox(
                     width: 110,
-                    child: QuickActionCard(
+                    child: ModernStatCard(
+                      layout: StatCardLayout.metric,
                       icon: Icons.payments_outlined,
-                      title: AppText.fees,
-                      subtitle: AppText.payDue,
-                      iconColor: Colors.green,
-                      iconBgColor: Colors.green.withOpacity(0.1),
+                      title: AppText.payDue,
+                      value: AppText.fees,
+                      accentColor: Colors.green,
+
                       onTap: () {
                         context.push('/student/payment');
                       },
@@ -104,12 +107,12 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(width: 12),
                   SizedBox(
                     width: 110,
-                    child: QuickActionCard(
+                    child: ModernStatCard(
                       icon: Icons.warning_amber_rounded,
-                      title: AppText.complaint,
-                      subtitle: AppText.raiseTicket,
-                      iconColor: Colors.orange,
-                      iconBgColor: Colors.orange.withOpacity(0.1),
+                      title: AppText.raiseTicket,
+                      value: AppText.complaint,
+                      accentColor: Colors.orange,
+                      layout: StatCardLayout.metric,
                       onTap: () {
                         context.push('/student/complaint');
                       },
@@ -118,12 +121,12 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(width: 12),
                   SizedBox(
                     width: 110,
-                    child: QuickActionCard(
+                    child: ModernStatCard(
+                      layout: StatCardLayout.metric,
                       icon: Icons.chat_bubble_outline,
-                      title: AppText.chat,
-                      subtitle: AppText.checkMessages,
-                      iconColor: Colors.purple,
-                      iconBgColor: Colors.purple.withOpacity(0.1),
+                      title: AppText.checkMessages,
+                      value: AppText.chat,
+                      accentColor: Colors.purple,
                       onTap: () {
                         context.push('/student/chat');
                       },
@@ -132,12 +135,12 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(width: 12),
                   SizedBox(
                     width: 110,
-                    child: QuickActionCard(
+                    child: ModernStatCard(
                       icon: Icons.note_alt_outlined,
-                      title: AppText.notes,
-                      subtitle: AppText.keepNotes,
-                      iconColor: Colors.teal,
-                      iconBgColor: Colors.teal.withOpacity(0.1),
+                      title: AppText.keepNotes,
+                      value: AppText.notes,
+                      accentColor: Colors.teal,
+                      layout: StatCardLayout.metric,
                       onTap: () {
                         context.push('/student/notes');
                       },
@@ -146,12 +149,12 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(width: 12),
                   SizedBox(
                     width: 110,
-                    child: QuickActionCard(
+                    child: ModernStatCard(
                       icon: Icons.holiday_village_outlined,
-                      title: AppText.holiday,
-                      subtitle: AppText.applyLeave,
-                      iconColor: Colors.pink,
-                      iconBgColor: Colors.pink.withOpacity(0.1),
+                      title: AppText.applyLeave,
+                      value: AppText.holiday,
+                      accentColor: Colors.pink,
+                      layout: StatCardLayout.metric,
                       onTap: () {
                         context.push('/student/holiday');
                       },
@@ -160,12 +163,12 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(width: 12),
                   SizedBox(
                     width: 110,
-                    child: QuickActionCard(
+                    child: ModernStatCard(
                       icon: Icons.directions_car,
-                      title: 'Vehicle', // Short title for UI
-                      subtitle: 'Register',
-                      iconColor: Colors.indigo,
-                      iconBgColor: Colors.indigo.withOpacity(0.1),
+                      title: 'Register', // Short title for UI
+                      value: 'Vehicle',
+                      accentColor: Colors.indigo,
+                      layout: StatCardLayout.metric,
                       onTap: () {
                         context.push('/student/vehicle-registration');
                       },
