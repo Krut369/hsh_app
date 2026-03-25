@@ -104,18 +104,13 @@ class RouterNotifier extends ChangeNotifier {
 final routerNotifier = RouterNotifier();
 
 final goRouter = GoRouter(
+  navigatorKey: Get.key,
   initialLocation: '/',
   refreshListenable: routerNotifier,
   redirect: routerNotifier.redirect,
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
-    ),
+    GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
 
     // Student Shell
     StatefulShellRoute.indexedStack(
@@ -183,10 +178,7 @@ final goRouter = GoRouter(
       path: '/student/holiday',
       builder: (context, state) => const HolidayScreen(),
       routes: [
-        GoRoute(
-          path: 'add',
-          builder: (context, state) => const HolidayForm(),
-        ),
+        GoRoute(path: 'add', builder: (context, state) => const HolidayForm()),
       ],
     ),
     GoRoute(
