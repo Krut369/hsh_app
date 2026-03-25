@@ -39,84 +39,95 @@ class _LaundryDetailScreenState extends State<LaundryDetailScreen> {
 
   void _showFilterDialog() {
     showModernSheet(
-      // context: context,
+      context: context,
       title: 'Filters',
-      actionText: 'Clear All',
-      onAction: () {
+      clearAllText: 'Clear all',
+      onClearAll: () {
         controller.setFilter('All');
-        setState(() {
-          selectedDate = DateTime.now();
-        });
-        Navigator.pop(context);
+        setState(() => selectedDate = DateTime.now());
+        Get.back();
       },
+      actionText: 'Apply Filters',
+      onAction: () => Get.back(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Date",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const ModernText('Date', fontWeight: FontWeight.bold),
           const SizedBox(height: 12),
           ModernDateField(
-            onDateSelected: (date) {
-              if (date != null) {
-                setState(() => selectedDate = date);
-              }
-            },
+            onDateSelected: (date) => setState(() => selectedDate = date),
           ),
           const SizedBox(height: 24),
-          const Text("Status",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 12),
+          const ModernText('Status', fontWeight: FontWeight.bold),
+          const SizedBox(height: 16),
           Obx(() {
+            final statuses = [
+              'All',
+              'Requested',
+              'In Progress',
+              'Ready for Pickup',
+              'Delivered',
+            ];
             return Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                'All',
-                'Requested',
-                'In Progress',
-                'Ready for Pickup',
-                'Delivered'
-              ].map((status) {
+              spacing: 10,
+              runSpacing: 10,
+              children: statuses.map((status) {
                 final isSelected = controller.filter.value == status;
-                return ChoiceChip(
-                  label: Text(status),
-                  selected: isSelected,
-                  onSelected: (bool selected) {
-                    if (selected) {
-                      controller.setFilter(status);
-                      Navigator.pop(context);
-                    }
-                  },
-                  selectedColor: Theme.of(context).primaryColor,
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black87,
-                    fontWeight: FontWeight.w500,
+                return GestureDetector(
+                  onTap: () => controller.setFilter(status),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF1E293B)
+                          : const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isSelected) ...[
+                          const Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        Text(
+                          status,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black87,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }).toList(),
             );
           }),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
   void _showUpdateStatusSheet(LaundryOrderEntity order) {
-    showModalBottomSheet(
+    showModernSheet(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      title: 'Update Status',
+      child: ModernStatusUpdateSheet(
+        currentStatus: order.status,
+        onStatusSelected: (newStatus) {
+          controller.updateOrderStatus(order.id, newStatus);
+        },
       ),
-      builder: (context) {
-        return StatusUpdateSheet(
-          currentStatus: order.status,
-          onStatusSelected: (newStatus) {
-            controller.updateOrderStatus(order.id, newStatus);
-          },
-        );
-      },
     );
   }
 
@@ -125,12 +136,13 @@ class _LaundryDetailScreenState extends State<LaundryDetailScreen> {
     return ModernScaffold(
       appBar: ModernAppBar(
         title: 'Laundry Orders',
-        onNotificationPressed: () {
+        onSearchPressed: () {
           setState(() {
             _isSearchVisible = !_isSearchVisible;
             if (!_isSearchVisible) _searchController.clear();
           });
         },
+        onFilterPressed: _showFilterDialog,
       ),
       body: Column(
         children: [
@@ -167,8 +179,9 @@ class _LaundryDetailScreenState extends State<LaundryDetailScreen> {
                     matchesStatus = false;
                 }
 
-                final matchesSearch =
-                    order.orderId.toLowerCase().contains(searchQuery);
+                final matchesSearch = order.orderId.toLowerCase().contains(
+                  searchQuery,
+                );
                 return matchesStatus && (searchQuery.isEmpty || matchesSearch);
               }).toList();
 
@@ -178,8 +191,11 @@ class _LaundryDetailScreenState extends State<LaundryDetailScreen> {
 
               if (filteredRequests.isEmpty) {
                 return const Center(
-                    child: Text("No orders found",
-                        style: TextStyle(color: Colors.grey)));
+                  child: Text(
+                    "No orders found",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                );
               }
 
               return ListView.builder(

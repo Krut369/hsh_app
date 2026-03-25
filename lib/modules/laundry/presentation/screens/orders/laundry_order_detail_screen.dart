@@ -25,14 +25,14 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
 
   void _showUpdateStatusSheet() {
     showModernSheet(
-      // actionText: context,
+      context: context,
       title: 'Update Status',
-      child: StatusUpdateSheet(
+      child: ModernStatusUpdateSheet(
         currentStatus: widget.order.status,
         onStatusSelected: (newStatus) {
           controller.updateOrderStatus(widget.order.id, newStatus);
           setState(() {});
-          Navigator.pop(context);
+          Navigator.of(context).pop();
         },
       ),
     );
@@ -42,13 +42,12 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
   Widget build(BuildContext context) {
     return Obx(() {
       final currentOrder = controller.orders.firstWhere(
-          (o) => o.id == widget.order.id,
-          orElse: () => widget.order);
+        (o) => o.id == widget.order.id,
+        orElse: () => widget.order,
+      );
 
       return ModernScaffold(
-        appBar: ModernAppBar(
-          title: 'Order Summary',
-        ),
+        appBar: ModernAppBar(title: 'Order Summary'),
         body: SingleChildScrollView(
           padding: EdgeInsets.all(ResponsiveUtil.responsivePadding(context)),
           child: Column(
@@ -73,8 +72,9 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 12),
-              ...currentOrder.items
-                  .map((item) => LaundryRequestItemRow(item: item)),
+              ...currentOrder.items.map(
+                (item) => LaundryRequestItemRow(item: item),
+              ),
               const SizedBox(height: 40),
               ModernButton(
                 text: 'Save Changes',
@@ -87,14 +87,6 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              ModernButton(
-                text: 'Message Student',
-                isSecondary: true,
-                onPressed: () {
-                  context.push('/laundry/chat/details', extra: 'some_id');
-                },
-              ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
