@@ -5,11 +5,14 @@ import 'package:hsh_app/modules/complain/presentation/screens/management/complai
 import 'package:hsh_app/modules/complain/presentation/screens/management/complaint_detail_view_screen.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 
+import '../../student/features/complaint/add_complaint_screen.dart';
+
 class ComplainRoutes {
   static const String main = '/complain';
   static const String feedback = '/complain/feedback';
   static const String admin = '/complain/admin';
   static const String detail = '/complain/detail';
+  static const String add = '/complain/add';
 
   static final List<RouteBase> routes = [
     GoRoute(
@@ -19,6 +22,10 @@ class ComplainRoutes {
         GoRoute(
           path: 'feedback',
           builder: (context, state) => const ComplainFeedbackScreen(),
+        ),
+        GoRoute(
+          path: 'add',
+          builder: (context, state) => const AddComplaintScreen(),
         ),
         GoRoute(
           path: 'admin',

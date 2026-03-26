@@ -4,6 +4,7 @@ import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_stats_model.dart';
 import 'package:hsh_app/modules/complain/domain/usecases/get_complaints_usecase.dart';
 import 'package:hsh_app/modules/complain/domain/repositories/complain_repository.dart';
+import 'package:uitoolkit/uitoolkit.dart';
 
 class ComplainController extends GetxController {
   final GetComplaintsUseCase _getComplaintsUseCase;
@@ -100,9 +101,10 @@ class ComplainController extends GetxController {
     );
   }
 
-  Future<void> submitComplaint() async {
+  Future<void> submitComplaint(BuildContext context) async {
     if (selectedType.value == null) return;
 
+    UIController.to.showLoading();
     isLoading.value = true;
     try {
       // Collect issues
@@ -114,7 +116,7 @@ class ComplainController extends GetxController {
           final issue = issues[sub.name];
           if (issue != null) {
             issuesData.add({
-              'sub_complaint': sub.name,
+              'sub_category': sub.name,
               'description': issue.description,
               'imagePath': issue.imagePath,
             });
@@ -141,16 +143,16 @@ class ComplainController extends GetxController {
 
       await _repository.createComplaint(complaint);
 
-      Get.snackbar('Success', 'Complaint submitted successfully!',
-          backgroundColor: Get.theme.colorScheme.primary.withOpacity(0.1));
+      UIController.to.showSuccess('Complaint submitted successfully!');
+      Get.back(); // Return to main screen
+      
       fetchComplaints();
       fetchStats();
       resetAddDraft();
-      Get.back(); // Return from add screen
     } catch (e) {
-      Get.snackbar('Error', 'Failed to submit complaint: $e',
-          backgroundColor: Colors.red.withOpacity(0.1));
+      UIController.to.showError('Failed to submit complaint: $e');
     } finally {
+      UIController.to.hideLoading();
       isLoading.value = false;
     }
   }
@@ -167,7 +169,7 @@ class ComplainController extends GetxController {
       fetchComplaints(); // Refresh
       fetchStats();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update status: $e');
+      UIController.to.showError('Failed to update status: $e');
     }
   }
 

@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/complain/presentation/controllers/complain_controller.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
-import 'package:hsh_app/widgets/custom_button.dart';
+import 'package:uitoolkit/uitoolkit.dart';
 
 class AddComplaintScreen extends GetView<ComplainController> {
   const AddComplaintScreen({super.key});
@@ -31,7 +32,7 @@ class AddComplaintScreen extends GetView<ComplainController> {
               leading: const Icon(Icons.photo_library),
               title: const Text('Gallery'),
               onTap: () {
-                Get.back();
+                context.pop();
                 _pickImage(key, ImageSource.gallery);
               },
             ),
@@ -39,7 +40,7 @@ class AddComplaintScreen extends GetView<ComplainController> {
               leading: const Icon(Icons.camera_alt),
               title: const Text('Camera'),
               onTap: () {
-                Get.back();
+                context.pop();
                 _pickImage(key, ImageSource.camera);
               },
             ),
@@ -54,18 +55,17 @@ class AddComplaintScreen extends GetView<ComplainController> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
-    return Scaffold(
+    return ModernScaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Add Complaint',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const ModernText("Add Complaint",fontWeight: FontWeight.bold,color: AppColors.textPrimary,fontSize: 18,),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () {
             controller.resetAddDraft();
-            Get.back();
+            context.pop();
           },
         ),
       ),
@@ -117,7 +117,7 @@ class AddComplaintScreen extends GetView<ComplainController> {
                         children: [
                           Icon(
                             ComplaintUtils.getComplaintTypeIcon(itemType.name),
-                            color: isSelected ? Colors.white : Colors.grey[600],
+                            color: isSelected ? Colors.white : Colors.grey[600]?.withValues(alpha: 0.8),
                             size: 28,
                           ),
                           const SizedBox(height: 8),
@@ -143,13 +143,13 @@ class AddComplaintScreen extends GetView<ComplainController> {
                     style: theme.textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
-                _buildSubComplaintSection(selectedType, scheme),
+                _buildSubComplaintSection(selectedType, scheme, context),
               ] else if (selectedType != null) ...[
                 Text('Describe Issue',
                     style: theme.textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
-                _buildDirectDescriptionSection(selectedType.name, scheme),
+                _buildDirectDescriptionSection(selectedType.name, scheme, context),
               ],
               const SizedBox(height: 32),
             ],
@@ -159,21 +159,18 @@ class AddComplaintScreen extends GetView<ComplainController> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: SizedBox(
-            height: 56,
-            child: Obx(() => CustomButton(
-                  text: 'Submit Complaint',
-                  onPressed: _canSubmit() ? _submit : null,
-                  borderRadius: 16,
-                )),
-          ),
+          child: Obx(() => ModernButton(
+                text: 'Submit Complaint',
+                onPressed: _canSubmit() ? () => _submit(context) : null,
+                isLoading: controller.isLoading.value,
+              )),
         ),
       ),
     );
   }
 
   Widget _buildSubComplaintSection(
-      ComplaintType selectedType, ColorScheme scheme) {
+      ComplaintType selectedType, ColorScheme scheme, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -189,7 +186,7 @@ class AddComplaintScreen extends GetView<ComplainController> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                     color: isSelected
-                        ? scheme.primary.withOpacity(0.5)
+                        ? scheme.primary.withValues(alpha: 0.5)
                         : Colors.grey[200]!)),
             child: Column(
               children: [
@@ -221,7 +218,7 @@ class AddComplaintScreen extends GetView<ComplainController> {
                         ),
                         const SizedBox(height: 12),
                         _buildImagePicker(
-                            subComplaint.name, issueData?.imagePath),
+                            subComplaint.name, issueData?.imagePath, context),
                       ],
                     ),
                   ),
@@ -233,7 +230,7 @@ class AddComplaintScreen extends GetView<ComplainController> {
     );
   }
 
-  Widget _buildDirectDescriptionSection(String key, ColorScheme scheme) {
+  Widget _buildDirectDescriptionSection(String key, ColorScheme scheme, BuildContext context) {
     return Column(
       children: [
         TextField(
@@ -245,15 +242,15 @@ class AddComplaintScreen extends GetView<ComplainController> {
           onChanged: (value) => controller.updateIssueDescription(key, value),
         ),
         const SizedBox(height: 12),
-        _buildImagePicker(key, controller.issues[key]?.imagePath),
+        _buildImagePicker(key, controller.issues[key]?.imagePath, context),
       ],
     );
   }
 
-  Widget _buildImagePicker(String key, String? imagePath) {
+  Widget _buildImagePicker(String key, String? imagePath, BuildContext context) {
     if (imagePath == null) {
       return InkWell(
-        onTap: () => _showImagePickerModal(Get.context!, key),
+        onTap: () => _showImagePickerModal(context, key),
         child: Container(
           height: 100,
           width: double.infinity,
@@ -296,7 +293,7 @@ class AddComplaintScreen extends GetView<ComplainController> {
     }
   }
 
-  void _submit() {
-    controller.submitComplaint();
+  void _submit(BuildContext context) {
+    controller.submitComplaint(context);
   }
 }

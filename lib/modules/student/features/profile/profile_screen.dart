@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
+import 'package:hsh_app/modules/student/presentation/controllers/student_main_controller.dart';
 
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/constants/font.dart';
@@ -31,7 +31,7 @@ class ProfileScreen extends GetView<ProfileController> {
         showLogoutIcon: true,
         onLogoutTap: () {
           Get.find<AuthController>().logout();
-          context.go('/login');
+          Get.offAllNamed('/login');
         },
       ),
       body: SingleChildScrollView(
@@ -59,7 +59,7 @@ class ProfileScreen extends GetView<ProfileController> {
                 ),
                 TextButton(
                   onPressed: () {
-                    context.push('/student/services-all');
+                    Get.toNamed('/student/services-all');
                   },
                   child: const Text(
                     AppText.viewAll,
@@ -83,7 +83,7 @@ class ProfileScreen extends GetView<ProfileController> {
                       icon: Icons.person_outline,
                       accentColor: Colors.blue,
                       onTap: () {
-                        context.go('/student/attendance');
+                        Get.find<StudentMainController>().changePage(3);
                       },
                       value: AppText.attendance,
                     ),
@@ -100,7 +100,7 @@ class ProfileScreen extends GetView<ProfileController> {
                       accentColor: Colors.green,
 
                       onTap: () {
-                        context.push('/student/payment');
+                        Get.toNamed('/student/payment');
                       },
                     ),
                   ),
@@ -114,7 +114,7 @@ class ProfileScreen extends GetView<ProfileController> {
                       accentColor: Colors.orange,
                       layout: StatCardLayout.metric,
                       onTap: () {
-                        context.push('/student/complaint');
+                        Get.find<StudentMainController>().changePage(1);
                       },
                     ),
                   ),
@@ -128,7 +128,7 @@ class ProfileScreen extends GetView<ProfileController> {
                       value: AppText.chat,
                       accentColor: Colors.purple,
                       onTap: () {
-                        context.push('/student/chat');
+                        Get.toNamed('/student/chat');
                       },
                     ),
                   ),
@@ -142,7 +142,7 @@ class ProfileScreen extends GetView<ProfileController> {
                       accentColor: Colors.teal,
                       layout: StatCardLayout.metric,
                       onTap: () {
-                        context.push('/student/notes');
+                        Get.toNamed('/student/notes');
                       },
                     ),
                   ),
@@ -156,7 +156,7 @@ class ProfileScreen extends GetView<ProfileController> {
                       accentColor: Colors.pink,
                       layout: StatCardLayout.metric,
                       onTap: () {
-                        context.push('/student/holiday');
+                        Get.toNamed('/student/holiday');
                       },
                     ),
                   ),
@@ -170,7 +170,7 @@ class ProfileScreen extends GetView<ProfileController> {
                       accentColor: Colors.indigo,
                       layout: StatCardLayout.metric,
                       onTap: () {
-                        context.push('/student/vehicle-registration');
+                        Get.toNamed('/student/vehicle-registration');
                       },
                     ),
                   ),
@@ -180,10 +180,7 @@ class ProfileScreen extends GetView<ProfileController> {
             SizedBox(height: vertical * 2),
 
             // Recent Activity
-            Text(
-              AppText.recentActivity,
-              style: AppFonts.heading3(context),
-            ),
+            ModernText(AppText.recentActivity,fontSize: 18,fontWeight: FontWeight.w600,),
             const SizedBox(height: 16),
             const ActivityTile(
               icon: Icons.check_circle,
