@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/providers/holiday_provider.dart';
@@ -24,7 +24,8 @@ class HolidayScreen extends ConsumerWidget {
         showNotificationIcon: true, 
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/student/holiday/add'),
+        heroTag: 'holiday_fab',
+        onPressed: () => Get.toNamed('/student/holiday/add'),
         backgroundColor: theme.colorScheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),

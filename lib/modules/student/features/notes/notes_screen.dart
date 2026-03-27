@@ -232,6 +232,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
               },
             ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'notes_fab',
         onPressed: () {
           Navigator.push(
             context,

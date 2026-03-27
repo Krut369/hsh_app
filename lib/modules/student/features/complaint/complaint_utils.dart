@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
 
 class ComplaintUtils {
   static IconData getComplaintTypeIcon(String typeName) {
@@ -62,29 +63,41 @@ class ComplaintUtils {
   }
 
   static Color getStatusColor(BuildContext context, ComplaintStatus status) {
-    final scheme = Theme.of(context).colorScheme;
     switch (status) {
       case ComplaintStatus.underReview:
-        return Colors.orange;
+        return AppColors.reviewOrange;
       case ComplaintStatus.pending:
-        return scheme.secondary; // Or specific color like Colors.amber
+        return AppColors.pendingBlue;
       case ComplaintStatus.awaitingFeedback:
-        return Colors.blue;
+        return AppColors.warningOrange; // Or another appropriate tone
       case ComplaintStatus.resolved:
-        return Colors.green;
+        return AppColors.resolvedGreen;
     }
   }
 
   static IconData getStatusIcon(ComplaintStatus status) {
     switch (status) {
       case ComplaintStatus.underReview:
-        return Icons.visibility_outlined;
+        return Icons.visibility_outlined; // Eye icon as per design
       case ComplaintStatus.pending:
-        return Icons.pending_actions_outlined;
+        return Icons.access_time; // Time icon as per design
       case ComplaintStatus.awaitingFeedback:
         return Icons.feedback_outlined;
       case ComplaintStatus.resolved:
-        return Icons.check_circle_outline;
+        return Icons.check_circle_outline; // Check circle as per design
+    }
+  }
+
+  static Color getCategoryColor(String typeName) {
+    switch (typeName) {
+      case 'Electrical':
+        return AppColors.reviewOrange; // Orange theme
+      case 'Plumbing':
+        return AppColors.resolvedGreen; // Green theme
+      case 'Housekeeping':
+        return AppColors.pendingBlue; // Blue theme
+      default:
+        return AppColors.primary;
     }
   }
 }

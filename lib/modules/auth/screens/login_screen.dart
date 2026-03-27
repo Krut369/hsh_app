@@ -124,6 +124,8 @@ class _LoginScreenState extends State<LoginScreen> {
         message: _friendlyError(authController.error.value!),
         type: ToastType.error,
       );
+    } else if (authController.isAuthenticated.value) {
+      Get.offAllNamed('/');
     }
   }
 
