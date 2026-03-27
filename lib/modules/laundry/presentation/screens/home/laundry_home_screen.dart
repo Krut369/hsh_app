@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hsh_app/core/constants/font.dart';
+import 'package:uitoolkit/uitoolkit.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
-import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
-import 'package:hsh_app/widgets/custom_app_bar.dart';
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
-
-import 'package:hsh_app/modules/laundry/presentation/widgets/home/stat_card_widget.dart';
-import 'package:hsh_app/modules/laundry/presentation/widgets/home/total_requests_card.dart';
-import 'package:hsh_app/modules/laundry/presentation/widgets/home/quick_action_button.dart';
 
 class LaundryHomeScreen extends GetView<LaundryController> {
   const LaundryHomeScreen({super.key});
@@ -23,19 +17,19 @@ class LaundryHomeScreen extends GetView<LaundryController> {
     const successGreen = Color(0xFF10B981);
     const warningOrange = Color(0xFFF59E0B);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
-        title: 'Laundry',
-        showNotificationIcon: true,
-        showLogoutIcon: true,
-        onLogoutTap: () async {
-          await Get.find<AuthController>().logout();
-        },
-      ),
+    return ModernScaffold(
+      title: 'Laundry',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () async {
+            await Get.find<AuthController>().logout();
+          },
+        ),
+      ],
       body: Obx(() {
         if (controller.isLoading.value && controller.orders.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: ModernLoader(size: 40));
         }
 
         final orders = controller.orders;
@@ -51,40 +45,44 @@ class LaundryHomeScreen extends GetView<LaundryController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Overview Section Header
-              Text(
+              const ModernText(
                 'OVERVIEW',
-                style: AppFonts.heading3(context).copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                  letterSpacing: 1.5,
-                ),
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
               ),
               const SizedBox(height: 16),
 
               // Total Requests Card
-              TotalRequestsCard(count: totalRequests.toString()),
+              ModernStatCard(
+                layout: StatCardLayout.horizontal,
+                title: 'TOTAL REQUESTS',
+                value: totalRequests.toString(),
+                icon: Icons.local_laundry_service_rounded,
+                accentColor: AppColors.primary,
+              ),
               const SizedBox(height: 16),
 
               // Row of Stats
               Row(
                 children: [
                   Expanded(
-                    child: StatCardWidget(
+                    child: ModernStatCard(
+                      layout: StatCardLayout.iconTop,
                       title: 'Pending Pickups',
                       value: pendingPickups.toString(),
                       icon: Icons.pending_actions,
-                      iconColor: warningOrange,
-                      iconBg: const Color(0xFFFFF3E0),
+                      accentColor: warningOrange,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: StatCardWidget(
+                    child: ModernStatCard(
+                      layout: StatCardLayout.iconTop,
                       title: 'Delivered',
                       value: completedCount.toString(),
                       icon: Icons.local_shipping,
-                      iconColor: successGreen,
-                      iconBg: const Color(0xFFE8F5E9),
+                      accentColor: successGreen,
                     ),
                   ),
                 ],
@@ -92,38 +90,37 @@ class LaundryHomeScreen extends GetView<LaundryController> {
               const SizedBox(height: 32),
 
               // Quick Actions Section
-              Text(
+              const ModernText(
                 'Quick Actions',
-                style: AppFonts.heading3(context).copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
               const SizedBox(height: 16),
 
               // View All Requests Button
-              QuickActionButton(
+              ModernListTile(
                 title: 'View All Requests',
-                icon: Icons.list,
-                onPressed: () {
+                leading: const Icon(Icons.list, color: AppColors.primary),
+                onTap: () {
                   controller.setFilter('All');
                   controller.changeTab(1); // Switch to Orders tab
                 },
-                isPrimary: true,
               ),
-              const SizedBox(height: 12),
 
               // Pending Pickups Button
-              QuickActionButton(
+              ModernListTile(
                 title: 'Pending Pickups',
-                icon: Icons.access_time,
-                onPressed: () {
+                leading: Icon(Icons.access_time, color: warningOrange),
+                trailing: pendingPickups > 0
+                    ? ModernBadge(
+                        text: pendingPickups.toString(),
+                        type: BadgeType.warning,
+                      )
+                    : null,
+                onTap: () {
                   controller.setFilter('Ready for Pickup');
                   controller.changeTab(1); // Switch to Orders tab
                 },
-                isPrimary: false,
-                badgeCount:
-                    pendingPickups > 0 ? pendingPickups.toString() : null,
               ),
 
               const SizedBox(height: 32),
