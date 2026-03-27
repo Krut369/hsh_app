@@ -50,8 +50,7 @@ dependencies:
   retrofit: ^4.9.2
   json_annotation: ^4.9.0
   uitoolkit:
-    git:
-      url: https://github.com/AVDAPPLICATIONS/uitoolkit.git
+    path: ../uitoolkit/uitoolkit
 
 dev_dependencies:
   flutter_test:

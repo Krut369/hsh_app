@@ -42,20 +42,47 @@ class ComplainController extends GetxController {
     try {
       final fetchedList = await _getComplaintsUseCase.execute();
       complaints.assignAll(fetchedList);
+      _calculateStatsLocally();
     } catch (e) {
+      print('=== COMPLAINTS FETCH ERROR ===');
+      print(e);
       error.value = e.toString();
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> fetchStats() async {
-    try {
-      final fetchedStats = await _repository.getComplaintStats();
-      stats.value = fetchedStats;
-    } catch (e) {
-      print('Error fetching stats: $e');
+  void _calculateStatsLocally() {
+    int pending = 0;
+    int resolved = 0;
+    int inProgress = 0;
+
+    for (var complaint in complaints) {
+      switch (complaint.status) {
+        case ComplaintStatus.pending:
+          pending++;
+          break;
+        case ComplaintStatus.resolved:
+          resolved++;
+          break;
+        case ComplaintStatus.underReview:
+        case ComplaintStatus.awaitingFeedback:
+          inProgress++;
+          break;
+      }
     }
+
+    stats.value = ComplaintStats(
+      total: complaints.length,
+      pending: pending,
+      resolved: resolved,
+      inProgress: inProgress,
+    );
+  }
+
+  Future<void> fetchStats() async {
+    // Rely on local calculation to ensure stats are perfectly synced with the complaints list
+    _calculateStatsLocally();
   }
 
   void setFilter(ComplaintStatus? newFilter) {
@@ -163,11 +190,13 @@ class ComplainController extends GetxController {
 
   Future<void> updateStatus(String id, ComplaintStatus status) async {
     try {
+      debugPrint('🔄 Updating complaint $id to ${status.toBackendString}');
       await _repository.updateComplaintStatus(id, status);
+      debugPrint('✅ Status updated successfully');
       fetchComplaints(); // Refresh
       fetchStats();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update status: $e');
+      debugPrint('❌ Failed to update status: $e');
     }
   }
 
