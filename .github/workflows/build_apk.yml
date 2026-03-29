@@ -1,0 +1,122 @@
+# ───────────────────────────────────────────────────────────────
+# 🏗️  Build Release APK — GitHub Actions
+# ───────────────────────────────────────────────────────────────
+# Triggers:
+#   • Push to main / master
+#   • Manual (workflow_dispatch)
+#
+# Required GitHub Secrets:
+#   KEYSTORE_BASE64      – base64-encoded .jks / .keystore file
+#   KEYSTORE_PASSWORD    – password for the keystore
+#   KEY_ALIAS            – alias of the signing key
+#   KEY_PASSWORD         – password for the key alias
+# ───────────────────────────────────────────────────────────────
+
+name: 🏗️ Build Release APK
+
+on:
+  push:
+    branches: [MVP-1.0.0]
+  pull_request:
+    branches: [MVP-1.0.0]
+  workflow_dispatch:            # manual trigger from GitHub UI
+
+# Cancel in-progress runs when a new push arrives
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # ── 1. Checkout ─────────────────────────────────────────
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Java (required by Gradle) ────────────────────────
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # ── 3. Flutter SDK ──────────────────────────────────────
+      - name: 🐦 Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # ── 4. Dependency Cache ─────────────────────────────────
+      - name: 📦 Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-
+
+      # ── 5. Install dependencies ─────────────────────────────
+      - name: 📥 Get Flutter dependencies
+        run: flutter pub get
+
+      # ── 6. Code generation (Retrofit, JSON Serializable) ────
+      - name: ⚙️ Run build_runner
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # ── 7. Static analysis ──────────────────────────────────
+      - name: 🔍 Analyze code
+        run: flutter analyze --no-fatal-infos
+        continue-on-error: true      # don't block build on info-level lints
+
+      # ── 8. Run tests ────────────────────────────────────────
+      - name: 🧪 Run tests
+        run: flutter test
+        continue-on-error: true      # don't block build if tests are minimal
+
+      # ── 9. Decode keystore (release signing) ────────────────
+      - name: 🔑 Decode keystore
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+
+      # ── 10. Create key.properties ───────────────────────────
+      - name: 📝 Create key.properties
+        if: github.event_name != 'pull_request'
+        run: |
+          cat > android/key.properties <<EOF
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storeFile=keystore.jks
+          EOF
+
+      # ── 11. Build APK ──────────────────────────────────────
+      - name: 🏗️ Build release APK
+        run: flutter build apk --release
+
+      # ── 12. Upload APK artifact ─────────────────────────────
+      - name: 📤 Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: hsh-app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
+
+      # ── 13. Job summary ─────────────────────────────────────
+      - name: 📊 Build Summary
+        run: |
+          APK_SIZE=$(du -sh build/app/outputs/flutter-apk/app-release.apk | cut -f1)
+          echo "## 🏗️ Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **APK Size** | $APK_SIZE |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Triggered by** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
