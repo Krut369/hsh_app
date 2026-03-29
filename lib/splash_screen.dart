@@ -2,7 +2,6 @@ import "package:hsh_app/core/enums/user_role.dart";
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 
 import 'core/theme/app_colors.dart';
 import 'modules/auth/presentation/controllers/auth_controller.dart';
@@ -13,8 +12,8 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controller and pass context for go_router
-    final controller = Get.put(SplashController(context));
+    // Initialize controller
+    final controller = Get.put(SplashController());
     final size = MediaQuery.of(context).size;
 
     return Scaffold(

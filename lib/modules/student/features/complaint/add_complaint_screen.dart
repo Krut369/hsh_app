@@ -58,7 +58,7 @@ class AddComplaintScreen extends GetView<ComplainController> {
     return ModernScaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const ModernText("Add Complaint",fontWeight: FontWeight.bold,color: AppColors.textPrimary,fontSize: 18,),
+        title: ModernText("Add Complaint",fontWeight: FontWeight.bold,color: AppColors.textPrimary,fontSize: 18,),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(

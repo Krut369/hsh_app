@@ -1,62 +1,64 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/models/note_model.dart';
-import 'package:hsh_app/providers/notes_provider.dart';
+import 'package:hsh_app/modules/student/features/notes/controllers/notes_controller.dart';
 import 'package:hsh_app/modules/student/features/notes/note_components.dart';
 import 'markdown_controller.dart';
 import 'note_toolbar.dart';
 import 'format_bottom_sheet.dart';
 import 'note_formatting_logic.dart';
+import 'checklist_editor.dart';
 
-class NoteEditorScreen extends ConsumerStatefulWidget {
+class NoteEditorScreen extends StatefulWidget {
   final Note? noteToEdit;
-  const NoteEditorScreen({super.key, this.noteToEdit});
+  final bool startInChecklistMode;
+  const NoteEditorScreen({super.key, this.noteToEdit, this.startInChecklistMode = false});
 
   @override
-  ConsumerState<NoteEditorScreen> createState() => _NoteEditorScreenState();
+  State<NoteEditorScreen> createState() => _NoteEditorScreenState();
 }
 
-class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
-  String _selectedTag = AppText.roomIssue;
+class _NoteEditorScreenState extends State<NoteEditorScreen> {
+  final NotesController controller = Get.find<NotesController>();
+  String _selectedTag = AppText.personal;
   final TextEditingController _titleController = TextEditingController();
-  late MarkdownSyntaxController _bodyController; // Use custom controller
+  late MarkdownSyntaxController _bodyController;
   final FocusNode _bodyFocusNode = FocusNode();
   TextSelection _lastSelection = const TextSelection.collapsed(offset: 0);
   TextEditingValue? _lastValue;
   
-  // Track if we are editing
+  bool _isChecklistMode = false;
+  List<ChecklistItem> _checklistItems = [];
+  
   bool get _isEditing => widget.noteToEdit != null;
-
-  // Auto-save
-  Timer? _debounce;
-  bool _isSaving = false;
-  DateTime? _lastSaved;
 
   @override
   void initState() {
     super.initState();
     
-    // Initialize with existing data if editing
-    if (_isSaving) { // Typo in original code check, but keeping logic consistent with cleanup below
-       // ... logic handled below
-    }
-
     if (_isEditing) {
       final note = widget.noteToEdit!;
       _titleController.text = note.title;
       _selectedTag = note.category;
       _bodyController = MarkdownSyntaxController(text: note.body);
+      
+      // Auto-detect checklist mode if body contains checkboxes
+      if (note.body.contains('- [ ]') || note.body.contains('- [x]')) {
+        _isChecklistMode = true;
+        _parseMarkdownToChecklist(note.body);
+      }
     } else {
       _bodyController = MarkdownSyntaxController();
+      if (widget.startInChecklistMode) {
+        _isChecklistMode = true;
+        _parseMarkdownToChecklist('');
+      }
     }
     
-    // Listeners for auto-save and auto-format
-    _titleController.addListener(_onTextChanged);
     _bodyController.addListener(() {
       final newValue = _bodyController.value;
       if (_lastValue != null && newValue != _lastValue) {
@@ -70,19 +72,39 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       if (_bodyFocusNode.hasFocus && _bodyController.selection.isValid) {
         _lastSelection = _bodyController.selection;
       }
-      _onTextChanged();
     });
   }
 
-  void _onTextChanged() {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    
-    setState(() {
-      _isSaving = true;
-    });
+  void _parseMarkdownToChecklist(String text) {
+    if (text.trim().isEmpty) {
+      _checklistItems = [ChecklistItem(id: const Uuid().v4(), text: '', isDone: false)];
+      return;
+    }
+    final lines = text.split('\n');
+    _checklistItems = lines.map((line) {
+      final trimmed = line.trim();
+      bool isDone = trimmed.startsWith('- [x]');
+      String itemText = trimmed.replaceFirst(RegExp(r'^- \[(x| )\]'), '').trim();
+      return ChecklistItem(id: const Uuid().v4(), text: itemText, isDone: isDone);
+    }).toList();
+  }
 
-    _debounce = Timer(const Duration(seconds: 2), () {
-      _saveNote(silent: true);
+  void _syncChecklistToMarkdown() {
+    final markdown = _checklistItems.map((item) {
+      return '- [${item.isDone ? 'x' : ' '}] ${item.text}';
+    }).join('\n');
+    _bodyController.text = markdown;
+  }
+
+  void _toggleChecklistMode() {
+    setState(() {
+      if (!_isChecklistMode) {
+        _isChecklistMode = true;
+        _parseMarkdownToChecklist(_bodyController.text);
+      } else {
+        _isChecklistMode = false;
+        _syncChecklistToMarkdown();
+      }
     });
   }
 
@@ -97,51 +119,41 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primary), 
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.primary), 
+          onPressed: () => Get.back(),
         ),
         actions: [
+          IconButton(
+            icon: Icon(
+              _isChecklistMode ? Icons.notes : Icons.checklist,
+              color: AppColors.primary,
+            ),
+            onPressed: _toggleChecklistMode,
+            tooltip: _isChecklistMode ? 'Switch to Text' : 'Switch to Checklist',
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: Row(
-              children: [
-                if (_isSaving) 
-                  const Text(
-                    'Saving...',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  )
-                else if (_lastSaved != null)
-                  const Text(
-                    'Saved',
-                    style: TextStyle(color: Colors.green, fontSize: 12),
-                  ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: () => _saveNote(silent: false),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                  ),
-                  child: Text(
-                    AppText.save,
-                    style: AppFonts.buttonText(context).copyWith(
-                      color: AppColors.primary, 
-                      fontSize: 17,
-                    ),
-                  ),
+            child: TextButton(
+              onPressed: () => _saveNote(),
+              child: Text(
+                AppText.save,
+                style: AppFonts.buttonText(context).copyWith(
+                  color: AppColors.primary, 
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
+              ),
             ),
           ),
         ],
       ),
       body: Column(
         children: [
-          // Tags Row
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -157,13 +169,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
               ],
             ),
           ),
-          const Divider(height: 1),
+          const Divider(height: 1, color: AppColors.border),
           
           Expanded(
             child: GestureDetector(
               onTap: () {
-                // Tapping background focuses body
-                _bodyFocusNode.requestFocus();
+                if (!_isChecklistMode) _bodyFocusNode.requestFocus();
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -171,14 +182,15 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 16),
-                     TextField(
+                    TextField(
                       controller: _titleController,
                       style: AppFonts.heading1(context).copyWith(
                         height: 1.2,
+                        color: AppColors.textPrimary,
                       ),
                       decoration: const InputDecoration(
                         hintText: AppText.noteTitleHint,
-                        hintStyle: TextStyle(color: Colors.grey),
+                        hintStyle: TextStyle(color: AppColors.requestedGrey),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
@@ -187,23 +199,30 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                     ),
                     const SizedBox(height: 8),
                     Expanded(
-                      child: TextField(
-                        focusNode: _bodyFocusNode,
-                        controller: _bodyController,
-                        maxLines: null,
-                        expands: true,
-                        style: AppFonts.bodyRegular(context).copyWith(
-                          fontSize: 17,
-                          height: 1.5,
-                        ),
-                        decoration: const InputDecoration(
-                          hintText: AppText.noteBodyHint,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
+                      child: _isChecklistMode
+                          ? ChecklistEditor(
+                              items: _checklistItems,
+                              onChanged: (newItems) => _checklistItems = newItems,
+                            )
+                          : TextField(
+                              focusNode: _bodyFocusNode,
+                              controller: _bodyController,
+                              maxLines: null,
+                              expands: true,
+                              style: AppFonts.bodyRegular(context).copyWith(
+                                fontSize: 17,
+                                height: 1.5,
+                                color: AppColors.textPrimary,
+                              ),
+                              decoration: const InputDecoration(
+                                hintText: AppText.noteBodyHint,
+                                hintStyle: TextStyle(color: AppColors.requestedGrey),
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                            ),
                     ),
                   ],
                 ),
@@ -211,28 +230,25 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             ),
           ),
           
-          // Quick Toolbar
-          NoteToolbar(
-            onFormat: _handleFormat,
-            onOpenFormatSheet: _showFormatSheet,
-          ), 
+          if (!_isChecklistMode)
+            NoteToolbar(
+              onFormat: _handleFormat,
+              onOpenFormatSheet: _showFormatSheet,
+            ), 
         ],
       ),
     );
   }
 
   void _showFormatSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => FormatBottomSheet(
+    Get.bottomSheet(
+      FormatBottomSheet(
         onFormat: (type) {
-          // Navigator.pop(context); // Optional: Close sheet on selection? 
-          // Keeping it open allows multiple edits.
           _handleFormat(type);
         },
       ),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
     );
   }
 
@@ -248,43 +264,44 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     );
   }
 
-  Future<void> _saveNote({bool silent = false}) async {
+  Future<void> _saveNote() async {
+    if (_isChecklistMode) {
+      _syncChecklistToMarkdown();
+    }
+    
     if (_titleController.text.trim().isEmpty && _bodyController.text.trim().isEmpty) {
-        // Empty note?
-        if (!silent) Navigator.pop(context);
+        Get.back();
         return;
     }
 
-    // Default title if empty
     String title = _titleController.text;
-    if (title.isEmpty) {
-        title = "New Note";
-    }
+    if (title.isEmpty) title = "New Note";
 
-    final newNote = Note(
+    final note = Note(
       id: _isEditing ? widget.noteToEdit!.id : const Uuid().v4(),
       title: title,
       body: _bodyController.text,
       category: _selectedTag,
+      isPinned: widget.noteToEdit?.isPinned ?? false,
       date: DateTime.now(),
     );
 
-    ref.read(notesProvider.notifier).addNote(newNote); // Updates if ID exists
-
-    setState(() {
-      _isSaving = false;
-      _lastSaved = DateTime.now();
-    });
-
-    if (!silent) {
-      Navigator.pop(context);
+    if (_isEditing) {
+      await controller.updateNote(note);
+    } else {
+      await controller.addNote(note);
     }
+
+    Get.back();
   }
 
   void _handleFormat(String type) {
-    if (!_bodyFocusNode.hasFocus) {
-       _bodyFocusNode.requestFocus();
+    if (type == 'checkbox') {
+      _toggleChecklistMode();
+      return;
     }
+
+    if (!_bodyFocusNode.hasFocus) _bodyFocusNode.requestFocus();
 
     final newValue = NoteFormattingLogic.applyFormat(
       type, 

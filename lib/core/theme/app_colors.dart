@@ -25,4 +25,9 @@ class AppColors {
   // Additional status colors
   static const Color requestedGrey = Color(0xFF94A3B8);
   static const Color cancelledRed = Color(0xFFEF4444);
+
+  // Base colors
+  static const Color white = Colors.white;
+  static const Color black = Colors.black;
+  static const Color transparent = Colors.transparent;
 }
