@@ -15,6 +15,11 @@ class ComplainRepositoryImpl implements ComplainRepository {
           ? (data['data'] as List<dynamic>)
           : (data is List ? data : []);
       return list.map((e) => Complaint.fromJson(e)).toList();
+    } else {
+      print('=== API FAILED OR RETURNED NULL DATA ===');
+      print('Success: ${response.success}');
+      print('Message: ${response.message}');
+      print('Data: ${response.data}');
     }
     return [];
   }
