@@ -5,10 +5,11 @@ import 'package:uuid/uuid.dart';
 
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
-import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/modules/student/features/orders/order_details_screen.dart';
 import 'package:hsh_app/modules/student/features/orders/select_items_screen.dart';
-import 'package:hsh_app/widgets/custom_app_bar.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
+import 'package:hsh_app/modules/student/features/laundry/widgets/laundry_card.dart';
+import 'package:uitoolkit/uitoolkit.dart' as ui;
 
 class LaundryScreen extends StatelessWidget {
   const LaundryScreen({super.key});
@@ -16,12 +17,11 @@ class LaundryScreen extends StatelessWidget {
   LaundryController get controller => Get.find<LaundryController>();
 
   void _openSelectItemsScreen(BuildContext context) {
-    // Generate order ID and Date
     final DateTime orderDate = DateTime.now();
     final String orderId =
         '#ORD${DateFormat('yyyyMMdd').format(orderDate)}${(const Uuid().v4().hashCode % 10000).abs()}';
 
-    Navigator.of(context).push(
+    Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute(
         builder: (ctx) => SelectItemsScreen(
           orderId: orderId,
@@ -31,235 +31,210 @@ class LaundryScreen extends StatelessWidget {
     );
   }
 
-  void _showFilterDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Obx(() {
-        final currentFilter = controller.filter.value;
-        return AlertDialog(
-          title: const Text('Filter Orders'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              RadioListTile<String>(
-                title: const Text('All'),
-                value: 'All',
-                groupValue: currentFilter,
-                onChanged: (value) {
-                  if (value != null) controller.setFilter(value);
-                  Navigator.of(context).pop();
-                },
-              ),
-              ...OrderStatus.values.map((status) => RadioListTile<String>(
-                    title: Text(status.label),
-                    value: status.label,
-                    groupValue: currentFilter,
-                    onChanged: (value) {
-                      if (value != null) controller.setFilter(value);
-                      Navigator.of(context).pop();
-                    },
-                  )),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    return ui.ModernScaffold(
+      backgroundColor: AppColors.mainBackground,
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'laundry_fab',
+        onPressed: () => _openSelectItemsScreen(context),
+        backgroundColor: AppColors.headerBlue,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
+      ),
+      body: Column(
+        children: [
+          // Custom Header
+          _buildHeader(context),
+          
+          // Order List
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value && controller.orders.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: CustomAppBar(
-        title: 'Laundry',
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Obx(() => ActionChip(
-                  avatar:
-                      Icon(Icons.filter_list, size: 16, color: scheme.primary),
-                  label: Text(
-                    controller.filter.value,
-                    style: TextStyle(
-                      color: scheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  backgroundColor: Colors.white,
-                  side: BorderSide.none,
-                  onPressed: () => _showFilterDialog(context),
-                )),
+              final currentFilter = controller.filter.value;
+              final filteredOrders = controller.orders.where((o) {
+                if (currentFilter == 'All') return true;
+                return o.status.label == currentFilter;
+              }).toList();
+
+              if (filteredOrders.isEmpty) {
+                return _buildEmptyState(context);
+              }
+
+              return RefreshIndicator(
+                onRefresh: () async {
+                  controller.fetchOrders();
+                },
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
+                  itemCount: filteredOrders.length,
+                  itemBuilder: (context, index) {
+                    final order = filteredOrders[index];
+                    return LaundryCard(
+                      order: order,
+                      onTap: () {
+                        Navigator.of(context, rootNavigator: true).push(
+                          MaterialPageRoute(
+                            builder: (ctx) => OrderDetailsScreen(order: order),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              );
+            }),
           ),
         ],
       ),
-      body: Obx(() {
-        final currentFilter = controller.filter.value;
-        final allOrders = controller.orders;
+    );
+  }
 
-        final orders = allOrders.where((o) {
-          if (currentFilter == 'All') return true;
-          return o.status.label == currentFilter;
-        }).toList();
-
-        if (orders.isEmpty) {
-          return _buildEmptyState(context, scheme, textTheme);
-        }
-
-        return ListView.builder(
-          padding: EdgeInsets.all(ResponsiveUtil.responsivePadding(context)),
-          itemCount: orders.length,
-          itemBuilder: (context, index) {
-            final order = orders[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: _buildOrderCard(context, order),
-            );
-          },
-        );
-      }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openSelectItemsScreen(context),
-        backgroundColor: scheme.primary,
-        child: const Icon(Icons.add, color: Colors.white),
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 20,
+        bottom: 40,
+        left: 24,
+        right: 24,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.headerBlue,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const ui.ModernText(
+            "Laundry",
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          _buildFilterButton(context),
+        ],
       ),
     );
   }
 
-  Widget _buildOrderCard(BuildContext context, LaundryOrderEntity order) {
-    return InkWell(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (ctx) => OrderDetailsScreen(order: order),
-          ),
-        );
-      },
-      borderRadius: BorderRadius.circular(20),
+  Widget _buildFilterButton(BuildContext context) {
+    return Obx(() => GestureDetector(
+      onTap: () => _showFilterDialog(context),
       child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(12),
         ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      order.serviceType,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      DateFormat('MMM d, yyyy').format(order.date),
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-                _buildStatusBadge(order.status),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildStatItem(
-                    Icons.grid_view_rounded, 'Items', '${order.totalItems}'),
-                _buildStatItem(Icons.tag, 'ID', order.orderId),
-              ],
+            const Icon(Icons.filter_alt_outlined, color: AppColors.headerBlue, size: 20),
+            const SizedBox(width: 8),
+            ui.ModernText(
+              controller.filter.value,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.headerBlue,
             ),
           ],
         ),
       ),
-    );
+    ));
   }
 
-  Widget _buildStatItem(IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: Colors.grey[400]),
-        const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: TextStyle(color: Colors.grey[600], fontSize: 13),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-            fontSize: 13,
+  void _showFilterDialog(BuildContext context) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildStatusBadge(OrderStatus status) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: status.backgroundColor.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        status.label,
-        style: TextStyle(
-          color: status.textColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 11,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const ui.ModernText(
+              "Filter Orders",
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.headerBlue,
+            ),
+            const SizedBox(height: 20),
+            _buildFilterOption("All"),
+            ...OrderStatus.values.map((status) => _buildFilterOption(status.label)),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState(
-      BuildContext context, ColorScheme scheme, TextTheme textTheme) {
+  Widget _buildFilterOption(String label) {
+    return Obx(() {
+      final isSelected = controller.filter.value == label;
+      return ListTile(
+        onTap: () {
+          controller.setFilter(label);
+          Get.back();
+        },
+        leading: Icon(
+          isSelected ? Icons.check_circle : Icons.circle_outlined,
+          color: isSelected ? AppColors.pendingBlue : Colors.grey,
+        ),
+        title: ui.ModernText(
+          label,
+          fontSize: 16,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: AppColors.headerBlue,
+        ),
+      );
+    });
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.local_laundry_service_outlined,
-            size: ResponsiveUtil.responsiveIconSize(context, 80),
-            color: scheme.onSurface.withOpacity(0.1),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No laundry orders yet!',
-            style: textTheme.titleMedium?.copyWith(
-              color: scheme.onSurface.withOpacity(0.5),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                )
+              ],
             ),
+            child: Icon(Icons.local_laundry_service_outlined, size: 64, color: Colors.grey[300]),
+          ),
+          const SizedBox(height: 24),
+          const ui.ModernText(
+            "No laundry orders yet!",
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.headerBlue,
           ),
           const SizedBox(height: 8),
-          Text(
-            'Tap the + button to place a new order.',
-            style: textTheme.bodySmall?.copyWith(
-              color: scheme.onSurface.withOpacity(0.4),
-            ),
+          ui.ModernText(
+            "Tap the + button to place a new order.",
+            fontSize: 14,
+            color: Colors.grey[500]!,
           ),
         ],
       ),

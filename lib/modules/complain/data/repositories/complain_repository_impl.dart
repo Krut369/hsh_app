@@ -51,15 +51,19 @@ class ComplainRepositoryImpl implements ComplainRepository {
 
     complaint.issues.forEach((subName, issueData) {
       processedIssues.add({
-        'sub_complaint': subName,
+        'sub_category': subName,
         'description': issueData.description,
         'imagePath': issueData.imagePath, // Service will handle the upload
       });
     });
 
-    await _service.createComplaint(
+    final response = await _service.createComplaint(
       complaintType: complaint.complaintType,
       issues: processedIssues,
     );
+
+    if (!response.success) {
+      throw Exception(response.message ?? 'Failed to create complaint');
+    }
   }
 }

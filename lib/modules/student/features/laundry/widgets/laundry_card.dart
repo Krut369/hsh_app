@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
-import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
-import 'package:hsh_app/modules/student/features/complaint/widgets/complaint_status_chip.dart';
+import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
+import 'package:hsh_app/modules/student/features/laundry/laundry_utils.dart';
+import 'package:hsh_app/modules/student/features/laundry/widgets/laundry_status_chip.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:uitoolkit/uitoolkit.dart' as ui;
 
-class ComplaintCard extends StatelessWidget {
-  final Complaint complaint;
+class LaundryCard extends StatelessWidget {
+  final LaundryOrderEntity order;
   final VoidCallback onTap;
 
-  const ComplaintCard({
+  const LaundryCard({
     super.key,
-    required this.complaint,
+    required this.order,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final categoryColor = ComplaintUtils.getCategoryColor(complaint.complaintType);
+    final statusColor = LaundryUtils.getStatusColor(order.status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: categoryColor.withValues(alpha: 0.5), width: 2),
+        border: Border.all(color: statusColor.withValues(alpha: 0.5), width: 2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -56,27 +56,27 @@ class ComplaintCard extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        ComplaintUtils.getComplaintTypeIcon(complaint.complaintType),
+                        LaundryUtils.getServiceIcon(order.serviceType),
                         color: AppColors.headerBlue,
                         size: 24,
                       ),
                     ),
                     const SizedBox(width: 16),
                     
-                    // Title and Date Section
+                    // Service and Date Section
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ui.ModernText(
-                            complaint.complaintType,
+                            order.serviceType,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: AppColors.headerBlue,
                           ),
                           const SizedBox(height: 4),
                           ui.ModernText(
-                            DateFormat('dd MMM yyyy, hh:mm a').format(complaint.dateTime),
+                            DateFormat('dd MMM yyyy').format(order.date),
                             fontSize: 12,
                             color: Colors.grey[500]!,
                           ),
@@ -85,28 +85,28 @@ class ComplaintCard extends StatelessWidget {
                     ),
                     
                     // Status Badge
-                    ComplaintStatusChip(status: complaint.status),
+                    LaundryStatusChip(status: order.status),
                   ],
                 ),
                 
-                if (complaint.issues.isNotEmpty) ...[
+                if (order.items.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   const Divider(height: 1, color: Color(0xFFEBF3F5)),
                   const SizedBox(height: 16),
                   
-                  // Description Section
+                  // Details Section (Primary Item)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Icon(
-                        Icons.notes_rounded,
+                        Icons.local_laundry_service_rounded,
                         size: 18,
                         color: Colors.grey,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: ui.ModernText(
-                          complaint.issues.entries.first.value.description,
+                          "${order.items.first.name} (${order.items.first.quantity} units)",
                           fontSize: 14,
                           color: AppColors.headerBlue.withValues(alpha: 0.8),
                           maxLines: 2,
@@ -115,17 +115,32 @@ class ComplaintCard extends StatelessWidget {
                     ],
                   ),
                   
-                  // Sub-issues counter
-                  if (complaint.issues.length > 1)
+                  // More items counter
+                  if (order.items.length > 1)
                     Padding(
                       padding: const EdgeInsets.only(top: 10, left: 30),
                       child: ui.ModernText(
-                        "+ ${complaint.issues.length - 1} more sub-issues",
+                        "+ ${order.items.length - 1} more items",
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: AppColors.headerBlue,
                       ),
                     ),
+                ] else ...[
+                  const SizedBox(height: 16),
+                  const Divider(height: 1, color: Color(0xFFEBF3F5)),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Icon(Icons.info_outline_rounded, size: 18, color: Colors.grey),
+                      const SizedBox(width: 12),
+                      ui.ModernText(
+                        "No items in this order",
+                        fontSize: 14,
+                        color: Colors.grey[500]!,
+                      ),
+                    ],
+                  ),
                 ],
               ],
             ),

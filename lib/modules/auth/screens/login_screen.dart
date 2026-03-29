@@ -3,6 +3,12 @@ import 'package:get/get.dart';
 import 'package:uitoolkit/uitoolkit.dart';
 import '../presentation/controllers/auth_controller.dart';
 
+/// Brand colors
+class _LoginScreenColors {
+  static const Color darkBlue = Color(0xFF1A365D);
+  static const Color hint = Color(0xFF6B8299);
+}
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -10,33 +16,16 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
-    with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  late AnimationController _animController;
-  late Animation<double> _cardAnim;
-  late Animation<double> _logoAnim;
+  bool _obscurePassword = true;
 
   AuthController get authController => Get.find<AuthController>();
 
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-    _cardAnim = CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeOutBack,
-    );
-    _logoAnim = CurvedAnimation(
-      parent: _animController,
-      curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
-    );
-    _animController.forward();
-
     _emailController.addListener(_clearLocalError);
     _passwordController.addListener(_clearLocalError);
   }
@@ -51,7 +40,6 @@ class _LoginScreenState extends State<LoginScreen>
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _animController.dispose();
     super.dispose();
   }
 
@@ -74,107 +62,245 @@ class _LoginScreenState extends State<LoginScreen>
         message: _friendlyError(authController.error.value!),
         type: ToastType.error,
       );
+    } else if (authController.isAuthenticated.value) {
+      Get.offAllNamed('/');
     }
+  }
+
+  InputDecoration _pillDecoration({
+    required String hintText,
+    required Widget prefixIcon,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: const TextStyle(
+        color: _LoginScreenColors.hint,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      filled: true,
+      // Semi-transparent so the background still shows through.
+      fillColor: Colors.white.withOpacity(0.18),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(999),
+        borderSide:
+            BorderSide(color: _LoginScreenColors.darkBlue.withOpacity(0.22)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(999),
+        borderSide:
+            BorderSide(color: _LoginScreenColors.darkBlue.withOpacity(0.28)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(999),
+        borderSide: const BorderSide(
+          color: _LoginScreenColors.darkBlue,
+          width: 2,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
+    final maxFieldWidth =
+        MediaQuery.of(context).size.width < 400 ? double.infinity : 380.0;
 
-    return ModernScaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: FadeTransition(
-            opacity: _cardAnim,
-            child: ScaleTransition(
-              scale: _cardAnim,
+    final screenH = MediaQuery.of(context).size.height;
+
+    final topPadding =
+        (screenH * 0.38).clamp(160.0, 300.0); // better positioning
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: false,
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            /// 🔥 FIXED BACKGROUND
+            Positioned.fill(
+              child: Image.asset(
+                'assets/login screen bg.jpeg',
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+                filterQuality: FilterQuality.high,
+              ),
+            ),
+
+            /// light overlay (optional)
+            Positioned.fill(
               child: Container(
-                width: size.width < 400 ? size.width * 0.92 : 380,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 32,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FadeTransition(
-                      opacity: _logoAnim,
-                      child: ScaleTransition(
-                        scale: _logoAnim,
-                        child: CircleAvatar(
-                          radius: 38,
-                          backgroundColor: const Color(0xFFe0eafc),
-                          child: Icon(Icons.lock_outline,
-                              size: 44, color: theme.primaryColor),
+                color: Colors.white.withOpacity(0.02),
+              ),
+            ),
+            /// UI
+            Padding(
+              
+              padding: EdgeInsets.fromLTRB(28, topPadding, 28, 24),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxFieldWidth),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Align(
+                        alignment: Alignment.topCenter,
+                        child: Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: _LoginScreenColors.darkBlue,
+                            letterSpacing: 0.8,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 18),
-                    Text(
-                      'Welcome Back',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.primaryColor,
+                      const SizedBox(height: 18),
+                      /// EMAIL
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          autocorrect: false,
+                          enableSuggestions: false,
+                          cursorColor: _LoginScreenColors.darkBlue,
+                          style: const TextStyle(
+                            color: _LoginScreenColors.darkBlue,
+                            fontSize: 16,
+                          ),
+                          decoration: _pillDecoration(
+                            hintText: 'Email or Phone',
+                            prefixIcon: const Icon(
+                              Icons.mail_outline_rounded,
+                              color: _LoginScreenColors.darkBlue,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 32),
-                    ModernTextField(
-                      label: 'Email',
-                      hint: 'Enter your email',
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(height: 18),
-                    ModernTextField(
-                      label: 'Password',
-                      hint: 'Enter your password',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      controller: _passwordController,
-                      isPassword: true,
-                    ),
-                    const SizedBox(height: 28),
-                    Obx(() => ModernButton(
-                          text: 'Log In',
-                          onPressed: _onLogin,
-                          isLoading: authController.isLoading.value,
-                        )),
-                    const SizedBox(height: 22),
-                  ],
+
+                      const SizedBox(height: 16),
+
+                      /// PASSWORD
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextFormField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _onLogin(),
+                          autocorrect: false,
+                          enableSuggestions: false,
+                          cursorColor: _LoginScreenColors.darkBlue,
+                          style: const TextStyle(
+                            color: _LoginScreenColors.darkBlue,
+                            fontSize: 16,
+                          ),
+                          decoration: _pillDecoration(
+                            hintText: 'Password',
+                            prefixIcon: const Icon(
+                              Icons.lock_outline_rounded,
+                              color: _LoginScreenColors.darkBlue,
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: _LoginScreenColors.darkBlue,
+                                size: 24,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 40,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 22),
+
+                      /// LOGIN BUTTON
+                      Obx(() {
+                        final loading = authController.isLoading.value;
+
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _LoginScreenColors.darkBlue,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              disabledBackgroundColor:
+                                  _LoginScreenColors.darkBlue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                            ),
+                            onPressed: loading ? null : _onLogin,
+                            child: loading
+                                ? const SizedBox(
+                                    height: 22,
+                                    width: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
   String _friendlyError(String error) {
-    if (error.isEmpty) return 'An error occurred. Please try again.';
     final lower = error.toLowerCase();
+
     if (lower.contains('invalid') ||
         lower.contains('incorrect') ||
-        lower.contains('wrong') ||
-        lower.contains('credentials') ||
         lower.contains('401')) {
       return 'Incorrect email or password.';
     }
-    if (lower.contains('network') ||
-        lower.contains('socket') ||
-        lower.contains('connection')) {
-      return 'Network error. Please check your connection.';
+
+    if (lower.contains('network')) {
+      return 'Check your internet connection.';
     }
+
     return error;
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_components.dart';
@@ -131,8 +130,8 @@ class _ChatScreenState extends State<ChatScreen> {
                               unreadCount: chat.unreadCount,
                               isOnline: chat.isOnline,
                               onTap: () {
-                                context.push('/student/chat/details',
-                                    extra: chat.id);
+                                Get.toNamed('/student/chat/details',
+                                    arguments: chat.id);
                               },
                             );
                           },
@@ -153,8 +152,8 @@ class _ChatScreenState extends State<ChatScreen> {
                               unreadCount: chat.unreadCount,
                               isOnline: chat.isOnline,
                               onTap: () {
-                                context.push('/student/chat/details',
-                                    extra: chat.id);
+                                Get.toNamed('/student/chat/details',
+                                    arguments: chat.id);
                               },
                             );
                           },

@@ -1,35 +1,11 @@
-import "package:hsh_app/core/enums/user_role.dart";
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
-import 'package:hsh_app/splash_screen.dart';
-import 'package:hsh_app/modules/auth/screens/login_screen.dart';
-import 'package:hsh_app/modules/student/student_main_shell.dart';
-import 'package:hsh_app/modules/complain/presentation/complain_routes.dart';
-import 'package:hsh_app/modules/laundry/presentation/laundry_routes.dart';
-import 'package:hsh_app/modules/leader/presentation/leader_routes.dart';
 
-// Feature screens
-import 'package:hsh_app/modules/student/features/attendance/attendance_screen.dart';
-import 'package:hsh_app/modules/student/features/chat/chat_screen.dart';
-import 'package:hsh_app/modules/student/features/complaint/complaint_screen.dart';
-import 'package:hsh_app/modules/student/features/holiday/holiday_screen.dart';
-import 'package:hsh_app/modules/student/features/notes/notes_screen.dart';
-import 'package:hsh_app/modules/student/features/payment/payment_screen.dart';
-import 'package:hsh_app/modules/student/features/services/all_services_screen.dart';
-import 'package:hsh_app/modules/student/features/vehicle/vehicle_registration_screen.dart';
-import 'package:hsh_app/modules/student/features/orders/order_details_screen.dart';
-import 'package:hsh_app/modules/student/features/profile/profile_screen.dart';
-import 'package:hsh_app/modules/student/features/laundry/laundry_screen.dart';
-import 'package:hsh_app/modules/student/features/complaint/add_complaint_screen.dart';
-import 'package:hsh_app/modules/student/features/holiday/holiday_form.dart';
-import 'package:hsh_app/modules/student/features/chat/chat_details_screen.dart';
-import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
+// This file is now legacy and mostly serves to hold the RouterNotifier 
+// if any parts of the app still rely on it during transition.
+// However, most logic has moved to AuthMiddleware in app_pages.dart.
 
-// ---------------------------------------------------------------------------
-// RouterNotifier
-// ---------------------------------------------------------------------------
 class RouterNotifier extends ChangeNotifier {
   RouterNotifier() {
     final authController = Get.find<AuthController>();
@@ -37,64 +13,6 @@ class RouterNotifier extends ChangeNotifier {
     authController.user.listen((_) => notifyListeners());
     authController.isLoading.listen((_) => notifyListeners());
     authController.error.listen((_) => notifyListeners());
-  }
-
-  String? redirect(BuildContext context, GoRouterState state) {
-    final authController = Get.find<AuthController>();
-    final isLoggingIn = state.uri.toString() == '/login';
-    final isSplash = state.uri.toString() == '/';
-
-    if (authController.isLoading.value) return null;
-
-    final isAuthenticated = authController.isAuthenticated.value;
-    final hasError = authController.error.value != null;
-
-    if (!isAuthenticated) {
-      if (hasError && isSplash) return '/login';
-      if (isLoggingIn || isSplash) return null;
-      return '/login';
-    }
-
-    final user = authController.user.value;
-    final role = user?.role;
-    final currentPath = state.uri.toString();
-
-    if (isLoggingIn) {
-      return _getDashboardForRole(role);
-    }
-
-    if (currentPath != '/') {
-      if (role == UserRole.laundry && !currentPath.startsWith('/laundry')) {
-        return '/laundry';
-      }
-      if (role == UserRole.complain && !currentPath.startsWith('/complain')) {
-        return '/complain';
-      }
-      if (role == UserRole.leader && !currentPath.startsWith('/leader')) {
-        return '/leader';
-      }
-      if (role == UserRole.student && !currentPath.startsWith('/student')) {
-        return '/student/profile';
-      }
-    }
-
-    if (currentPath == '/student') return '/student/profile';
-
-    return null;
-  }
-
-  String _getDashboardForRole(UserRole? role) {
-    switch (role) {
-      case UserRole.laundry:
-        return '/laundry';
-      case UserRole.complain:
-        return '/complain';
-      case UserRole.leader:
-        return '/leader';
-      case UserRole.student:
-      default:
-        return '/student/profile';
-    }
   }
 }
 
@@ -104,18 +22,13 @@ class RouterNotifier extends ChangeNotifier {
 final routerNotifier = RouterNotifier();
 
 final goRouter = GoRouter(
+  navigatorKey: Get.key,
   initialLocation: '/',
   refreshListenable: routerNotifier,
   redirect: routerNotifier.redirect,
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
-    ),
+    GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
 
     // Student Shell
     StatefulShellRoute.indexedStack(
@@ -183,10 +96,7 @@ final goRouter = GoRouter(
       path: '/student/holiday',
       builder: (context, state) => const HolidayScreen(),
       routes: [
-        GoRoute(
-          path: 'add',
-          builder: (context, state) => const HolidayForm(),
-        ),
+        GoRoute(path: 'add', builder: (context, state) => const HolidayForm()),
       ],
     ),
     GoRoute(

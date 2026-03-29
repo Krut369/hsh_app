@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
 import 'package:hsh_app/modules/student/features/complaint/widgets/complaint_status_chip.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
+import 'package:uitoolkit/uitoolkit.dart' as ui;
 
 class ComplaintDetailsSheet extends StatelessWidget {
   final Complaint complaint;
@@ -17,9 +19,6 @@ class ComplaintDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -45,57 +44,58 @@ class ComplaintDetailsSheet extends StatelessWidget {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: scheme.primary.withOpacity(0.1),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFEBF3F5),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                          ComplaintUtils.getComplaintTypeIcon(
-                              complaint.complaintType),
-                          color: scheme.primary),
+                        ComplaintUtils.getComplaintTypeIcon(complaint.complaintType),
+                        color: AppColors.headerBlue,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                        child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(complaint.complaintType,
-                            style: textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold, fontSize: 20)),
-                        Text(
-                          'Ticket ID: #${complaint.id}',
-                          style: TextStyle(
-                              color: Colors.grey[500], fontSize: 13),
-                        )
-                      ],
-                    )),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Status', style: TextStyle(color: Colors.grey)),
-                    ComplaintStatusChip(status: complaint.status)
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Date', style: TextStyle(color: Colors.grey)),
-                    Text(
-                      DateFormat('MMM dd, yyyy • hh:mm a')
-                          .format(complaint.dateTime),
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    )
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ui.ModernText(
+                            complaint.complaintType,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.headerBlue,
+                          ),
+                          ui.ModernText(
+                            'Ticket ID: #${complaint.id}',
+                            fontSize: 13,
+                            color: Colors.grey[500]!,
+                          )
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 32),
-                Text('Reported Issues',
-                    style: textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold)),
+                
+                _buildDetailRow("Status", ComplaintStatusChip(status: complaint.status)),
                 const SizedBox(height: 16),
+                _buildDetailRow(
+                  "Date", 
+                  ui.ModernText(
+                    DateFormat('MMM dd, yyyy • hh:mm a').format(complaint.dateTime),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.headerBlue,
+                  ),
+                ),
+                
+                const SizedBox(height: 40),
+                const ui.ModernText(
+                  'Reported Issues',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.headerBlue,
+                ),
+                const SizedBox(height: 20),
                 ...complaint.issues.entries.map((entry) {
                   final issueData = entry.value;
                   return Container(
@@ -103,50 +103,50 @@ class ComplaintDetailsSheet extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFEEEEEE)),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFEBF3F5), width: 1.5),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            if (complaint.complaintType == 'Electrical' ||
-                                complaint.complaintType == 'Plumbing' ||
-                                complaint.complaintType == 'Carpentry') ...[
-                              Icon(
-                                  ComplaintUtils.getSubComplaintIcon(
-                                      complaint.complaintType, entry.key),
-                                  size: 18,
-                                  color: Colors.grey[700]),
-                              const SizedBox(width: 8),
-                            ],
-                            Text(entry.key,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 15)),
+                            Icon(
+                              ComplaintUtils.getSubComplaintIcon(complaint.complaintType, entry.key),
+                              size: 18,
+                              color: AppColors.headerBlue,
+                            ),
+                            const SizedBox(width: 10),
+                            ui.ModernText(
+                              entry.key,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.headerBlue,
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(issueData.description,
-                            style: TextStyle(
-                                color: Colors.grey[800], height: 1.5)),
+                        const SizedBox(height: 10),
+                        ui.ModernText(
+                          issueData.description,
+                          fontSize: 14,
+                          color: AppColors.headerBlue.withValues(alpha: 0.8),
+                          height: 1.5,
+                        ),
                         if (issueData.imagePath != null) ...[
                           const SizedBox(height: 12),
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
                             child: Image.file(
                               File(issueData.imagePath!),
-                              height: 120,
+                              height: 150,
                               width: double.infinity,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Container(
+                              errorBuilder: (context, error, stackTrace) => Container(
                                 height: 120,
                                 width: double.infinity,
                                 color: Colors.grey[200],
                                 alignment: Alignment.center,
-                                child: const Icon(Icons.broken_image,
-                                    color: Colors.grey),
+                                child: const Icon(Icons.broken_image, color: Colors.grey),
                               ),
                             ),
                           ),
@@ -160,6 +160,16 @@ class ComplaintDetailsSheet extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, Widget value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        ui.ModernText(label, fontSize: 14, color: Colors.grey[600]!),
+        value,
+      ],
     );
   }
 }

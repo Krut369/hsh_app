@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
-import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
+import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
+import 'package:hsh_app/modules/student/features/laundry/laundry_utils.dart';
 
-class ComplaintStatusChip extends StatelessWidget {
-  final ComplaintStatus status;
+class LaundryStatusChip extends StatelessWidget {
+  final OrderStatus status;
 
-  const ComplaintStatusChip({super.key, required this.status});
+  const LaundryStatusChip({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final color = ComplaintUtils.getStatusColor(context, status);
+    final color = LaundryUtils.getStatusColor(status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
@@ -21,7 +21,7 @@ class ComplaintStatusChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            ComplaintUtils.getStatusIcon(status),
+            LaundryUtils.getStatusIcon(status),
             color: color,
             size: 14,
           ),
