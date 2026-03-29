@@ -9,12 +9,11 @@ import 'package:hsh_app/modules/student/features/profile/bindings/profile_bindin
 import 'package:hsh_app/modules/student/features/attendance/bindings/attendance_binding.dart';
 import 'package:hsh_app/modules/student/features/scanner/bindings/mobile_scanner_binding.dart';
 import 'package:hsh_app/controllers/chat_controller.dart';
-import 'package:hsh_app/controllers/theme_controller.dart';
 import 'package:hsh_app/providers/bottom_nav_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uitoolkit/uitoolkit.dart';
-import 'package:uitoolkit/uitoolkit.dart';
 import 'package:hsh_app/routes/app_pages.dart';
+import 'package:hsh_app/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,26 +31,18 @@ void main() async {
   AttendanceBinding().dependencies();
   MobileScannerBinding().dependencies();
   Get.put(ChatController());
-  Get.put(ThemeController());
   Get.put(BottomNavController());
   Get.put(UIController());
 
-  runApp(const ProviderScope(child: MyApp()));
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final themeController = Get.find<ThemeController>();
-
-    return GetMaterialApp(
-      title: 'HSH App',
-      debugShowCheckedModeBanner: false,
-      theme: themeController.theme,
-      initialRoute: '/',
-      getPages: AppPages.pages,
-    );
-  }
+  runApp(
+    ProviderScope(
+      child: ModernApp.supabase(
+        title: 'HSH App',
+        appId: 'hsh_app',
+        debugShowCheckedModeBanner: false,
+        getPages: AppPages.pages,
+        home: const SplashScreen(), 
+      ),
+    ),
+  );
 }

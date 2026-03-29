@@ -100,7 +100,7 @@ class LaundryHomeScreen extends GetView<LaundryController> {
               // View All Requests Button
               ModernListTile(
                 title: 'View All Requests',
-                leading: const Icon(Icons.list, color: AppColors.primary),
+                leading: Icon(Icons.list, color: AppColors.primary),
                 onTap: () {
                   controller.setFilter('All');
                   controller.changeTab(1); // Switch to Orders tab
