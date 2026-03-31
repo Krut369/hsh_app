@@ -1,16 +1,6 @@
 # ───────────────────────────────────────────────────────────────
 # 🏗️  Build Release APK — GitHub Actions
 # ───────────────────────────────────────────────────────────────
-# Triggers:
-#   • Push to main / master
-#   • Manual (workflow_dispatch)
-#
-# Required GitHub Secrets:
-#   KEYSTORE_BASE64      – base64-encoded .jks / .keystore file
-#   KEYSTORE_PASSWORD    – password for the keystore
-#   KEY_ALIAS            – alias of the signing key
-#   KEY_PASSWORD         – password for the key alias
-# ───────────────────────────────────────────────────────────────
 
 name: 🏗️ Build Release APK
 
@@ -19,9 +9,8 @@ on:
     branches: [MVP-1.0.0]
   pull_request:
     branches: [MVP-1.0.0]
-  workflow_dispatch:            # manual trigger from GitHub UI
+  workflow_dispatch:
 
-# Cancel in-progress runs when a new push arrives
 concurrency:
   group: build-apk-${{ github.ref }}
   cancel-in-progress: true
@@ -61,31 +50,36 @@ jobs:
           key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
           restore-keys: pub-${{ runner.os }}-
 
-      # ── 5. Install dependencies ─────────────────────────────
+      # ── 5. 🔐 Git Auth for Private Repo (FIX) ───────────────
+      - name: 🔐 Setup Git authentication for private repos
+        run: |
+          git config --global url."https://${{ secrets.GH_PAT }}@github.com/".insteadOf "https://github.com/"
+
+      # ── 6. Install dependencies ─────────────────────────────
       - name: 📥 Get Flutter dependencies
         run: flutter pub get
 
-      # ── 6. Code generation (Retrofit, JSON Serializable) ────
+      # ── 7. Code generation ──────────────────────────────────
       - name: ⚙️ Run build_runner
         run: dart run build_runner build --delete-conflicting-outputs
 
-      # ── 7. Static analysis ──────────────────────────────────
+      # ── 8. Static analysis ──────────────────────────────────
       - name: 🔍 Analyze code
         run: flutter analyze --no-fatal-infos
-        continue-on-error: true      # don't block build on info-level lints
+        continue-on-error: true
 
-      # ── 8. Run tests ────────────────────────────────────────
+      # ── 9. Run tests ────────────────────────────────────────
       - name: 🧪 Run tests
         run: flutter test
-        continue-on-error: true      # don't block build if tests are minimal
+        continue-on-error: true
 
-      # ── 9. Decode keystore (release signing) ────────────────
+      # ── 10. Decode keystore ────────────────────────────────
       - name: 🔑 Decode keystore
         if: github.event_name != 'pull_request'
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
 
-      # ── 10. Create key.properties ───────────────────────────
+      # ── 11. Create key.properties ──────────────────────────
       - name: 📝 Create key.properties
         if: github.event_name != 'pull_request'
         run: |
@@ -96,11 +90,11 @@ jobs:
           storeFile=keystore.jks
           EOF
 
-      # ── 11. Build APK ──────────────────────────────────────
+      # ── 12. Build APK ──────────────────────────────────────
       - name: 🏗️ Build release APK
         run: flutter build apk --release
 
-      # ── 12. Upload APK artifact ─────────────────────────────
+      # ── 13. Upload APK artifact ────────────────────────────
       - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
         with:
@@ -108,7 +102,7 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 14
 
-      # ── 13. Job summary ─────────────────────────────────────
+      # ── 14. Job summary ────────────────────────────────────
       - name: 📊 Build Summary
         run: |
           APK_SIZE=$(du -sh build/app/outputs/flutter-apk/app-release.apk | cut -f1)
