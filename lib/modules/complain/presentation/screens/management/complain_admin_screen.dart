@@ -426,10 +426,10 @@ class ComplaintAdminScreen extends GetView<ComplainController> {
     showModernSheet(
       context: context,
       title: 'Update ${complaint.complaintType} Status',
-      subtitle: 'Select the current progress of the complaint',
-      centerTitle: true,
+      // subtitle: 'Select the current progress of the complaint',
+      // centerTitle: true,
       actionText: 'Confirm Update',
-      actionIcon: Icons.update,
+      // actionIcon: Icons.update,
       onAction: () {
         if (selectedStatus != null && selectedStatus != complaint.status) {
           controller.updateStatus(complaint.id, selectedStatus!);
