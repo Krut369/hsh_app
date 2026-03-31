@@ -73,7 +73,7 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
         subtitle = 'Technician is evaluating the issue';
         icon = Icons.search;
         iconColor = const Color(0xFFE8862A);
-        circleBgColor = AppColors.warning.withValues(alpha: 0.1);
+        circleBgColor = const Color(0xFFFFF7ED);
         break;
       case ComplaintStatus.resolved:
         subtitle = 'Issue has been fixed and verified';
@@ -170,7 +170,10 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
     showModernSheet(
       context: context,
       title: 'Update ${widget.complaint.complaintType} Status',
-      actionIcon: Icons.update,
+      // subtitle: 'Select the current progress of the complaint',
+      // centerTitle: true,
+      actionText: 'Confirm Update',
+      // actionIcon: Icons.update,
       onAction: () {
         if (tempStatus != null && tempStatus != selectedStatus) {
           setState(() => selectedStatus = tempStatus);
@@ -270,11 +273,9 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
       currentIndex = 0;
     } else if (currentStatus == ComplaintStatus.underReview) {
       currentIndex = 1;
-    } else if (currentStatus == ComplaintStatus.awaitingFeedback) {
+    }else if (currentStatus == ComplaintStatus.awaitingFeedback)
       currentIndex = 2; // Treat as "IN REVIEW" for the design match
-    } else if (currentStatus == ComplaintStatus.resolved) {
-      currentIndex = 3;
-    }
+    else if (currentStatus == ComplaintStatus.resolved) currentIndex = 3;
 
     final dateStr = DateFormat('MMM dd').format(widget.complaint.dateTime);
 
@@ -472,11 +473,11 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
         ],
       ),
       backgroundColor: hsh.AppColors.background, // Overall white background to match image exactly (Wait, design shows slightly offwhite behind card? Or card has border? No, background is purely white except for Card.) - Let's use white for everything or F9FAFB if top card stands out
-      bottomNavigationBar: ModernBottomBar(
-        text: 'Update Status',
-        icon: Icons.sort,
-        onPressed: _showStatusUpdateSheet,
-      ),
+      // bottomNavigationBar: ModernBottomBar(
+      //   text: 'Update Status',
+      //   icon: Icons.sort,
+      //   onPressed: _showStatusUpdateSheet,
+      // ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -490,7 +491,7 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -537,13 +538,13 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.location_on_outlined,
-                          size: 16, color: AppColors.textMuted),
-                      SizedBox(width: 4),
-                      ModernText(
+                      const Icon(Icons.location_on_outlined,
+                          size: 16, color: Color(0xFF6B7280)),
+                      const SizedBox(width: 4),
+                      const ModernText(
                         'Kitchen Area, Floor 2',
                         fontSize: 14,
-                        color: AppColors.textMuted,
+                        color: Color(0xFF6B7280),
                       ),
                     ],
                   ),
