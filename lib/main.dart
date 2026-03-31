@@ -36,9 +36,9 @@ void main() async {
 
   runApp(
     ProviderScope(
-      child: ModernApp.supabase(
+      
+      child: ModernApp(
         title: 'HSH App',
-        appId: 'hsh_app',
         debugShowCheckedModeBanner: false,
         getPages: AppPages.pages,
         home: const SplashScreen(), 

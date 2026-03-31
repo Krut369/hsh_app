@@ -258,7 +258,7 @@ class ComplaintAdminScreen extends GetView<ComplainController> {
           border: Border.all(color: const Color(0xFF28A960), width: 1.5),
           borderRadius: BorderRadius.circular(24),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.check, size: 16, color: Color(0xFF28A960)),
@@ -322,7 +322,7 @@ class ComplaintAdminScreen extends GetView<ComplainController> {
     String subtitle = '';
     IconData icon = Icons.circle;
     Color iconColor = _statusBadgeColor(status);
-    Color circleBgColor = Colors.white;
+    Color circleBgColor = AppColors.warning.withValues(alpha: 0.1);
 
     switch (status) {
       case ComplaintStatus.underReview:
@@ -391,7 +391,7 @@ class ComplaintAdminScreen extends GetView<ComplainController> {
                             color: const Color(0xFFE2E8F0),
                             borderRadius: BorderRadius.circular(100),
                           ),
-                          child: const ModernText('CURRENT', fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                          child: ModernText('CURRENT', fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.surfaceDark),
                         ),
                       ],
                     ],
@@ -481,7 +481,7 @@ class ComplaintAdminScreen extends GetView<ComplainController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ── Filter by Status ──
-                const ModernText(
+                ModernText(
                   'Filter by Status',
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -499,9 +499,8 @@ class ComplaintAdminScreen extends GetView<ComplainController> {
                       isExpanded: true,
                       value: tempStatus,
                       icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF6B7280)),
-                      hint: const ModernText('All Statuses', fontSize: 15),
                       items: [
-                        const DropdownMenuItem(
+                        DropdownMenuItem(
                           value: null,
                           child: ModernText('All Statuses', fontSize: 15),
                         ),
@@ -523,7 +522,7 @@ class ComplaintAdminScreen extends GetView<ComplainController> {
                 const SizedBox(height: 24),
 
                 // ── Filter by Type ──
-                const ModernText(
+                ModernText(
                   'Filter by Type',
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -541,7 +540,7 @@ class ComplaintAdminScreen extends GetView<ComplainController> {
                       isExpanded: true,
                       value: null, // Hardcoded for now since controller doesn't support type filtering
                       icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF6B7280)),
-                      hint: const ModernText('All Types', fontSize: 15),
+                      hint: ModernText('All Types', fontSize: 15),
                       items: const [
                         DropdownMenuItem(
                           value: null,

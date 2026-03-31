@@ -35,11 +35,11 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
       case ComplaintStatus.underReview:
         return const Color(0xFFE2E8F0); // Slate light grey
       case ComplaintStatus.pending:
-        return const Color(0xFFFFFBEB); // Amber 50
+        return AppColors.warning.withValues(alpha: 0.1); // Amber 50
       case ComplaintStatus.awaitingFeedback:
-        return const Color(0xFFEFF6FF); // Blue 50
+        return AppColors.info.withValues(alpha: 0.1); // Blue 50
       case ComplaintStatus.resolved:
-        return const Color(0xFFF0FDF4); // Green 50
+        return AppColors.success.withValues(alpha: 0.1); // Green 50
     }
   }
 
@@ -73,7 +73,7 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
         subtitle = 'Technician is evaluating the issue';
         icon = Icons.search;
         iconColor = const Color(0xFFE8862A);
-        circleBgColor = const Color(0xFFFFF7ED);
+        circleBgColor = AppColors.warning.withValues(alpha: 0.1);
         break;
       case ComplaintStatus.resolved:
         subtitle = 'Issue has been fixed and verified';
@@ -135,7 +135,7 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
                             color: const Color(0xFFE2E8F0),
                             borderRadius: BorderRadius.circular(100),
                           ),
-                          child: const ModernText('CURRENT', fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                          child: ModernText('CURRENT', fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.surfaceDark),
                         ),
                       ],
                     ],
@@ -170,9 +170,6 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
     showModernSheet(
       context: context,
       title: 'Update ${widget.complaint.complaintType} Status',
-      subtitle: 'Select the current progress of the complaint',
-      centerTitle: true,
-      actionText: 'Confirm Update',
       actionIcon: Icons.update,
       onAction: () {
         if (tempStatus != null && tempStatus != selectedStatus) {
@@ -269,13 +266,15 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
     // Determine step status manually. Adjust based on real logic.
     final currentStatus = widget.complaint.status;
     int currentIndex = 0;
-    if (currentStatus == ComplaintStatus.pending)
+    if (currentStatus == ComplaintStatus.pending) {
       currentIndex = 0;
-    else if (currentStatus == ComplaintStatus.underReview)
+    } else if (currentStatus == ComplaintStatus.underReview) {
       currentIndex = 1;
-    else if (currentStatus == ComplaintStatus.awaitingFeedback)
+    } else if (currentStatus == ComplaintStatus.awaitingFeedback) {
       currentIndex = 2; // Treat as "IN REVIEW" for the design match
-    else if (currentStatus == ComplaintStatus.resolved) currentIndex = 3;
+    } else if (currentStatus == ComplaintStatus.resolved) {
+      currentIndex = 3;
+    }
 
     final dateStr = DateFormat('MMM dd').format(widget.complaint.dateTime);
 
@@ -339,8 +338,8 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEF4444),
+                  decoration: BoxDecoration(
+                    color: AppColors.error,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -423,8 +422,8 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
                           width: 90,
                           height: 90,
                           color: const Color(0xFFF3F4F6),
-                          child: const Icon(Icons.image_not_supported,
-                              color: Color(0xFF9CA3AF)),
+                          child: Icon(Icons.image_not_supported,
+                              color: AppColors.textMuted),
                         ),
                       ),
                     ),
@@ -441,9 +440,9 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
                       style: BorderStyle
                           .none), // Using color fill to simulate dot design or just shape
                 ),
-                child: const Center(
+                child: Center(
                   child: Icon(Icons.add_a_photo_outlined,
-                      color: Color(0xFF9CA3AF), size: 28),
+                      color: AppColors.textMuted, size: 28),
                 ),
               ),
             ],
@@ -491,7 +490,7 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -538,13 +537,13 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_outlined,
-                          size: 16, color: Color(0xFF6B7280)),
-                      const SizedBox(width: 4),
-                      const ModernText(
+                      Icon(Icons.location_on_outlined,
+                          size: 16, color: AppColors.textMuted),
+                      SizedBox(width: 4),
+                      ModernText(
                         'Kitchen Area, Floor 2',
                         fontSize: 14,
-                        color: Color(0xFF6B7280),
+                        color: AppColors.textMuted,
                       ),
                     ],
                   ),
