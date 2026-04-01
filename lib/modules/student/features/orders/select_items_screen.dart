@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uuid/uuid.dart';
 
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
@@ -23,7 +22,6 @@ class SelectItemsScreen extends StatefulWidget {
 
 class _SelectItemsScreenState extends State<SelectItemsScreen> {
   final LaundryController controller = Get.find<LaundryController>();
-  final Uuid _uuid = const Uuid();
   final TextEditingController _noteController = TextEditingController();
 
   int _selectedIndex = 0;
@@ -84,13 +82,14 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
     return 'N/A';
   }
 
-  void _placeOrder() {
+  Future<void> _placeOrder() async {
     if (_basket.isEmpty) {
       Get.snackbar('Error', 'Please select at least one item.',
           snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
+    // Support multiple items of same category but different service types
     final List<LaundryItemEntity> orderItems = [];
     final allItems = controller.selectableItems;
 
@@ -108,14 +107,13 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
       });
     });
 
-    final totalItems = _getBasketTotal();
     final serviceTypeStr = _getCombinedServiceTypeString();
 
-    final newOrder = LaundryOrderEntity(
-      id: _uuid.v4(),
-      orderId: widget.orderId,
-      date: widget.orderDate,
-      totalItems: totalItems,
+    final order = LaundryOrderEntity(
+      id: '', 
+      orderId: '',
+      date: DateTime.now(),
+      totalItems: _getBasketTotal(),
       serviceType: serviceTypeStr,
       status: OrderStatus.requested,
       items: orderItems,
@@ -124,14 +122,8 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
           : _noteController.text.trim(),
     );
 
-    controller.addOrder(newOrder);
-
-    Get.snackbar('Success', 'Order placed successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.resolvedGreen,
-        colorText: Colors.white);
-
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    // Call the controller's submit method which uses the CreateOrderUseCase
+    await controller.submitOrderFromItems(order);
   }
 
   @override
@@ -285,24 +277,26 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                     // Button
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: SizedBox(
+                      child: Obx(() => SizedBox(
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
-                          onPressed: _placeOrder,
+                          onPressed: controller.isLoading.value ? null : _placeOrder,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.headerBlue,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             elevation: 0,
                           ),
-                          child: const ui.ModernText(
-                            'Add Laundry Items',
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                          child: controller.isLoading.value
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const ui.ModernText(
+                                'Add Laundry Items',
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                         ),
-                      ),
+                      )),
                     ),
                     const SizedBox(height: 20),
                   ],

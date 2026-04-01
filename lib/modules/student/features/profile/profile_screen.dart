@@ -22,10 +22,10 @@ class ProfileScreen extends GetView<ProfileController> {
     final padding = ResponsiveUtil.responsivePadding(context);
     final vertical = ResponsiveUtil.verticalSpacing(context);
 
-    final theme = Theme.of(context);
+    // final theme = AppColors;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: AppText.hostelHub,
         showLogoutIcon: true,
@@ -75,7 +75,6 @@ class ProfileScreen extends GetView<ProfileController> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-
                   SizedBox(
                     child: ModernStatCard(
                       layout: StatCardLayout.metric,
@@ -98,7 +97,6 @@ class ProfileScreen extends GetView<ProfileController> {
                       title: AppText.payDue,
                       value: AppText.fees,
                       accentColor: Colors.green,
-
                       onTap: () {
                         Get.toNamed('/student/payment');
                       },
@@ -180,7 +178,11 @@ class ProfileScreen extends GetView<ProfileController> {
             SizedBox(height: vertical * 2),
 
             // Recent Activity
-            ModernText(AppText.recentActivity,fontSize: 18,fontWeight: FontWeight.w600,),
+            ModernText(
+              AppText.recentActivity,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
             const SizedBox(height: 16),
             const ActivityTile(
               icon: Icons.check_circle,

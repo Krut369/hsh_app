@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
+import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
+import 'package:hsh_app/core/theme/app_colors.dart';
 
+/// Reusable status chip using uitoolkit [ModernText].
+/// Uses a colored pill with icon + label matching the complaint status.
 class ComplaintStatusChip extends StatelessWidget {
   final ComplaintStatus status;
 
@@ -10,12 +14,13 @@ class ComplaintStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = ComplaintUtils.getStatusColor(context, status);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.35), width: 1.2),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -23,16 +28,14 @@ class ComplaintStatusChip extends StatelessWidget {
           Icon(
             ComplaintUtils.getStatusIcon(status),
             color: color,
-            size: 14,
+            size: 12,
           ),
-          const SizedBox(width: 8),
-          Text(
+          const SizedBox(width: 5),
+          ModernText(
             status.label,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-            ),
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: color,
           ),
         ],
       ),

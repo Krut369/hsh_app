@@ -32,7 +32,7 @@ class AddComplaintScreen extends GetView<ComplainController> {
               leading: const Icon(Icons.photo_library),
               title: const Text('Gallery'),
               onTap: () {
-                context.pop();
+                Get.back();
                 _pickImage(key, ImageSource.gallery);
               },
             ),
@@ -40,7 +40,7 @@ class AddComplaintScreen extends GetView<ComplainController> {
               leading: const Icon(Icons.camera_alt),
               title: const Text('Camera'),
               onTap: () {
-                context.pop();
+                Get.back();
                 _pickImage(key, ImageSource.camera);
               },
             ),
@@ -65,7 +65,7 @@ class AddComplaintScreen extends GetView<ComplainController> {
           icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () {
             controller.resetAddDraft();
-            context.pop();
+            Get.back();
           },
         ),
       ),

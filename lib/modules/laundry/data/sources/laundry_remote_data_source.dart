@@ -1,62 +1,66 @@
 import 'package:hsh_app/modules/laundry/data/models/laundry_models.dart';
-import 'package:flutter/material.dart';
+import 'package:hsh_app/services/service_provider.dart';
 
 class LaundryRemoteDataSource {
+  final _service = serviceProvider.laundry;
+
+  /// Fetch laundry labels and orders
+  /// GET /laundry
   Future<List<LaundryOrderModel>> getOrders() async {
-    // Mocking API call
-    await Future.delayed(const Duration(seconds: 1));
-    return [
-      LaundryOrderModel(
-        id: '1',
-        orderId: 'ORD-001',
-        date: DateTime.now().subtract(const Duration(hours: 2)),
-        totalItems: 5,
-        serviceType: 'Wash',
-        status: 'requested',
-        items: [
-          LaundryItemModel(
-              id: '1',
-              name: 'T-Shirt',
-              quantity: 3,
-              iconCodePoint: Icons.tsunami.codePoint,
-              selectedService: 'wash'),
-          LaundryItemModel(
-              id: '2',
-              name: 'Jeans',
-              quantity: 2,
-              iconCodePoint: Icons.tsunami.codePoint,
-              selectedService: 'wash'),
-        ],
-      ),
-      LaundryOrderModel(
-        id: '2',
-        orderId: 'ORD-002',
-        date: DateTime.now().subtract(const Duration(days: 1)),
-        totalItems: 3,
-        serviceType: 'Press',
-        status: 'inProgress',
-        items: [
-          LaundryItemModel(
-              id: '3',
-              name: 'Shirt',
-              quantity: 3,
-              iconCodePoint: Icons.iron.codePoint,
-              selectedService: 'press'),
-        ],
-      ),
-    ];
+    final response = await _service.getLaundryOrders();
+
+    if (response.success && response.data != null) {
+      final List<dynamic> list = (response.data is Map && response.data.containsKey('data'))
+          ? (response.data['data'] as List<dynamic>)
+          : (response.data is List ? response.data : []);
+      return list.map((e) => LaundryOrderModel.fromJson(e)).toList();
+    }
+    return [];
   }
 
+  /// Update laundry order status
+  /// PATCH /laundry/:id/status
   Future<void> updateOrderStatus(String orderId, String status) async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    final response = await _service.updateOrderStatus(
+      orderId: orderId,
+      status: status,
+    );
+    if (!response.success) {
+      throw Exception(response.message ?? 'Failed to update order status');
+    }
   }
 
+  /// Get pricing configuration
+  /// GET /laundry/prices
   Future<LaundryCostModel> getLaundryCost() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    return LaundryCostModel(washPrice: 10, pressPrice: 5, bothPrice: 15);
+    final response = await _service.getLaundryPrices();
+    if (response.success && response.data != null) {
+      final data = response.data is Map && response.data.containsKey('data')
+          ? response.data['data']
+          : response.data;
+      return LaundryCostModel.fromJson(data);
+    }
+    throw Exception(response.message ?? 'Failed to fetch laundry prices');
   }
 
+  /// Update pricing configuration
+  /// PUT /laundry/prices
   Future<void> updateLaundryCost(LaundryCostModel cost) async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    final response = await _service.updateLaundryPrices(cost.toJson());
+    if (!response.success) {
+      throw Exception(response.message ?? 'Failed to update laundry prices');
+    }
+  }
+
+  /// Create a new laundry order
+  /// POST /laundry
+  Future<void> createOrder(Map<String, dynamic> body) async {
+    final response = await _service.createLaundryOrder(
+      serviceType: body['serviceType'],
+      items: (body['items'] as List).cast<Map<String, dynamic>>(),
+    );
+    if (!response.success) {
+      throw Exception(response.message ?? 'Failed to place laundry order');
+    }
   }
 }

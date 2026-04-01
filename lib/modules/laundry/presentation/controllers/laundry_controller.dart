@@ -3,19 +3,23 @@ import 'package:get/get.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/modules/laundry/domain/usecases/get_laundry_orders_usecase.dart';
 import 'package:hsh_app/modules/laundry/domain/usecases/update_order_status_usecase.dart';
+import 'package:hsh_app/modules/laundry/domain/usecases/create_laundry_order_usecase.dart';
 import 'package:hsh_app/modules/laundry/domain/usecases/manage_laundry_cost_usecase.dart';
 
 class LaundryController extends GetxController {
   final GetLaundryOrdersUseCase _getOrdersUseCase;
   final UpdateOrderStatusUseCase _updateStatusUseCase;
+  final CreateLaundryOrderUseCase _createOrderUseCase;
   final ManageLaundryCostUseCase _costUseCase;
 
   LaundryController({
     required GetLaundryOrdersUseCase getOrdersUseCase,
     required UpdateOrderStatusUseCase updateStatusUseCase,
+    required CreateLaundryOrderUseCase createOrderUseCase,
     required ManageLaundryCostUseCase costUseCase,
   })  : _getOrdersUseCase = getOrdersUseCase,
         _updateStatusUseCase = updateStatusUseCase,
+        _createOrderUseCase = createOrderUseCase,
         _costUseCase = costUseCase;
 
   // Observables
@@ -125,6 +129,54 @@ class LaundryController extends GetxController {
 
   void setFilter(String newFilter) {
     filter.value = newFilter;
+  }
+
+  Future<void> submitOrder() async {
+    final selected = selectableItems.where((i) => i.quantity > 0).toList();
+    if (selected.isEmpty) {
+      Get.snackbar('Error', 'Please select at least one item');
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      final order = LaundryOrderEntity(
+        id: '', // Backend generates id
+        orderId: '', // Backend generates orderId
+        date: DateTime.now(),
+        totalItems: selected.fold(0, (sum, i) => sum + i.quantity),
+        serviceType: selected.length == 1
+            ? selected.first.selectedService.label
+            : 'Mixed Service',
+        status: OrderStatus.requested,
+        items: selected,
+      );
+
+      await _createOrderUseCase.execute(order);
+      resetItems();
+      await fetchOrders(); // Refresh order history
+      Get.back();
+      Get.snackbar('Success', 'Laundry order placed successfully');
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to place order: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> submitOrderFromItems(LaundryOrderEntity order) async {
+    isLoading.value = true;
+    try {
+      await _createOrderUseCase.execute(order);
+      resetItems();
+      await fetchOrders(); // Refresh order history
+      Get.back();
+      Get.snackbar('Success', 'Laundry order placed successfully');
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to place order: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void changeTab(int index) {

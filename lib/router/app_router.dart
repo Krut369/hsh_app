@@ -5,24 +5,18 @@ import 'package:get/get.dart';
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
 import 'package:hsh_app/splash_screen.dart';
 import 'package:hsh_app/modules/auth/screens/login_screen.dart';
-import 'package:hsh_app/modules/student/student_main_shell.dart';
 import 'package:hsh_app/modules/complain/presentation/complain_routes.dart';
 import 'package:hsh_app/modules/laundry/presentation/laundry_routes.dart';
 import 'package:hsh_app/modules/leader/presentation/leader_routes.dart';
 
 // Feature screens
-import 'package:hsh_app/modules/student/features/attendance/attendance_screen.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_screen.dart';
-import 'package:hsh_app/modules/student/features/complaint/complaint_screen.dart';
 import 'package:hsh_app/modules/student/features/holiday/holiday_screen.dart';
 import 'package:hsh_app/modules/student/features/notes/notes_screen.dart';
 import 'package:hsh_app/modules/student/features/payment/payment_screen.dart';
 import 'package:hsh_app/modules/student/features/services/all_services_screen.dart';
 import 'package:hsh_app/modules/student/features/vehicle/vehicle_registration_screen.dart';
 import 'package:hsh_app/modules/student/features/orders/order_details_screen.dart';
-import 'package:hsh_app/modules/student/features/profile/profile_screen.dart';
-import 'package:hsh_app/modules/student/features/laundry/laundry_screen.dart';
-import 'package:hsh_app/modules/student/features/complaint/add_complaint_screen.dart';
 import 'package:hsh_app/modules/student/features/holiday/holiday_form.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_details_screen.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
