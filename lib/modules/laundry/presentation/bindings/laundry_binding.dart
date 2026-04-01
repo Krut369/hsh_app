@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hsh_app/modules/laundry/data/repositories/laundry_repository_impl.dart';
+import 'package:hsh_app/core/network/api_client.dart';
 import 'package:hsh_app/modules/laundry/data/sources/laundry_local_data_source.dart';
 import 'package:hsh_app/modules/laundry/data/sources/laundry_remote_data_source.dart';
 import 'package:hsh_app/modules/laundry/domain/usecases/get_laundry_orders_usecase.dart';
@@ -13,7 +14,7 @@ class LaundryBinding extends Bindings {
   @override
   void dependencies() {
     // 1. Sources
-    Get.lazyPut(() => LaundryRemoteDataSource());
+    Get.lazyPut(() => LaundryRemoteDataSource(Get.find<ApiClient>()));
     Get.lazyPut(() => LaundryLocalDataSource(Get.find<SharedPreferences>()));
 
     // 2. Repository

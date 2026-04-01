@@ -37,12 +37,12 @@ class ComplaintService {
     );
   }
 
-  /// Update complaint status (Complain role only)
+  /// Update complaint status (Complaint role only)
   Future<ApiResponse> updateComplaintStatus({
     required String complaintId,
     required String status,
   }) async {
-    return await _apiClient.put(
+    return await _apiClient.patch(
       '${ApiConstants.complaints}/$complaintId/status',
       body: {'status': status},
     );
