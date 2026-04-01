@@ -51,7 +51,8 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   json_annotation: ^4.9.0
   uitoolkit:
-    path: ../uitoolkit/uitoolkit
+    git:
+      url: https://github.com/AVDAPPLICATIONS/uitoolkit.git
 
 dev_dependencies:
   flutter_test:

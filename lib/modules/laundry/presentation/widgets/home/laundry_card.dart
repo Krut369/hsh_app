@@ -46,16 +46,23 @@ class LaundryCard extends StatelessWidget {
         break;
     }
 
-    return ModernActionCard(
-      title: 'Student Name', // Should ideally come from order entity
-      subtitle: '${order.orderId} • ${order.totalItems} Items',
-      badgeText: order.status.label,
-      badgeColor: statusColor,
-      statusIndicatorColor: statusColor,
-      footerLabel: DateFormat('MMM d, h:mm a').format(order.date),
-      buttonText: actionLabel,
-      onButtonPressed: isFinished ? null : onActionTap,
-      onTap: onTap,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: ModernActionCard(
+          title: 'Student Name', 
+          subtitle: '${order.orderId} • ${order.totalItems} Items',
+          badgeText: order.status.label,
+          badgeColor: statusColor,
+          statusIndicatorColor: statusColor,
+          footerLabel: DateFormat('MMM d, h:mm a').format(order.date),
+          buttonText: actionLabel,
+          onButtonPressed: isFinished ? null : onActionTap,
+          onTap: null, // Managed by parent InkWell
+        ),
+      ),
     );
   }
 }
