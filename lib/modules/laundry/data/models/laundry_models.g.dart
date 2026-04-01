@@ -8,9 +8,9 @@ part of 'laundry_models.dart';
 
 LaundryItemModel _$LaundryItemModelFromJson(Map<String, dynamic> json) =>
     LaundryItemModel(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       name: json['name'] as String,
-      iconCodePoint: (json['iconCodePoint'] as num).toInt(),
+      iconCodePoint: (json['iconCodePoint'] as num?)?.toInt(),
       iconFontFamily: json['iconFontFamily'] as String?,
       iconFontPackage: json['iconFontPackage'] as String?,
       quantity: (json['quantity'] as num).toInt(),
@@ -30,9 +30,10 @@ Map<String, dynamic> _$LaundryItemModelToJson(LaundryItemModel instance) =>
 
 LaundryOrderModel _$LaundryOrderModelFromJson(Map<String, dynamic> json) =>
     LaundryOrderModel(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       orderId: json['orderId'] as String,
-      date: DateTime.parse(json['date'] as String),
+      date:
+          json['date'] == null ? null : DateTime.parse(json['date'] as String),
       totalItems: (json['totalItems'] as num).toInt(),
       serviceType: json['serviceType'] as String,
       status: json['status'] as String,
@@ -46,7 +47,7 @@ Map<String, dynamic> _$LaundryOrderModelToJson(LaundryOrderModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'orderId': instance.orderId,
-      'date': instance.date.toIso8601String(),
+      'date': instance.date?.toIso8601String(),
       'totalItems': instance.totalItems,
       'serviceType': instance.serviceType,
       'status': instance.status,
