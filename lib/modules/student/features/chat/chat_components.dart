@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
 
 class ChatListTile extends StatelessWidget {
@@ -263,76 +262,43 @@ class ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
-    final borderRadius = BorderRadius.only(
-      topLeft: const Radius.circular(20),
-      topRight: const Radius.circular(20),
-      bottomLeft: isMe
-          ? const Radius.circular(20)
-          : (isFirstInSequence ? const Radius.circular(4) : const Radius.circular(20)),
-      bottomRight: isMe
-          ? (isFirstInSequence ? const Radius.circular(4) : const Radius.circular(20))
-          : const Radius.circular(20),
-    );
-
     return Padding(
-      padding: EdgeInsets.only(
-          top: isFirstInSequence ? 8.0 : 2.0,
-          bottom: 2.0,
-          left: 16,
-          right: 16),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         crossAxisAlignment:
             isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          // Time & Sender Label
-          if (isFirstInSequence)
-            Padding(
-              padding: EdgeInsets.only(
-                  bottom: 4,
-                  left: isMe ? 0 : (showAvatar ? 44 : 2), 
-                  right: isMe ? 2 : 0),
-              child: Text(
-                isMe ? 'You • $time' : '${senderName ?? "Support"} • $time',
-                style: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-
           Row(
             mainAxisAlignment:
                 isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (!isMe && showAvatar)
-                SizedBox(
-                  width: 32,
-                  child: isFirstInSequence
-                      ? const CircleAvatar(
-                          radius: 16,
-                          backgroundColor: Color(0xFFE0E0E0),
-                          child: Icon(Icons.person,
-                              color: Colors.white, size: 20),
-                        )
-                      : null,
+                const CircleAvatar(
+                  radius: 14,
+                  backgroundColor: Color(0xFFD1D5DB),
+                  child: Icon(Icons.person, color: Colors.white, size: 18),
                 ),
               if (!isMe && showAvatar) const SizedBox(width: 8),
+              if (!isMe && !showAvatar) const SizedBox(width: 36),
 
               Flexible(
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isMe ? AppColors.primary : const Color(0xFFF2F4F7),
-                    borderRadius: borderRadius,
+                    color: isMe ? AppColors.headerBlue : Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(20),
+                      topRight: const Radius.circular(20),
+                      bottomLeft: Radius.circular(isMe ? 20 : 4),
+                      bottomRight: Radius.circular(isMe ? 4 : 20),
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
-                        blurRadius: 2,
-                        offset: const Offset(0, 1),
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
@@ -340,13 +306,33 @@ class ChatBubble extends StatelessWidget {
                     message,
                     style: TextStyle(
                       color: isMe ? Colors.white : Colors.black87,
-                      fontSize: 15,
+                      fontSize: 14,
                       height: 1.4,
                     ),
                   ),
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: EdgeInsets.only(left: isMe ? 0 : 44, right: isMe ? 4 : 0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  time,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 10,
+                  ),
+                ),
+                if (isMe) ...[
+                  const SizedBox(width: 4),
+                  const Icon(Icons.done_all, color: Color(0xFF3B82F6), size: 14),
+                ],
+              ],
+            ),
           ),
         ],
       ),
@@ -364,18 +350,25 @@ class DateChip extends StatelessWidget {
     return Center(
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 20),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFFF0F2F5),
-          borderRadius: BorderRadius.circular(12),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+             BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+             )
+          ],
         ),
         child: Text(
-          label,
+          label.toUpperCase(),
           style: TextStyle(
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w600,
-            fontSize: 11,
-            letterSpacing: 0.3,
+            color: Colors.grey[400],
+            fontWeight: FontWeight.bold,
+            fontSize: 10,
+            letterSpacing: 1.0,
           ),
         ),
       ),
@@ -414,75 +407,59 @@ class _ChatInputState extends State<ChatInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          )
-        ],
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      decoration: const BoxDecoration(
+        color: Colors.transparent, // Transparent to show background Color
       ),
       child: SafeArea(
-        child: Row(
-          children: [
-            // Attachments Button
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.add, color: AppColors.primary),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            ],
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.attach_file, color: Colors.grey[400]),
                 onPressed: () {},
-                splashRadius: 24,
-                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F7FA),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.transparent),
-                ),
+              Expanded(
                 child: TextField(
                   controller: _controller,
-                  decoration: const InputDecoration(
-                    hintText: AppText.typeMessage,
-                    hintStyle: TextStyle(color: Colors.grey),
+                  decoration: InputDecoration(
+                    hintText: 'Type a message...',
+                    hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
                     border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 10),
-                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
-                  textCapitalization: TextCapitalization.sentences,
-                  style: const TextStyle(fontSize: 15),
-                  minLines: 1,
-                  maxLines: 4,
+                  style: const TextStyle(fontSize: 14),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
+              IconButton(
+                icon: Icon(Icons.sentiment_satisfied_alt_outlined, color: Colors.grey[400]),
+                onPressed: () {},
               ),
-              child: IconButton(
-                icon: const Icon(Icons.send_rounded,
-                    color: Colors.white, size: 20),
-                onPressed: _handleSend,
-                splashRadius: 24,
-                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+              Container(
+                margin: const EdgeInsets.only(left: 4),
+                decoration: const BoxDecoration(
+                  color: AppColors.headerBlue,
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.near_me, color: Colors.white, size: 20),
+                  onPressed: _handleSend,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

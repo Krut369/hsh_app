@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/modules/student/features/laundry/laundry_utils.dart';
-import 'package:hsh_app/modules/student/features/laundry/widgets/laundry_status_chip.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:uitoolkit/uitoolkit.dart' as ui;
+import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
 
 class LaundryCard extends StatelessWidget {
   final LaundryOrderEntity order;
@@ -20,132 +19,184 @@ class LaundryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor = LaundryUtils.getStatusColor(order.status);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: statusColor.withValues(alpha: 0.5), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        // ClipRRect so the left strip respects rounded corners
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Icon Section
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFEBF3F5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        LaundryUtils.getServiceIcon(order.serviceType),
-                        color: AppColors.headerBlue,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    
-                    // Service and Date Section
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ui.ModernText(
-                            order.serviceType,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.headerBlue,
-                          ),
-                          const SizedBox(height: 4),
-                          ui.ModernText(
-                            DateFormat('dd MMM yyyy').format(order.date),
-                            fontSize: 12,
-                            color: Colors.grey[500]!,
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    // Status Badge
-                    LaundryStatusChip(status: order.status),
-                  ],
-                ),
-                
-                if (order.items.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  const Divider(height: 1, color: Color(0xFFEBF3F5)),
-                  const SizedBox(height: 16),
-                  
-                  // Details Section (Primary Item)
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.local_laundry_service_rounded,
-                        size: 18,
-                        color: Colors.grey,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ui.ModernText(
-                          "${order.items.first.name} (${order.items.first.quantity} units)",
-                          fontSize: 14,
-                          color: AppColors.headerBlue.withValues(alpha: 0.8),
-                          maxLines: 2,
+                // ── Left status-coloured accent strip ───────────────────
+                Container(width: 5, color: statusColor),
+
+                // ── Card content ────────────────────────────────────────
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Top row: icon + service/date + status chip
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Service icon circle
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFEBF3F5),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                LaundryUtils.getServiceIcon(order.serviceType),
+                                color: AppColors.headerBlue,
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+
+                            // Service type + date
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ModernText(
+                                    order.serviceType,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.headerBlue,
+                                  ),
+                                  const SizedBox(height: 3),
+                                  ModernText(
+                                    DateFormat('d MMM yyyy').format(order.date),
+                                    fontSize: 12,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(width: 8),
+
+                            // Status chip
+                            _LaundryStatusChip(
+                              status: order.status,
+                              color: statusColor,
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  
-                  // More items counter
-                  if (order.items.length > 1)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10, left: 30),
-                      child: ui.ModernText(
-                        "+ ${order.items.length - 1} more items",
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.headerBlue,
-                      ),
+
+                        const SizedBox(height: 14),
+                        Divider(height: 1, color: Colors.grey.shade200),
+                        const SizedBox(height: 12),
+
+                        // Items section
+                        if (order.items.isNotEmpty) ...[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.menu,
+                                  size: 18, color: Colors.grey.shade400),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: ModernText(
+                                  '${order.items.first.name} (${order.items.first.quantity} units)',
+                                  fontSize: 13,
+                                  color: AppColors.headerBlue
+                                      .withValues(alpha: 0.8),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (order.items.length > 1)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 8, left: 28),
+                              child: ModernText(
+                                '+ ${order.items.length - 1} more items',
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.headerBlue,
+                              ),
+                            ),
+                        ] else
+                          Row(
+                            children: [
+                              Icon(Icons.info_outline_rounded,
+                                  size: 18, color: Colors.grey.shade400),
+                              const SizedBox(width: 10),
+                              ModernText(
+                                'No items in this order',
+                                fontSize: 13,
+                                color: Colors.grey.shade500,
+                              ),
+                            ],
+                          ),
+                      ],
                     ),
-                ] else ...[
-                  const SizedBox(height: 16),
-                  const Divider(height: 1, color: Color(0xFFEBF3F5)),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      const Icon(Icons.info_outline_rounded, size: 18, color: Colors.grey),
-                      const SizedBox(width: 12),
-                      ui.ModernText(
-                        "No items in this order",
-                        fontSize: 14,
-                        color: Colors.grey[500]!,
-                      ),
-                    ],
                   ),
-                ],
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Laundry Status Chip ────────────────────────────────────────────────────────
+
+class _LaundryStatusChip extends StatelessWidget {
+  final OrderStatus status;
+  final Color color;
+
+  const _LaundryStatusChip({required this.status, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(maxWidth: 115),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 1.2),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(LaundryUtils.getStatusIcon(status), color: color, size: 13),
+          const SizedBox(width: 5),
+          Flexible(
+            child: ModernText(
+              status.label,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: color,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -23,6 +23,21 @@ class LaundryRepositoryImpl implements LaundryRepository {
   }
 
   @override
+  Future<void> createOrder(LaundryOrderEntity order) async {
+    final Map<String, dynamic> body = {
+      'serviceType': order.serviceType,
+      'items': order.items
+          .map((item) => {
+                'name': item.name,
+                'quantity': item.quantity,
+                'selectedService': item.selectedService.name,
+              })
+          .toList(),
+    };
+    await _remoteDataSource.createOrder(body);
+  }
+
+  @override
   Future<LaundryCostEntity> getLaundryCost() async {
     final model = await _remoteDataSource.getLaundryCost();
     return model.toEntity();

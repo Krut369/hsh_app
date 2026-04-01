@@ -22,73 +22,75 @@ class ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print(profile.imagePath);
-   return ModernCard(
-     color: Colors.white,
-     padding: EdgeInsetsGeometry.all(16),
-     child: Row(
-       children: [
+    return ModernCard(
+      color: Colors.white,
+      padding: EdgeInsetsGeometry.all(16),
+      child: Row(
+        children: [
           ModernAvatar(
             backgroundColor: Colors.white,
-            imageUrl: profile.imagePath.contains("http") ? profile.imagePath : "https://i.pravatar.cc/40",
+            imageUrl: profile.imagePath.contains("http")
+                ? profile.imagePath
+                : "https://i.pravatar.cc/40",
             size: 65,
           ),
-         const SizedBox(width: 16),
-         Expanded(
-           child: Column(
-             crossAxisAlignment: CrossAxisAlignment.start,
-             children: [
-               ModernText(
-                 '${AppText.goodMorning}, ${profile.name.split(' ').first}',
-                 color: Colors.black87,
-                 fontWeight: FontWeight.w600,
-                 fontSize: 18,
-               ),
-               const SizedBox(height: 8),
-               Row(
-                 children: [
-                   Container(
-                     padding: const EdgeInsets.symmetric(
-                       horizontal: 12,
-                       vertical: 6,
-                     ),
-                     decoration: BoxDecoration(
-                       color: AppColors.primary.withOpacity(0.1),
-                       borderRadius: BorderRadius.circular(20),
-                     ),
-                     child: Row(
-                       mainAxisSize: MainAxisSize.min,
-                       children: [
-                         Icon(Icons.meeting_room_outlined,
-                             size: 14, color: AppColors.primary),
-                         const SizedBox(width: 4),
-                         ModernText(
-                             'Room ${profile.room}',
-                           color: AppColors.primary,
-                           fontSize: 12,
-                           fontWeight: FontWeight.bold,
-                         ),
-                       ],
-                     ),
-                   ),
-                   const SizedBox(width: 12),
-                   const Flexible(
-                     child: ModernText(
-                       AppText.premiumResident,
-                       overflow: TextOverflow.ellipsis,
-                       maxLines: 1,
-                       color: Colors.grey,
-                       fontSize: 13,
-                       fontWeight: FontWeight.w500,
-                     ),
-                   )
-                 ],
-               ),
-             ],
-           ),
-         ),
-       ],
-     ),
-   );
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ModernText(
+                  '${AppText.goodMorning}, ${profile.name.split(' ').first}',
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.meeting_room_outlined,
+                              size: 14, color: AppColors.primary),
+                          const SizedBox(width: 4),
+                          ModernText(
+                            'Room ${profile.room}',
+                            color: AppColors.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Flexible(
+                      child: ModernText(
+                        AppText.premiumResident,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        color: Colors.grey,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
     // return Container(
     //   width: double.infinity,
     //   padding: const EdgeInsets.all(20),

@@ -20,20 +20,20 @@ class VehicleDropdown extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.2)),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          hint: Text(hint, style: TextStyle(color: AppColors.textPrimary.withOpacity(0.5))),
-          icon: const Icon(Icons.arrow_drop_down_circle_outlined, color: AppColors.primary),
+          hint: Text(hint, style: TextStyle(color: Colors.grey.withOpacity(0.7), fontSize: 14)),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey),
           items: items.map((String item) {
             return DropdownMenuItem<String>(
               value: item,
-              child: Text(item, style: const TextStyle(color: AppColors.textPrimary)),
+              child: Text(item, style: const TextStyle(color: Colors.black87, fontSize: 14)),
             );
           }).toList(),
           onChanged: onChanged,

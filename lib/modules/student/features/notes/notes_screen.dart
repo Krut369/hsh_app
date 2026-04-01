@@ -198,25 +198,12 @@ class _NotesScreenState extends State<NotesScreen> {
           },
         );
       }),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton(
-            heroTag: 'notes_checklist_fab',
-            mini: true,
-            onPressed: () => Get.to(() => const NoteEditorScreen(startInChecklistMode: true)),
-            backgroundColor: AppColors.secondary,
-            child: const Icon(Icons.checklist, color: AppColors.white, size: 20),
-          ),
-          const SizedBox(height: 12),
-          FloatingActionButton(
-            heroTag: 'notes_fab',
-            onPressed: () => Get.to(() => const NoteEditorScreen()),
-            backgroundColor: AppColors.primary,
-            elevation: 4,
-            child: const Icon(Icons.add, color: AppColors.white),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'notes_fab',
+        onPressed: () => Get.to(() => const NoteEditorScreen()),
+        backgroundColor: AppColors.primary,
+        elevation: 4,
+        child: const Icon(Icons.add, color: AppColors.white),
       ),
     );
   }
