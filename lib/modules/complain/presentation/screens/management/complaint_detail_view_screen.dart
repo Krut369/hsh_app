@@ -104,7 +104,8 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
           color: isSelected ? const Color(0xFFF8FAFC) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? const Color(0xFF1E293B) : const Color(0xFFF3F4F6),
+            color:
+                isSelected ? const Color(0xFF1E293B) : const Color(0xFFF3F4F6),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -126,22 +127,30 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
                 children: [
                   Row(
                     children: [
-                      ModernText(title, fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+                      ModernText(title,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1E293B)),
                       if (isCurrent) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: const Color(0xFFE2E8F0),
                             borderRadius: BorderRadius.circular(100),
                           ),
-                          child: ModernText('CURRENT', fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.surfaceDark),
+                          child: ModernText('CURRENT',
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.surfaceDark),
                         ),
                       ],
                     ],
                   ),
                   const SizedBox(height: 4),
-                  ModernText(subtitle, fontSize: 13, color: const Color(0xFF6B7280)),
+                  ModernText(subtitle,
+                      fontSize: 13, color: const Color(0xFF6B7280)),
                 ],
               ),
             ),
@@ -152,7 +161,9 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+                  color: isSelected
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFCBD5E1),
                   width: isSelected ? 7 : 2,
                 ),
                 color: Colors.white,
@@ -166,10 +177,13 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
 
   void _showStatusUpdateSheet() {
     ComplaintStatus? tempStatus = selectedStatus;
-    
+
     showModernSheet(
       context: context,
       title: 'Update ${widget.complaint.complaintType} Status',
+      subtitle: 'Select the current progress of the complaint',
+      centerTitle: true,
+      actionText: 'Confirm Update',
       actionIcon: Icons.update,
       onAction: () {
         if (tempStatus != null && tempStatus != selectedStatus) {
@@ -393,13 +407,7 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
     );
   }
 
-  Widget _buildImagesSection() {
-    // Collect all valid image urls
-    final imagePaths = widget.complaint.issues.values
-        .where((i) => i.imagePath != null && i.imagePath!.isNotEmpty)
-        .map((i) => i.imagePath!)
-        .toList();
-
+  Widget _buildImagesSection(List<String> imagePaths) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -459,23 +467,30 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
         ? 'The main light fixture in the kitchen area is flickering constantly and occasionally making a buzzing sound. This started after the heavy rains yesterday. It poses a safety risk as it\'s near the prep station.'
         : widget.complaint.issues.values.first.description;
 
+    final imagePaths = widget.complaint.issues.values
+        .where((i) => i.imagePath != null && i.imagePath!.isNotEmpty)
+        .map((i) => i.imagePath!)
+        .toList();
+
     return ModernScaffold(
       appBar: ModernAppBar(
         title: 'Complaint Details',
         showBack: true,
         onBack: () => Navigator.pop(context),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.white),
-            onPressed: () {}, // Action for 3-dots
-          )
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.more_vert, color: Colors.white),
+        //     onPressed: () {}, // Action for 3-dots
+        //   )
+        // ],
       ),
-      backgroundColor: hsh.AppColors.background, // Overall white background to match image exactly (Wait, design shows slightly offwhite behind card? Or card has border? No, background is purely white except for Card.) - Let's use white for everything or F9FAFB if top card stands out
+      backgroundColor: hsh.AppColors
+          .background, // Overall white background to match image exactly (Wait, design shows slightly offwhite behind card? Or card has border? No, background is purely white except for Card.) - Let's use white for everything or F9FAFB if top card stands out
       bottomNavigationBar: ModernBottomBar(
         text: 'Update Status',
         icon: Icons.sort,
         onPressed: _showStatusUpdateSheet,
+        backgroundColor: hsh.AppColors.background,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -571,8 +586,10 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
             const SizedBox(height: 32),
             _buildDetailsGrid(),
 
-            const SizedBox(height: 32),
-            _buildImagesSection(),
+            if (imagePaths.isNotEmpty) ...[
+              const SizedBox(height: 32),
+              _buildImagesSection(imagePaths),
+            ],
 
             const SizedBox(height: 16),
           ],

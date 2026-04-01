@@ -12,7 +12,7 @@ AuthUserModel _$AuthUserModelFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String?,
       role: json['role'] == null
           ? UserRole.student
-          : UserRole.parse(json['role'] as String?),
+          : UserRole.parse(json['role']),
       roomNumber: json['room_number'] as String?,
       email: json['email'] as String?,
       hostelBlock: json['hostel_block'] as String?,

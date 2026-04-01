@@ -7,8 +7,31 @@ import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/complain/presentation/controllers/complain_controller.dart';
 import 'complaint_detail_view_screen.dart';
 
-class ComplaintAdminScreen extends GetView<ComplainController> {
+class ComplaintAdminScreen extends StatefulWidget {
   const ComplaintAdminScreen({super.key});
+
+  @override
+  State<ComplaintAdminScreen> createState() => _ComplaintAdminScreenState();
+}
+
+class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
+  final ComplainController controller = Get.find<ComplainController>();
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearchVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   /// Returns the accent color for the left card border based on status.
   Color _statusAccentColor(ComplaintStatus status) {
@@ -78,50 +101,84 @@ class ComplaintAdminScreen extends GetView<ComplainController> {
       backgroundColor: hsh.AppColors.background,
       appBar: ModernAppBar(
         title: 'Complaint Management',
-        onSearchPressed: () {},
-          onFilterPressed: () => _showFilterSheet(context),
+        onSearchPressed: () {
+          setState(() {
+            _isSearchVisible = !_isSearchVisible;
+            if (!_isSearchVisible) _searchController.clear();
+          });
+        },
+        onFilterPressed: () => _showFilterSheet(context),
       ),
-      body: Obx(() {
-        if (controller.isLoading.value && controller.complaints.isEmpty) {
-          return const Center(child: ModernLoader());
-        }
-        if (controller.error.value != null) {
-          return Center(
-            child: Text(
-              'Error loading complaints:\n${controller.error.value}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red),
+      body: Column(
+        children: [
+          if (_isSearchVisible)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ModernSearchField(
+                hint: 'Search by ID, type, or description...',
+                onChanged: (val) => setState(() {}),
+                controller: _searchController,
+                onFilterPressed: () => _showFilterSheet(context),
+              ),
             ),
-          );
-        }
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value && controller.complaints.isEmpty) {
+                return const Center(child: ModernLoader());
+              }
+              if (controller.error.value != null) {
+                return Center(
+                  child: Text(
+                    'Error loading complaints:\n${controller.error.value}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                );
+              }
 
-        final list = controller.filteredComplaints;
+              final searchQuery = _searchController.text.toLowerCase();
+              final list = controller.filteredComplaints.where((complaint) {
+                if (searchQuery.isEmpty) return true;
+                final idStr = _complaintIdStr(complaint).toLowerCase();
+                final type = complaint.complaintType.toLowerCase();
+                final desc = _descriptionText(complaint).toLowerCase();
+                final location = _locationText(complaint).toLowerCase();
+                return idStr.contains(searchQuery) ||
+                    type.contains(searchQuery) ||
+                    desc.contains(searchQuery) ||
+                    location.contains(searchQuery);
+              }).toList();
 
-        if (list.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.inbox_rounded,
-                    size: 64, color: Colors.grey.shade400),
-                const SizedBox(height: 12),
-                ModernText(
-                  'No complaints found',
-                  fontSize: 16,
-                  color: Colors.grey.shade500,
-                ),
-              ],
-            ),
-          );
-        }
+              if (list.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.inbox_rounded,
+                          size: 64, color: Colors.grey.shade400),
+                      const SizedBox(height: 12),
+                      ModernText(
+                        searchQuery.isNotEmpty
+                            ? 'No complaints matching "$searchQuery"'
+                            : 'No complaints found',
+                        fontSize: 16,
+                        color: Colors.grey.shade500,
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          itemCount: list.length,
-          itemBuilder: (context, index) =>
-              _buildComplaintCard(context, list[index]),
-        );
-      }),
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                itemCount: list.length,
+                itemBuilder: (context, index) =>
+                    _buildComplaintCard(context, list[index]),
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 

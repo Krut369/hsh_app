@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uitoolkit/uitoolkit.dart';
 import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
+import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:get/get.dart';
 
 class CostManagementScreen extends StatefulWidget {
@@ -32,93 +33,123 @@ class _CostManagementScreenState extends State<CostManagementScreen> {
       title: 'Cost Management',
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const ModernText(
-              'Revenue Overview',
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-            const SizedBox(height: 16),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildStatCard(
-                    title: 'This Month',
-                    value: '₹2,450',
-                    icon: Icons.currency_rupee,
-                    color: Colors.tealAccent.shade700,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildStatCard(
-                    title: 'Orders',
-                    value: '24',
-                    icon: Icons.inventory_2_outlined,
-                    color: Colors.indigoAccent,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildStatCard(
-                    title: 'Avg. Order',
-                    value: '₹102',
-                    icon: Icons.trending_up,
-                    color: Colors.orange,
-                  ),
-                ],
+        child: Obx(() {
+          // Calculate real revenue data from orders
+          final now = DateTime.now();
+          final thisMonthOrders = controller.orders
+              .where(
+                  (o) => o.date.month == now.month && o.date.year == now.year)
+              .toList();
+          final completedThisMonth = thisMonthOrders
+              .where((o) => o.status == OrderStatus.completed)
+              .toList();
+
+          // Calculate total revenue from completed orders
+          double totalRevenue = 0;
+          for (final order in completedThisMonth) {
+            for (final item in order.items) {
+              switch (item.selectedService) {
+                case LaundryServiceType.wash:
+                  totalRevenue += item.quantity * controller.washPrice.value;
+                  break;
+                case LaundryServiceType.press:
+                  totalRevenue += item.quantity * controller.pressPrice.value;
+                  break;
+                case LaundryServiceType.both:
+                  totalRevenue += item.quantity * controller.bothPrice.value;
+                  break;
+              }
+            }
+          }
+
+          final totalOrders = thisMonthOrders.length;
+          final avgOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0.0;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Revenue Overview Section
+              const ModernText(
+                'Revenue Overview',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
-            ),
-            const SizedBox(height: 32),
-            const ModernText(
-              'Service Prices',
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-            const ModernText(
-              'Set cost per cloth for each service',
-              fontSize: 12,
-              isSecondary: true,
-            ),
-            const SizedBox(height: 24),
-            Obx(() => Column(
-                  children: [
-                    _buildServicePriceCard(
-                      title: 'Washing',
-                      subtitle: 'Wash only',
-                      icon: Icons.local_laundry_service_outlined,
-                      price: controller.washPrice.value,
-                      accentColor: Colors.blue,
-                      onChanged: (val) => controller.washPrice.value = val,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildServicePriceCard(
-                      title: 'Pressing (Iron)',
-                      subtitle: 'Iron only',
-                      icon: Icons.auto_awesome_outlined,
-                      price: controller.pressPrice.value,
-                      accentColor: Colors.tealAccent.shade700,
-                      onChanged: (val) => controller.pressPrice.value = val,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildServicePriceCard(
-                      title: 'Both (Wash + Press)',
-                      subtitle: 'Full service',
-                      icon: Icons.checkroom_outlined,
-                      price: controller.bothPrice.value,
-                      accentColor: Colors.orange,
-                      onChanged: (val) => controller.bothPrice.value = val,
-                    ),
-                  ],
-                )),
-            const SizedBox(height: 32),
-            ModernButton(
-              text: 'Save Changes',
-              icon: Icons.save_outlined,
-              onPressed: _saveCosts,
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
+              const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildStatCard(
+                        title: 'This Month',
+                        value: '₹${totalRevenue.toStringAsFixed(0)}',
+                        icon: Icons.currency_rupee,
+                        color: Colors.tealAccent.shade700,
+                      ),
+                      const SizedBox(width: 12),
+                      _buildStatCard(
+                        title: 'Orders',
+                        value: totalOrders.toString(),
+                        icon: Icons.inventory_2_outlined,
+                        color: Colors.indigoAccent,
+                      ),
+                      const SizedBox(width: 12),
+                      _buildStatCard(
+                        title: 'Avg. Order',
+                        value: '₹${avgOrder.toStringAsFixed(0)}',
+                        icon: Icons.trending_up,
+                        color: Colors.orange,
+                      ),
+                    ],
+                  ),
+              const SizedBox(height: 32),
+
+              // Service Prices Section
+              const ModernText(
+                'Service Prices',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              const ModernText(
+                'Set cost per cloth for each service',
+                fontSize: 12,
+                isSecondary: true,
+              ),
+              const SizedBox(height: 24),
+              _buildServicePriceCard(
+                title: 'Washing',
+                subtitle: 'Wash only',
+                icon: Icons.local_laundry_service_outlined,
+                price: controller.washPrice.value,
+                accentColor: Colors.blue,
+                onChanged: (val) => controller.washPrice.value = val,
+              ),
+              const SizedBox(height: 16),
+              _buildServicePriceCard(
+                title: 'Pressing (Iron)',
+                subtitle: 'Iron only',
+                icon: Icons.auto_awesome_outlined,
+                price: controller.pressPrice.value,
+                accentColor: Colors.tealAccent.shade700,
+                onChanged: (val) => controller.pressPrice.value = val,
+              ),
+              const SizedBox(height: 16),
+              _buildServicePriceCard(
+                title: 'Both (Wash + Press)',
+                subtitle: 'Full service',
+                icon: Icons.checkroom_outlined,
+                price: controller.bothPrice.value,
+                accentColor: Colors.orange,
+                onChanged: (val) => controller.bothPrice.value = val,
+              ),
+              const SizedBox(height: 32),
+              ModernButton(
+                text: 'Save Changes',
+                icon: Icons.save_outlined,
+                onPressed: _saveCosts,
+              ),
+              const SizedBox(height: 20),
+            ],
+          );
+        }),
       ),
     );
   }

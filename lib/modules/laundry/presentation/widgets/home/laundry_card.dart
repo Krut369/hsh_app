@@ -55,7 +55,7 @@ class LaundryCard extends StatelessWidget {
       footerLabel: DateFormat('MMM d, h:mm a').format(order.date),
       buttonText: actionLabel,
       onButtonPressed: isFinished ? null : onActionTap,
-      onTap: null,
+      onTap: onTap,
     );
   }
 }

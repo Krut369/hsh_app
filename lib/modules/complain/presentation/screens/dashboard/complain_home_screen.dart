@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:hsh_app/core/theme/app_colors.dart' as hsh;
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
 import 'package:hsh_app/modules/complain/presentation/controllers/complain_controller.dart';
+import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:uitoolkit/uitoolkit.dart';
 
 class ComplainHomeScreen extends GetView<ComplainController> {
@@ -17,14 +18,14 @@ class ComplainHomeScreen extends GetView<ComplainController> {
       appBar: ModernAppBar(
         title: 'Complaint Manager',
         actions: [
-          GestureDetector(
-            onTap: () {},
-            behavior: HitTestBehavior.opaque,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Icon(Icons.notifications_outlined, color: Colors.white, size: 24),
-            ),
-          ),
+          // GestureDetector(
+          //   onTap: () {},
+          //   behavior: HitTestBehavior.opaque,
+          //   child: const Padding(
+          //     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          //     child: Icon(Icons.notifications_outlined, color: Colors.white, size: 24),
+          //   ),
+          // ),
           GestureDetector(
             onTap: () => authController.logout(),
             behavior: HitTestBehavior.opaque,
@@ -66,25 +67,35 @@ class ComplainHomeScreen extends GetView<ComplainController> {
                     color: hsh.AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Welcome back, Administrator',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+                // Text(
+                //   'Welcome back, Administrator',
+                //   style: TextStyle(
+                //     fontSize: 14,
+                //     color: Colors.grey[600],
+                //   ),
+                // ),
+                // const SizedBox(height: 24),
                 // Stat Cards Grid
+                // Total Complaints - Full Width
+                _StatCard(
+                  title: 'TOTAL COMPLAINTS',
+                  value: stats.total.toString(),
+                  icon: Icons.bar_chart,
+                  iconColor: const Color(0xFF2196F3),
+                  borderColor: const Color(0xFFBBDEFB),
+                ),
+                const SizedBox(height: 16),
+                // Pending + Resolved Row
                 Row(
                   children: [
                     Expanded(
                       child: _StatCard(
-                        title: 'TOTAL COMPLAINTS',
-                        value: stats.total.toString(),
-                        icon: Icons.bar_chart,
-                        iconColor: const Color(0xFF2196F3),
-                        borderColor: const Color(0xFFBBDEFB),
+                        title: 'PENDING',
+                        value: stats.pending.toString(),
+                        icon: Icons.assignment_outlined,
+                        iconColor: const Color(0xFFFF9800),
+                        borderColor: const Color(0xFFFFE0B2),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -99,21 +110,59 @@ class ComplainHomeScreen extends GetView<ComplainController> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _StatCard(
-                        title: 'PENDING',
-                        value: stats.pending.toString(),
-                        icon: Icons.assignment_outlined,
-                        iconColor: const Color(0xFFFF9800),
-                        borderColor: const Color(0xFFFFE0B2),
-                      ),
-                    ),
-                    const Expanded(child: SizedBox()),
-                  ],
+                const SizedBox(height: 32),
+
+                // Quick Actions Section
+                const Text(
+                  'Quick Actions',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: hsh.AppColors.textPrimary,
+                  ),
                 ),
+                const SizedBox(height: 16),
+
+                ModernListTile(
+                  title: 'View All Complaints',
+                  leading: const Icon(Icons.list_alt, color: Color(0xFF2196F3)),
+                  onTap: () {
+                    controller.setFilter(null);
+                    controller.changeTab(1);
+                  },
+                ),
+
+                ModernListTile(
+                  title: 'Pending Complaints',
+                  leading: const Icon(Icons.access_time_rounded, color: Color(0xFFFF9800)),
+                  trailing: stats.pending > 0
+                      ? ModernBadge(
+                          text: stats.pending.toString(),
+                          type: BadgeType.warning,
+                        )
+                      : null,
+                  onTap: () {
+                    controller.setFilter(ComplaintStatus.pending);
+                    controller.changeTab(1);
+                  },
+                ),
+
+                ModernListTile(
+                  title: 'Resolved Complaints',
+                  leading: const Icon(Icons.check_circle_outline, color: Color(0xFF26A69A)),
+                  trailing: stats.resolved > 0
+                      ? ModernBadge(
+                          text: stats.resolved.toString(),
+                          type: BadgeType.success,
+                        )
+                      : null,
+                  onTap: () {
+                    controller.setFilter(ComplaintStatus.resolved);
+                    controller.changeTab(1);
+                  },
+                ),
+
+                const SizedBox(height: 100),
               ],
             ),
           ),
@@ -141,8 +190,8 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 110,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      height: 90,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -180,7 +229,7 @@ class _StatCard extends StatelessWidget {
               Text(
                 value,
                 style: const TextStyle(
-                  fontSize: 34,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                   height: 1,

@@ -5,9 +5,25 @@ import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hsh_app/modules/laundry/presentation/widgets/home/laundry_card.dart';
+import 'package:hsh_app/modules/laundry/presentation/widgets/home/status_update_sheet.dart';
 
 class LaundryHomeScreen extends GetView<LaundryController> {
   const LaundryHomeScreen({super.key});
+
+  void _showUpdateStatusSheet(BuildContext context, LaundryOrderEntity order) {
+    showModernSheet(
+      context: context,
+      title: 'Update Status',
+      child: ModernStatusUpdateSheet(
+        currentStatus: order.status,
+        onStatusSelected: (newStatus) {
+          controller.updateOrderStatus(order.id, newStatus);
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +104,37 @@ class LaundryHomeScreen extends GetView<LaundryController> {
                 ],
               ),
               const SizedBox(height: 32),
+
+              // Active Orders Section
+              if (orders.any((o) =>
+                  o.status != OrderStatus.completed &&
+                  o.status != OrderStatus.cancelled)) ...[
+                const ModernText(
+                  'ACTIVE ORDERS',
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.5,
+                ),
+                const SizedBox(height: 16),
+                ...orders
+                    .where((o) =>
+                        o.status != OrderStatus.completed &&
+                        o.status != OrderStatus.cancelled)
+                    .take(3)
+                    .map((order) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: LaundryCard(
+                            order: order,
+                            onTap: () {
+                              context.push('/laundry/order-detail',
+                                  extra: order);
+                            },
+                            onActionTap: () =>
+                                _showUpdateStatusSheet(context, order),
+                          ),
+                        )),
+                const SizedBox(height: 32),
+              ],
 
               // Quick Actions Section
               const ModernText(
