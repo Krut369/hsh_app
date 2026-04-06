@@ -4,7 +4,7 @@ import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/complain/presentation/controllers/complain_controller.dart';
 import 'package:hsh_app/modules/student/features/complaint/widgets/complaint_card.dart';
-import 'package:hsh_app/modules/student/features/complaint/widgets/complaint_details_sheet.dart';
+import 'package:hsh_app/modules/student/features/complaint/complaint_details_screen.dart';
 import 'package:uitoolkit/uitoolkit.dart' as ui;
 
 class ComplaintScreen extends GetView<ComplainController> {
@@ -25,7 +25,7 @@ class ComplaintScreen extends GetView<ComplainController> {
         children: [
           // Custom Header
           _buildHeader(context),
-          
+
           // Complaint List
           Expanded(
             child: Obx(() {
@@ -34,7 +34,7 @@ class ComplaintScreen extends GetView<ComplainController> {
               }
 
               var complaintsList = controller.filteredComplaints;
-              if(complaintsList.isEmpty){
+              if (complaintsList.isEmpty) {
                 final List<Map<String, dynamic>> dummyComplaintsJson = [
                   {
                     "id": "CMP001",
@@ -115,7 +115,8 @@ class ComplaintScreen extends GetView<ComplainController> {
                   itemBuilder: (context, index) {
                     return ComplaintCard(
                       complaint: complaintsList[index],
-                      onTap: () => _showComplaintDetails(context, complaintsList[index]),
+                      onTap: () =>
+                          _showComplaintDetails(context, complaintsList[index]),
                     );
                   },
                 ),
@@ -132,7 +133,7 @@ class ComplaintScreen extends GetView<ComplainController> {
       width: double.infinity,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 20,
-        bottom: 40,
+        bottom: 20,
         left: 24,
         right: 24,
       ),
@@ -148,7 +149,7 @@ class ComplaintScreen extends GetView<ComplainController> {
         children: [
           const ui.ModernText(
             "Complaint",
-            fontSize: 28,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -160,28 +161,29 @@ class ComplaintScreen extends GetView<ComplainController> {
 
   Widget _buildFilterButton(BuildContext context) {
     return Obx(() => GestureDetector(
-      onTap: () => _showFilterDialog(context),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.filter_alt_outlined, color: AppColors.headerBlue, size: 20),
-            const SizedBox(width: 8),
-            ui.ModernText(
-              controller.filter.value?.label ?? "All",
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.headerBlue,
+          onTap: () => _showFilterDialog(context),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
             ),
-          ],
-        ),
-      ),
-    ));
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.filter_alt_outlined,
+                    color: AppColors.headerBlue, size: 15),
+                const SizedBox(width: 8),
+                ui.ModernText(
+                  controller.filter.value?.label ?? "All",
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.headerBlue,
+                ),
+              ],
+            ),
+          ),
+        ));
   }
 
   Widget _buildEmptyState(BuildContext context) {
@@ -245,7 +247,8 @@ class ComplaintScreen extends GetView<ComplainController> {
             ),
             const SizedBox(height: 20),
             _buildFilterOption(null, "All"),
-            ...ComplaintStatus.values.map((status) => _buildFilterOption(status, status.label)),
+            ...ComplaintStatus.values
+                .map((status) => _buildFilterOption(status, status.label)),
             const SizedBox(height: 20),
           ],
         ),
@@ -276,19 +279,6 @@ class ComplaintScreen extends GetView<ComplainController> {
   }
 
   void _showComplaintDetails(BuildContext context, Complaint complaint) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.75,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (_, scrollController) => ComplaintDetailsSheet(
-          complaint: complaint,
-          scrollController: scrollController,
-        ),
-      ),
-    );
+    Get.to(() => ComplaintDetailsScreen(complaint: complaint));
   }
 }

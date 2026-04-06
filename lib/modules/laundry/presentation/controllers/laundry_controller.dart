@@ -58,7 +58,72 @@ class LaundryController extends GetxController {
     error.value = null;
     try {
       final fetchedOrders = await _getOrdersUseCase.execute();
-      _orders.assignAll(fetchedOrders);
+      var ordersList = fetchedOrders.toList();
+      
+      if (ordersList.isEmpty) {
+        ordersList = [
+          LaundryOrderEntity(
+            id: 'd1',
+            orderId: '#ORD20240612111',
+            date: DateTime.now().subtract(const Duration(days: 1)),
+            totalItems: 5,
+            serviceType: 'Wash & Press',
+            status: OrderStatus.inProgress,
+            items: [
+              const LaundryItemEntity(
+                id: 't1',
+                name: 'T-Shirts',
+                icon: Icons.content_cut,
+                quantity: 3,
+                selectedService: LaundryServiceType.wash,
+              ),
+              const LaundryItemEntity(
+                id: 'c1',
+                name: 'Coats',
+                icon: Icons.accessibility_new,
+                quantity: 2,
+                selectedService: LaundryServiceType.press,
+              ),
+            ],
+          ),
+          LaundryOrderEntity(
+            id: 'd2',
+            orderId: '#ORD20240610222',
+            date: DateTime.now().subtract(const Duration(days: 3)),
+            totalItems: 3,
+            serviceType: 'Wash',
+            status: OrderStatus.completed,
+            items: [
+              const LaundryItemEntity(
+                id: 't1',
+                name: 'T-Shirts',
+                icon: Icons.content_cut,
+                quantity: 3,
+                selectedService: LaundryServiceType.wash,
+              ),
+            ],
+          ),
+          LaundryOrderEntity(
+            id: 'd3',
+            orderId: '#ORD20240605333',
+            date: DateTime.now().subtract(const Duration(days: 8)),
+            totalItems: 2,
+            serviceType: 'Press',
+            status: OrderStatus.readyForPickup,
+            items: [
+              const LaundryItemEntity(
+                id: 'c1',
+                name: 'Coats',
+                icon: Icons.accessibility_new,
+                quantity: 2,
+                selectedService: LaundryServiceType.press,
+              ),
+            ],
+          ),
+        ];
+      }
+
+      _orders.assignAll(ordersList);
     } catch (e) {
       error.value = e.toString();
     } finally {

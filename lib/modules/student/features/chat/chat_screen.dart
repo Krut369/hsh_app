@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
 
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_components.dart';
@@ -35,45 +36,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          "Messages",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.primary,
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: Icon(
-              _isSearchVisible ? Icons.close : Icons.search,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              setState(() {
-                _isSearchVisible = !_isSearchVisible;
-                if (!_isSearchVisible) {
-                  _searchController.clear();
-                }
-              });
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              setState(() {
-                isGridView = !isGridView;
-              });
-            },
-          ),
-        ],
-      ),
+      backgroundColor: AppColors.mainBackground,
       body: Obx(() {
         final allConversations = controller.conversations;
         final searchQuery = _searchController.text.toLowerCase();
@@ -84,19 +47,22 @@ class _ChatScreenState extends State<ChatScreen> {
 
         return Column(
           children: [
+            // Navy Arc Header
+            _buildHeader(context),
+
             if (_isSearchVisible)
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: TextField(
                   controller: _searchController,
                   autofocus: true,
                   decoration: InputDecoration(
                     hintText: 'Search message...',
-                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
                     prefixIcon:
-                        const Icon(Icons.search, color: AppColors.primary),
+                        const Icon(Icons.search, color: AppColors.headerBlue),
                     filled: true,
-                    fillColor: Colors.grey[100],
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
@@ -105,12 +71,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
               ),
+
             Expanded(
               child: conversations.isEmpty
-                  ? const Center(child: Text('No messages'))
+                  ? const ChatEmptyState()
                   : isGridView
                       ? GridView.builder(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(20),
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
@@ -136,25 +103,26 @@ class _ChatScreenState extends State<ChatScreen> {
                             );
                           },
                         )
-                      : ListView.separated(
+                      : ListView.builder(
                           itemCount: conversations.length,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          separatorBuilder: (context, index) =>
-                              const Divider(height: 1, indent: 84),
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
                           itemBuilder: (context, index) {
                             final chat = conversations[index];
                             final lastMessage = chat.lastMessage;
 
-                            return ChatListTile(
-                              name: chat.name,
-                              message: lastMessage?.text ?? '',
-                              time: lastMessage?.timeString ?? '',
-                              unreadCount: chat.unreadCount,
-                              isOnline: chat.isOnline,
-                              onTap: () {
-                                Get.toNamed('/student/chat/details',
-                                    arguments: chat.id);
-                              },
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: ChatListTile(
+                                name: chat.name,
+                                message: lastMessage?.text ?? '',
+                                time: lastMessage?.timeString ?? '',
+                                unreadCount: chat.unreadCount,
+                                isOnline: chat.isOnline,
+                                onTap: () {
+                                  Get.toNamed('/student/chat/details',
+                                      arguments: chat.id);
+                                },
+                              ),
                             );
                           },
                         ),
@@ -162,6 +130,68 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 20,
+        bottom: 24,
+        left: 12,
+        right: 20,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.headerBlue,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Get.back(),
+          ),
+          const SizedBox(width: 4),
+          const ModernText(
+            'Messages',
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+          const Spacer(),
+          IconButton(
+            icon: Icon(
+              _isSearchVisible ? Icons.close_rounded : Icons.search_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
+            onPressed: () {
+              setState(() {
+                _isSearchVisible = !_isSearchVisible;
+                if (!_isSearchVisible) {
+                  _searchController.clear();
+                }
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              isGridView ? Icons.view_agenda_outlined : Icons.grid_view_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
+            onPressed: () {
+              setState(() {
+                isGridView = !isGridView;
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 }

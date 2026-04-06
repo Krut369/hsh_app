@@ -94,7 +94,7 @@ class ComplaintCard extends StatelessWidget {
                               ),
                             ),
 
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 10),
 
                             // Status pill chip
                             _StatusChip(

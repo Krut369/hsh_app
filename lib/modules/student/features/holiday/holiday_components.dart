@@ -8,8 +8,6 @@ class HolidayEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -21,30 +19,33 @@ class HolidayEmptyState extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4)),
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
               ],
             ),
             child: Icon(
               Icons.beach_access_rounded,
-              size: 56,
-              color: Colors.grey[400],
+              size: 48,
+              color: Colors.grey.shade300,
             ),
           ),
           const SizedBox(height: 24),
-          Text(
-            'No Holidays Found',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: Colors.grey[700],
+          const Text(
+            'No Leaves Found',
+            style: TextStyle(
+              color: Color(0xFF1D3557),
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'You haven\'t requested any holidays yet.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[500],
+            "You haven't requested any leaves yet.",
+            style: TextStyle(
+              color: Colors.grey.shade500,
+              fontSize: 14,
             ),
           ),
         ],
@@ -59,7 +60,7 @@ extension LeaveStatusExtension on LeaveStatus {
       case LeaveStatus.pending:
         return 'Pending';
       case LeaveStatus.approved:
-        return 'Approved'; // Was Confirmed in Holiday model
+        return 'Approved';
       case LeaveStatus.rejected:
         return 'Rejected';
     }
@@ -70,9 +71,9 @@ extension LeaveStatusExtension on LeaveStatus {
       case LeaveStatus.pending:
         return Colors.orange;
       case LeaveStatus.approved:
-        return Colors.green;
+        return const Color(0xFF10B981); // Modern green
       case LeaveStatus.rejected:
-        return Colors.redAccent;
+        return const Color(0xFFEF4444); // Modern red
     }
   }
 }
@@ -85,7 +86,7 @@ class HolidayStatusTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       decoration: BoxDecoration(
         color: status.color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(6),
@@ -116,15 +117,15 @@ class HolidayListTile extends StatelessWidget {
     final duration = holiday.endDate.difference(holiday.startDate).inDays + 1;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -135,14 +136,15 @@ class HolidayListTile extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(0xFFEBF3F5),
+                    shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.flight_takeoff_rounded,
-                    color: theme.colorScheme.primary,
+                    color: const Color(0xFF1D3557),
                     size: 24,
                   ),
                 ),

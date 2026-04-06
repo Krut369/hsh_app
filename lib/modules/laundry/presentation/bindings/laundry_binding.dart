@@ -14,7 +14,7 @@ class LaundryBinding extends Bindings {
   @override
   void dependencies() {
     // 1. Sources
-    Get.lazyPut(() => LaundryRemoteDataSource(Get.find<ApiClient>()));
+    Get.lazyPut(() => LaundryRemoteDataSource());
     Get.lazyPut(() => LaundryLocalDataSource(Get.find<SharedPreferences>()));
 
     // 2. Repository

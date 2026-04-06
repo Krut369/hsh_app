@@ -110,7 +110,7 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
     final serviceTypeStr = _getCombinedServiceTypeString();
 
     final order = LaundryOrderEntity(
-      id: '', 
+      id: '',
       orderId: '',
       date: DateTime.now(),
       totalItems: _getBasketTotal(),
@@ -141,7 +141,6 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
         return Column(
           children: [
             _buildHeader(context),
-            
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(vertical: 20),
@@ -168,11 +167,14 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                                     width: 70,
                                     height: 70,
                                     decoration: BoxDecoration(
-                                      color: isSelected ? AppColors.headerBlue : Colors.white,
+                                      color: isSelected
+                                          ? AppColors.headerBlue
+                                          : Colors.white,
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.04),
+                                          color: Colors.black
+                                              .withValues(alpha: 0.04),
                                           blurRadius: 8,
                                           offset: const Offset(0, 4),
                                         )
@@ -180,7 +182,9 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                                     ),
                                     child: Icon(
                                       _getCategoryIcon(item.name),
-                                      color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFF94A3B8),
                                       size: 32,
                                     ),
                                   ),
@@ -188,8 +192,12 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                                   ui.ModernText(
                                     item.name,
                                     fontSize: 12,
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                    color: isSelected ? AppColors.headerBlue : const Color(0xFF64748B),
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.w500,
+                                    color: isSelected
+                                        ? AppColors.headerBlue
+                                        : const Color(0xFF64748B),
                                   ),
                                 ],
                               ),
@@ -259,8 +267,10 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                         controller: _noteController,
                         maxLines: 3,
                         decoration: InputDecoration(
-                          hintText: 'e.g. Use mild detergent, fold carefully...',
-                          hintStyle: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 14),
+                          hintText:
+                              'e.g. Use mild detergent, fold carefully...',
+                          hintStyle: const TextStyle(
+                              color: Color(0xFFCBD5E1), fontSize: 14),
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
@@ -273,30 +283,34 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                     ),
 
                     const SizedBox(height: 32),
-                    
+
                     // Button
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Obx(() => SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed: controller.isLoading.value ? null : _placeOrder,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.headerBlue,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            elevation: 0,
-                          ),
-                          child: controller.isLoading.value
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const ui.ModernText(
-                                'Add Laundry Items',
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: controller.isLoading.value
+                                  ? null
+                                  : _placeOrder,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.headerBlue,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                elevation: 0,
                               ),
-                        ),
-                      )),
+                              child: controller.isLoading.value
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white)
+                                  : const ui.ModernText(
+                                      'Add Laundry Items',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                            ),
+                          )),
                     ),
                     const SizedBox(height: 20),
                   ],
@@ -314,7 +328,7 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
       width: double.infinity,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 20,
-        bottom: 30,
+        bottom: 14,
         left: 16,
         right: 24,
       ),
@@ -343,7 +357,8 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
     );
   }
 
-  Widget _buildServiceCard(LaundryItemEntity item, LaundryServiceType type, String title, double price) {
+  Widget _buildServiceCard(LaundryItemEntity item, LaundryServiceType type,
+      String title, double price) {
     final qty = _getQuantity(item.id, type);
     final isSelected = qty > 0;
 
@@ -384,7 +399,7 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
               ],
             ),
           ),
-          
+
           // Stepper
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -394,7 +409,8 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
             ),
             child: Row(
               children: [
-                _buildStepperButton(Icons.remove_rounded, () => _updateQuantity(item.id, type, -1), false),
+                _buildStepperButton(Icons.remove_rounded,
+                    () => _updateQuantity(item.id, type, -1), false),
                 SizedBox(
                   width: 32,
                   child: ui.ModernText(
@@ -405,7 +421,8 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                _buildStepperButton(Icons.add_rounded, () => _updateQuantity(item.id, type, 1), true),
+                _buildStepperButton(Icons.add_rounded,
+                    () => _updateQuantity(item.id, type, 1), true),
               ],
             ),
           ),

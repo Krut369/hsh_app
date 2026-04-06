@@ -46,7 +46,6 @@ class LaundryScreen extends StatelessWidget {
         children: [
           // Custom Header
           _buildHeader(context),
-          
           // Order List
           Expanded(
             child: Obx(() {
@@ -98,7 +97,7 @@ class LaundryScreen extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 20,
-        bottom: 40,
+        bottom: 20,
         left: 24,
         right: 24,
       ),
@@ -114,7 +113,7 @@ class LaundryScreen extends StatelessWidget {
         children: [
           const ui.ModernText(
             "Laundry",
-            fontSize: 28,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -126,28 +125,29 @@ class LaundryScreen extends StatelessWidget {
 
   Widget _buildFilterButton(BuildContext context) {
     return Obx(() => GestureDetector(
-      onTap: () => _showFilterDialog(context),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.filter_alt_outlined, color: AppColors.headerBlue, size: 20),
-            const SizedBox(width: 8),
-            ui.ModernText(
-              controller.filter.value,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.headerBlue,
+          onTap: () => _showFilterDialog(context),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
             ),
-          ],
-        ),
-      ),
-    ));
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.filter_alt_outlined,
+                    color: AppColors.headerBlue, size: 14),
+                const SizedBox(width: 8),
+                ui.ModernText(
+                  controller.filter.value,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.headerBlue,
+                ),
+              ],
+            ),
+          ),
+        ));
   }
 
   void _showFilterDialog(BuildContext context) {
@@ -173,7 +173,8 @@ class LaundryScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _buildFilterOption("All"),
-            ...OrderStatus.values.map((status) => _buildFilterOption(status.label)),
+            ...OrderStatus.values
+                .map((status) => _buildFilterOption(status.label)),
             const SizedBox(height: 20),
           ],
         ),
@@ -221,7 +222,8 @@ class LaundryScreen extends StatelessWidget {
                 )
               ],
             ),
-            child: Icon(Icons.local_laundry_service_outlined, size: 64, color: Colors.grey[300]),
+            child: Icon(Icons.local_laundry_service_outlined,
+                size: 64, color: Colors.grey[300]),
           ),
           const SizedBox(height: 24),
           const ui.ModernText(
