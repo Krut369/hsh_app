@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uitoolkit/uitoolkit.dart';
-import '../presentation/controllers/auth_controller.dart';
-import 'login_screen_v2.dart';
+import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
 
-// ─────────────────────────────────────────────
-//  LoginScreen — wraps both designs with toggle
-// ─────────────────────────────────────────────
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -15,83 +10,27 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  /// false → Design 1 (original background-image layout)
-  /// true  → Design 2 (premium card / hero layout)
-  bool _showV2 = false;
-
-  void _toggle() => setState(() => _showV2 = !_showV2);
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 450),
-      transitionBuilder: (child, animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.06, 0),
-              end: Offset.zero,
-            ).animate(
-                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
-            child: child,
-          ),
-        );
-      },
-      child: _showV2
-          ? LoginScreenV2(key: const ValueKey('v2'), onSwitch: _toggle)
-          : _LoginScreenV1(key: const ValueKey('v1'), onSwitch: _toggle),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────
-//  Design 1 — original background-image layout
-// ─────────────────────────────────────────────
-class _LoginScreenColors {
-  static const Color darkBlue = Color(0xFF1A365D);
-  static const Color hint = Color(0xFF6B8299);
-}
-
-class _LoginScreenV1 extends StatefulWidget {
-  final VoidCallback onSwitch;
-  const _LoginScreenV1({super.key, required this.onSwitch});
-
-  @override
-  State<_LoginScreenV1> createState() => _LoginScreenV1State();
-}
-
-class _LoginScreenV1State extends State<_LoginScreenV1> {
-  final _emailController = TextEditingController();
+  final _emailOrPhoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
   bool _obscurePassword = true;
-
-  AuthController get authController => Get.find<AuthController>();
-
-  @override
-  void initState() {
-    super.initState();
-    _emailController.addListener(_clearLocalError);
-    _passwordController.addListener(_clearLocalError);
-  }
-
-  void _clearLocalError() {
-    if (authController.error.value != null) {
-      authController.error.value = null;
-    }
-  }
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _emailOrPhoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> _onLogin() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
+  Future<void> _onLoginPressed() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    final authController = Get.find<AuthController>();
+    await authController.login(
+      _emailOrPhoneController.text.trim(),
+      _passwordController.text,
     if (email.isEmpty || password.isEmpty) {
       ModernToast.show(
         message: 'Please enter both email and password.',
@@ -153,161 +92,202 @@ class _LoginScreenV1State extends State<_LoginScreenV1> {
 
   @override
   Widget build(BuildContext context) {
-    final maxFieldWidth =
-        MediaQuery.of(context).size.width < 400 ? double.infinity : 380.0;
-    final screenH = MediaQuery.of(context).size.height;
-    final topPadding = (screenH * 0.38).clamp(160.0, 300.0);
+    final authController = Get.find<AuthController>();
+    final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        top: false,
-        bottom: false,
-        child: Stack(
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        body: Stack(
           fit: StackFit.expand,
           children: [
-            // ── Background image ──────────────────────────
             Positioned.fill(
               child: Image.asset(
-                'assets/login screen bg.jpeg',
+                'assets/login_screen_bg.jpeg',
                 fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-                filterQuality: FilterQuality.high,
               ),
             ),
-
-            // ── Subtle overlay ────────────────────────────
-            Positioned.fill(
-              child: Container(color: Colors.white.withOpacity(0.02)),
+            // const DecoratedBox(
+            //   decoration: BoxDecoration(
+            //     image: DecorationImage(
+            //       image: AssetImage('assets/login_screen_bg.jpeg'),
+            //       fit: BoxFit.cover,
+            //     ),
+            //   ),
+            // ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.35),
+                    Colors.white.withValues(alpha: 0.08),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
             ),
-
-            // ── Switch Design button (top-right) ──────────
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 12,
-              right: 16,
-              child: _SwitchDesignButton(onTap: widget.onSwitch),
-            ),
-
-            // ── Form ──────────────────────────────────────
-            Padding(
-              padding: EdgeInsets.fromLTRB(28, topPadding, 28, 24),
+            SafeArea(
               child: Align(
                 alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxFieldWidth),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: _LoginScreenColors.darkBlue,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 18),
-
-                      // EMAIL
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          autocorrect: false,
-                          enableSuggestions: false,
-                          cursorColor: _LoginScreenColors.darkBlue,
-                          style: const TextStyle(
-                              color: _LoginScreenColors.darkBlue, fontSize: 16),
-                          decoration: _pillDecoration(
-                            hintText: 'Email or Phone',
-                            prefixIcon: const Icon(Icons.mail_outline_rounded,
-                                color: _LoginScreenColors.darkBlue),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(22, 18, 22, 24),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Image.asset(
+                            'assets/Ai logo.png',
+                            height: 200,
+                            fit: BoxFit.contain,
                           ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // PASSWORD
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _onLogin(),
-                          autocorrect: false,
-                          enableSuggestions: false,
-                          cursorColor: _LoginScreenColors.darkBlue,
-                          style: const TextStyle(
-                              color: _LoginScreenColors.darkBlue, fontSize: 16),
-                          decoration: _pillDecoration(
-                            hintText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline_rounded,
-                                color: _LoginScreenColors.darkBlue),
-                            suffixIcon: IconButton(
-                              onPressed: () => setState(
-                                  () => _obscurePassword = !_obscurePassword),
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: _LoginScreenColors.darkBlue,
-                                size: 24,
+                          SizedBox(height:MediaQuery.of(context).size.height * 0.1),
+                          _InputCard(
+                            child: TextFormField(
+                              controller: _emailOrPhoneController,
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              decoration: const InputDecoration(
+                                hintText: 'Email or Phone',
+                                prefixIcon: Icon(Icons.mail_outline_rounded),
                               ),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                  minWidth: 40, minHeight: 40),
+                              validator: (value) {
+                                final v = (value ?? '').trim();
+                                if (v.isEmpty) return 'Enter email or phone';
+                                return null;
+                              },
                             ),
                           ),
-                        ),
-                      ),
 
-                      const SizedBox(height: 22),
-
-                      // LOGIN BUTTON
-                      Obx(() {
-                        final loading = authController.isLoading.value;
-                        return SizedBox(
-                          width: double.infinity,
-                          height: 54,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _LoginScreenColors.darkBlue,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              disabledBackgroundColor:
-                                  _LoginScreenColors.darkBlue,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(999),
+                          const SizedBox(height: 14),
+                          _InputCard(
+                            child: TextFormField(
+                              controller: _passwordController,
+                              obscureText: _obscurePassword,
+                              textInputAction: TextInputAction.done,
+                              onFieldSubmitted: (_) => _onLoginPressed(),
+                              decoration: InputDecoration(
+                                hintText: 'Password',
+                                prefixIcon:
+                                    const Icon(Icons.lock_outline_rounded),
+                                suffixIcon: IconButton(
+                                  onPressed: () => setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  }),
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                  ),
+                                ),
                               ),
+                              validator: (value) {
+                                final v = (value ?? '');
+                                if (v.isEmpty) return 'Enter password';
+                                if (v.length < 4) return 'Password is too short';
+                                return null;
+                              },
                             ),
-                            onPressed: loading ? null : _onLogin,
-                            child: loading
-                                ? const SizedBox(
-                                    height: 22,
-                                    width: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
+                          ),
+                          const SizedBox(height: 26),
+                          Obx(() {
+                            final errorText = authController.error.value;
+                            if (errorText == null || errorText.trim().isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withValues(alpha: 0.10),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.red.withValues(alpha: 0.25),
+                                  ),
+                                ),
+                                child: Text(
+                                  errorText,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: Colors.red.shade800,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                          const SizedBox(height: 12),
+                          Obx(() {
+                            final isLoading = authController.isLoading.value;
+                            return SizedBox(
+                              width: double.infinity,
+                              height: 54,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF4DA0FF),
+                                      Color(0xFF2B66C7),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(28),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.18),
+                                      blurRadius: 18,
+                                      offset: const Offset(0, 10),
                                     ),
-                                  )
-                                : const Text(
-                                    'Login',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed:
+                                      isLoading ? null : _onLoginPressed,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(28),
                                     ),
                                   ),
-                          ),
-                        );
-                      }),
-                    ],
+                                  child: isLoading
+                                      ? const SizedBox(
+                                          height: 22,
+                                          width: 22,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.6,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                          ),
+                                        )
+                                      : Text(
+                                          'Login',
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 0.2,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            );
+                          }),
+                          const SizedBox(height: 34),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -317,58 +297,39 @@ class _LoginScreenV1State extends State<_LoginScreenV1> {
       ),
     );
   }
-
-  String _friendlyError(String error) {
-    final lower = error.toLowerCase();
-    if (lower.contains('invalid') ||
-        lower.contains('incorrect') ||
-        lower.contains('401')) return 'Incorrect email or password.';
-    if (lower.contains('network')) return 'Check your internet connection.';
-    return error;
-  }
 }
 
-// ─────────────────────────────────────────────
-//  Switch Design button — used in Design 1
-// ─────────────────────────────────────────────
-class _SwitchDesignButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _SwitchDesignButton({required this.onTap});
+class _InputCard extends StatelessWidget {
+  const _InputCard({required this.child});
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.82),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFF1A365D).withOpacity(0.22)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: theme.copyWith(
+          inputDecorationTheme: const InputDecorationTheme(
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          ),
         ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.swap_horiz_rounded, size: 15, color: Color(0xFF1A365D)),
-            SizedBox(width: 5),
-            Text(
-              'Design 2',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1A365D),
-              ),
-            ),
-          ],
-        ),
+        child: child,
       ),
     );
   }
 }
+
