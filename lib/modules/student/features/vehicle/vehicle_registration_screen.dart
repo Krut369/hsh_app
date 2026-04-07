@@ -94,7 +94,8 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
       // TODO: Call your provider/repo here to save 'request'
       debugPrint('Submitting Vehicle Request: $request');
 
-      Get.snackbar('Success', 'Vehicle registration application submitted successfully');
+      Get.snackbar(
+          'Success', 'Vehicle registration application submitted successfully');
 
       Navigator.of(context).pop();
     }
@@ -102,7 +103,7 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ModernScaffold(
+    return Scaffold(
       backgroundColor: AppColors.mainBackground,
       body: SingleChildScrollView(
         child: Column(
@@ -110,10 +111,18 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
             // Custom Rounded Header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 60, 20, 40),
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 20,
+                bottom: 32,
+                left: 12,
+                right: 12,
+              ),
               decoration: const BoxDecoration(
                 color: AppColors.headerBlue,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
               ),
               child: Row(
                 children: [
@@ -121,7 +130,7 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   const ModernText(
                     'Vehicle Registration',
                     color: Colors.white,
@@ -131,12 +140,24 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
-            // Form Content
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+
+            // Form Content Card
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -144,30 +165,38 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
                   children: [
                     const ModernText(
                       'Register your vehicle',
-                      fontSize: 26,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
+                      color: AppColors.headerBlue,
                     ),
                     const SizedBox(height: 8),
                     const ModernText(
-                      'Please provide your vehicle details to secure a parking permit on campus.',
-                      fontSize: 15,
+                      'Provide your details to secure a permit.',
+                      fontSize: 14,
                       color: Colors.grey,
                     ),
                     const SizedBox(height: 32),
 
                     // Vehicle Type
-                    const ModernText('Vehicle Type', fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
+                    const ModernText('Vehicle Type',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
                     const SizedBox(height: 8),
                     VehicleDropdown(
                       hint: 'Select vehicle type',
                       value: _selectedVehicleType,
                       items: _vehicleTypes,
-                      onChanged: (val) => setState(() => _selectedVehicleType = val),
+                      onChanged: (val) =>
+                          setState(() => _selectedVehicleType = val),
                     ),
                     const SizedBox(height: 24),
 
                     // Plate Number
-                    const ModernText('Plate Number', fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
+                    const ModernText('Plate Number',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
                     const SizedBox(height: 8),
                     ModernTextField(
                       controller: _plateNumberController,
@@ -177,7 +206,10 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
                     const SizedBox(height: 24),
 
                     // Model / Make
-                    const ModernText('Model / Make', fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
+                    const ModernText('Model / Make',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
                     const SizedBox(height: 8),
                     ModernTextField(
                       controller: _modelController,
@@ -187,19 +219,26 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
                     const SizedBox(height: 24),
 
                     // Parking Preference
-                    const ModernText('Parking Preference', fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
+                    const ModernText('Parking Preference',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
                     const SizedBox(height: 8),
                     VehicleDropdown(
                       hint: 'Select slot preference',
                       value: _selectedParkingPreference,
                       items: _parkingPreferences,
-                      onChanged: (val) => setState(() => _selectedParkingPreference = val),
+                      onChanged: (val) =>
+                          setState(() => _selectedParkingPreference = val),
                     ),
                     const SizedBox(height: 24),
 
                     // Upload Registration Papers
-                    const ModernText('Upload Registration Papers', fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
-                    const SizedBox(height: 8),
+                    const ModernText('Upload Registration Papers',
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey),
+                    const SizedBox(height: 12),
                     if (_pickedFile == null)
                       FileUploadCard(
                         title: 'Upload Registration Papers',
@@ -210,13 +249,14 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: const Color(0xFFF9FAFB),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.2), width: 1.5),
+                          border: Border.all(color: Colors.grey.shade200),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.insert_drive_file, color: AppColors.primary, size: 32),
+                            const Icon(Icons.insert_drive_file,
+                                color: AppColors.headerBlue, size: 32),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
@@ -224,25 +264,28 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
                                 children: [
                                   ModernText(
                                     _pickedFile!.name,
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.bold,
+                                    color: AppColors.headerBlue,
                                   ),
                                   Text(
                                     '${(_pickedFile!.size / 1024).toStringAsFixed(1)} KB',
-                                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                    style: TextStyle(
+                                        color: Colors.grey[500], fontSize: 11),
                                   ),
                                 ],
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close, color: Colors.red),
+                              icon: const Icon(Icons.close,
+                                  color: Colors.red, size: 20),
                               onPressed: _clearFile,
                             ),
                           ],
                         ),
                       ),
-                    
-                    const SizedBox(height: 48),
+
+                    const SizedBox(height: 32),
 
                     // Submit Button
                     SizedBox(
@@ -251,13 +294,14 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
                       child: ModernButton(
                         text: 'Submit Application',
                         onPressed: _submitForm,
+                        icon: Icons.near_me_outlined,
                       ),
                     ),
-                    const SizedBox(height: 40),
                   ],
                 ),
               ),
             ),
+            const SizedBox(height: 48),
           ],
         ),
       ),

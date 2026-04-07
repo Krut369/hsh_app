@@ -67,41 +67,49 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
       );
 
       return ModernScaffold(
-        backgroundColor: const Color(0xFFEFF6FF), // Light blue background
+        backgroundColor: const Color(0xFFEBF3F5),
         body: Column(
           children: [
             // Custom Rounded Header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 60, 20, 40),
+              padding: const EdgeInsets.fromLTRB(12, 50, 20, 32),
               decoration: const BoxDecoration(
                 color: AppColors.headerBlue,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
               ),
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
                     onPressed: () => Get.back(),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   Stack(
                     children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.white,
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 1.5),
+                        ),
                         child: ClipOval(
-                          child: Icon(Icons.person, color: AppColors.headerBlue.withOpacity(0.5), size: 32),
+                          child: Icon(Icons.person, color: Colors.white, size: 28),
                         ),
                       ),
                       Positioned(
-                        right: 0,
-                        bottom: 0,
+                        right: 2,
+                        bottom: 2,
                         child: Container(
-                          width: 14,
-                          height: 14,
+                          width: 12,
+                          height: 12,
                           decoration: BoxDecoration(
-                            color: Colors.green,
+                            color: const Color(0xFF10B981), // Modern Green
                             shape: BoxShape.circle,
                             border: Border.all(color: AppColors.headerBlue, width: 2),
                           ),
@@ -120,21 +128,16 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
-                        const ModernText(
+                        const Text(
                           'Online',
-                          color: Colors.greenAccent,
-                          fontSize: 12,
+                          style: TextStyle(
+                            color: Color(0xFF10B981),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.phone_outlined, color: Colors.white),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.more_vert, color: Colors.white),
-                    onPressed: () {},
                   ),
                 ],
               ),

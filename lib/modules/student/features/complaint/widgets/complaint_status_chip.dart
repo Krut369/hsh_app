@@ -16,26 +16,31 @@ class ComplaintStatusChip extends StatelessWidget {
     final color = ComplaintUtils.getStatusColor(context, status);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(maxWidth: 115),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.35), width: 1.2),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 1.2),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             ComplaintUtils.getStatusIcon(status),
             color: color,
-            size: 12,
+            size: 13,
           ),
           const SizedBox(width: 5),
-          ModernText(
-            status.label,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: color,
+          Flexible(
+            child: ModernText(
+              status.label,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: color,
+              textAlign: TextAlign.center,
+            ),
           ),
         ],
       ),
