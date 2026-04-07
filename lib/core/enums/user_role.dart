@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import "package:hsh_app/core/enums/user_role.dart";
 
 enum UserRole {
   student,

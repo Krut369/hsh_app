@@ -1,5 +1,4 @@
 import "package:hsh_app/core/enums/user_role.dart";
-import '../core/enums/user_role.dart';
 
 class Student {
   final String username;

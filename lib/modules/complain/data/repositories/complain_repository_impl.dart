@@ -15,6 +15,11 @@ class ComplainRepositoryImpl implements ComplainRepository {
           ? (data['data'] as List<dynamic>)
           : (data is List ? data : []);
       return list.map((e) => Complaint.fromJson(e)).toList();
+    } else {
+      print('=== API FAILED OR RETURNED NULL DATA ===');
+      print('Success: ${response.success}');
+      print('Message: ${response.message}');
+      print('Data: ${response.data}');
     }
     return [];
   }
@@ -30,10 +35,13 @@ class ComplainRepositoryImpl implements ComplainRepository {
 
   @override
   Future<void> updateComplaintStatus(String id, ComplaintStatus status) async {
-    await _service.updateComplaintStatus(
+    final response = await _service.updateComplaintStatus(
       complaintId: id,
       status: status.toBackendString,
     );
+    if (!response.success) {
+      throw Exception(response.message ?? 'Failed to update status');
+    }
   }
 
   @override
@@ -43,15 +51,19 @@ class ComplainRepositoryImpl implements ComplainRepository {
 
     complaint.issues.forEach((subName, issueData) {
       processedIssues.add({
-        'sub_complaint': subName,
+        'sub_category': subName,
         'description': issueData.description,
         'imagePath': issueData.imagePath, // Service will handle the upload
       });
     });
 
-    await _service.createComplaint(
+    final response = await _service.createComplaint(
       complaintType: complaint.complaintType,
       issues: processedIssues,
     );
+
+    if (!response.success) {
+      throw Exception(response.message ?? 'Failed to create complaint');
+    }
   }
 }

@@ -1,61 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:hsh_app/models/note_model.dart';
+import 'package:hsh_app/modules/student/features/notes/controllers/notes_controller.dart';
 import 'package:hsh_app/modules/student/features/notes/note_editor/note_editor_screen.dart';
-import 'package:hsh_app/providers/notes_provider.dart';
 import 'package:hsh_app/widgets/custom_app_bar.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-enum SortOption { newest, oldest, titleAZ }
-
-class NotesScreen extends ConsumerStatefulWidget {
+class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key});
 
   @override
-  ConsumerState<NotesScreen> createState() => _NotesScreenState();
+  State<NotesScreen> createState() => _NotesScreenState();
 }
 
-class _NotesScreenState extends ConsumerState<NotesScreen> {
-  bool _isSearching = false;
+class _NotesScreenState extends State<NotesScreen> {
+  final NotesController controller = Get.put(NotesController());
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  SortOption _sortOption = SortOption.newest;
-  String _searchQuery = '';
+  bool _isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      controller.fetchNotes();
+    }
+  }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final notes = ref.watch(notesProvider);
-
-    // Filter and Sort Logic
-    List<Note> filteredNotes = notes.where((note) {
-      final query = _searchQuery.toLowerCase();
-      return note.title.toLowerCase().contains(query) ||
-          note.body.toLowerCase().contains(query) ||
-          note.category.toLowerCase().contains(query);
-    }).toList();
-
-    filteredNotes.sort((a, b) {
-      switch (_sortOption) {
-        case SortOption.newest:
-          return b.date.compareTo(a.date);
-        case SortOption.oldest:
-          return a.date.compareTo(b.date);
-        case SortOption.titleAZ:
-          return a.title.compareTo(b.title);
-      }
-    });
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppColors.mainBackground,
       appBar: CustomAppBar(
         title: _isSearching ? '' : AppText.notes,
         showNotificationIcon: false,
@@ -63,26 +52,24 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
             ? Container(
                 height: 44,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(22),
                 ),
                 child: TextField(
                   controller: _searchController,
                   autofocus: true,
-                  style: const TextStyle(color: Colors.black87),
+                  style: const TextStyle(color: AppColors.textPrimary),
                   cursorColor: AppColors.primary,
                   decoration: InputDecoration(
                     hintText: 'Search notes...',
-                    hintStyle: TextStyle(color: Colors.grey[400]),
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                    suffixIcon: _searchQuery.isNotEmpty 
+                    hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.5)),
+                    prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                    suffixIcon: _searchController.text.isNotEmpty 
                       ? IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.grey, size: 20),
+                          icon: const Icon(Icons.clear, color: AppColors.textSecondary, size: 20),
                           onPressed: () {
                             _searchController.clear();
-                            setState(() {
-                              _searchQuery = '';
-                            });
+                            controller.fetchNotes(refresh: true, query: '');
                           },
                         )
                       : null,
@@ -90,9 +77,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
                   onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
+                    controller.fetchNotes(refresh: true, query: value);
                   },
                 ),
               )
@@ -100,147 +85,146 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search,
-                color: Colors.white),
+                color: AppColors.white),
             onPressed: () {
               setState(() {
                 if (_isSearching) {
                   _isSearching = false;
-                  _searchQuery = '';
                   _searchController.clear();
+                  controller.fetchNotes(refresh: true, query: '');
                 } else {
                   _isSearching = true;
                 }
               });
             },
           ),
-          if (!_isSearching)
-            PopupMenuButton<SortOption>(
-              icon: const Icon(Icons.sort, color: Colors.white),
-              onSelected: (option) {
-                setState(() {
-                  _sortOption = option;
-                });
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: SortOption.newest,
-                  child: Text('Date (Newest First)'),
+        ],
+      ),
+      body: Obx(() {
+        if (controller.isLoading.value && controller.notes.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (controller.notes.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.note_alt_outlined,
+                  size: 64,
+                  color: AppColors.textSecondary.withOpacity(0.3)),
+                const SizedBox(height: 16),
+                Text(
+                  'No notes yet',
+                  style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600),
                 ),
-                const PopupMenuItem(
-                  value: SortOption.oldest,
-                  child: Text('Date (Oldest First)'),
-                ),
-                const PopupMenuItem(
-                  value: SortOption.titleAZ,
-                  child: Text('Title (A-Z)'),
+                const SizedBox(height: 8),
+                Text(
+                  'Tap + to create your first note',
+                  style: TextStyle(color: AppColors.textSecondary.withOpacity(0.6)),
                 ),
               ],
             ),
-        ],
-      ),
-      body: filteredNotes.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                   Icon(
-                      _searchQuery.isNotEmpty
-                          ? Icons.search_off
-                          : Icons.note_alt_outlined,
-                      size: 64,
-                      color: Colors.grey[300]),
-                  const SizedBox(height: 16),
-                  Text(
-                    _searchQuery.isNotEmpty
-                        ? 'No notes found'
-                        : 'No notes yet',
-                    style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600),
-                  ),
-                  if (_searchQuery.isEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      'Tap + to create your first note',
-                      style: TextStyle(color: Colors.grey[500]),
-                    ),
-                  ],
-                ],
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: filteredNotes.length,
-              itemBuilder: (context, index) {
-                final note = filteredNotes[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Dismissible(
-                    key: Key(note.id),
-                    background: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      alignment: Alignment.centerLeft,
-                      decoration: BoxDecoration(
-                        color: Colors.green[400],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(Icons.edit_outlined,
-                          color: Colors.white, size: 28),
-                    ),
-                    secondaryBackground: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      alignment: Alignment.centerRight,
-                      decoration: BoxDecoration(
-                        color: Colors.red[400],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(Icons.delete_outline,
-                          color: Colors.white, size: 28),
-                    ),
-                    confirmDismiss: (direction) async {
-                      if (direction == DismissDirection.startToEnd) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                NoteEditorScreen(noteToEdit: note),
-                          ),
-                        );
-                        return false;
-                      } else {
-                        return true;
-                      }
-                    },
-                    onDismissed: (direction) {
-                      if (direction == DismissDirection.endToStart) {
-                        ref.read(notesProvider.notifier).deleteNote(note.id);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${note.title} deleted')),
-                        );
-                      }
-                    },
-                    child: _buildNoteCard(
-                      context,
-                      title: note.title,
-                      preview: note.body,
-                      tag: note.category,
-                      date: _formatDate(note.date),
-                    ),
-                  ),
-                );
-              },
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const NoteEditorScreen()),
           );
-        },
+        }
+
+        return ListView.builder(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(16),
+          itemCount: controller.notes.length + (controller.hasMore.value ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == controller.notes.length) {
+              return const Center(child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: CircularProgressIndicator(),
+              ));
+            }
+
+            final note = controller.notes[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Dismissible(
+                key: Key(note.id),
+                background: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  alignment: Alignment.centerLeft,
+                  decoration: BoxDecoration(
+                    color: AppColors.successGreen.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.edit_outlined,
+                      color: AppColors.white, size: 28),
+                ),
+                secondaryBackground: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  alignment: Alignment.centerRight,
+                  decoration: BoxDecoration(
+                    color: AppColors.cancelledRed.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.delete_outline,
+                      color: AppColors.white, size: 28),
+                ),
+                confirmDismiss: (direction) async {
+                  if (direction == DismissDirection.startToEnd) {
+                    Get.to(() => NoteEditorScreen(noteToEdit: note));
+                    return false;
+                  } else {
+                    return await _confirmDelete(context);
+                  }
+                },
+                onDismissed: (direction) {
+                  if (direction == DismissDirection.endToStart) {
+                    controller.deleteNote(note.id);
+                  }
+                },
+                child: InkWell(
+                  onTap: () => Get.to(() => NoteEditorScreen(noteToEdit: note)),
+                  child: _buildNoteCard(
+                    context,
+                    title: note.title,
+                    preview: note.body,
+                    tag: note.category,
+                    date: _formatDate(note.date),
+                    isPinned: note.isPinned,
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      }),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'notes_fab',
+        onPressed: () => Get.to(() => const NoteEditorScreen()),
         backgroundColor: AppColors.primary,
-         elevation: 4,
-        child: const Icon(Icons.add, color: Colors.white),
+        elevation: 4,
+        child: const Icon(Icons.add, color: AppColors.white),
+      ),
+    );
+  }
+
+  Future<bool?> _confirmDelete(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Note'),
+        content: const Text('Are you sure you want to delete this note?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.cancelledRed),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }
@@ -259,20 +243,21 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     required String preview,
     required String tag,
     required String date,
+    bool isPinned = false,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
-            blurRadius: 12,
+            color: AppColors.black.withOpacity(0.05),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.withOpacity(0.05)),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,31 +266,35 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: tag == 'Important'
-                      ? Colors.red.withOpacity(0.1)
-                      : AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   tag.toUpperCase(),
                   style: TextStyle(
-                    color:
-                        tag == 'Important' ? Colors.red : AppColors.primary,
+                    color: AppColors.primary,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
                   ),
                 ),
               ),
-              Text(
-                date,
-                style: AppFonts.smallText(context).copyWith(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 12,
-                ),
+              Row(
+                children: [
+                  if (isPinned)
+                    const Icon(Icons.push_pin, size: 14, color: AppColors.primary),
+                  if (isPinned) const SizedBox(width: 4),
+                  Text(
+                    date,
+                    style: AppFonts.smallText(context).copyWith(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -315,6 +304,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
             style: AppFonts.heading2(context).copyWith(
               fontSize: 17,
               height: 1.3,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -327,10 +317,10 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 styleSheet: MarkdownStyleSheet(
                   p: AppFonts.bodyRegular(context).copyWith(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: AppColors.textSecondary,
                     height: 1.4,
                   ),
-                  strong: AppFonts.bodyBold(context),
+                  strong: AppFonts.bodyBold(context).copyWith(color: AppColors.textPrimary),
                 ),
               ),
             ),

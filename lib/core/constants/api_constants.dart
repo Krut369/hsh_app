@@ -39,9 +39,11 @@ class ApiConstants {
   static const String paymentsSummary = '/payments/summary';
 
   // Laundry Endpoints
-  static const String laundryOrders = '/laundry/orders';
+  static const String laundry = '/laundry';
+  static const String laundryOrders = '/laundry';      // Updated to match backend
+  static const String laundryPrices = '/laundry/prices';
   static const String laundryItems = '/laundry/items';
-  static const String laundryConfig = '/laundry/config';
+  static const String laundryConfig = '/laundry/prices';
   static const String laundryStats = '/laundry/stats';
 
   // Complaint Endpoints

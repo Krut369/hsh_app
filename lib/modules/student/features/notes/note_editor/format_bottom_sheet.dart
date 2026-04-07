@@ -13,7 +13,7 @@ class FormatBottomSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
@@ -27,13 +27,13 @@ class FormatBottomSheet extends StatelessWidget {
               const Text(
                 'Format',
                 style: TextStyle(
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close, color: Colors.grey),
+                icon: const Icon(Icons.close, color: AppColors.textSecondary),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -91,7 +91,7 @@ class FormatBottomSheet extends StatelessWidget {
               const SizedBox(width: 8),
               _FormatIconButton(
                 icon: Icons.format_underline,
-                onTap: () => onFormat('underline'), // Will likely map to italics or similar if markdown limited
+                onTap: () => onFormat('underline'),
                 label: 'U',
               ),
               const SizedBox(width: 8),
@@ -129,7 +129,6 @@ class FormatBottomSheet extends StatelessWidget {
                   ),
                 ],
               ),
-              // Indent controls could go here if implemented
             ],
           ),
         ],
@@ -163,7 +162,7 @@ class _StyleButton extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: Colors.black87,
+              color: AppColors.textPrimary,
               fontSize: fontSize,
               fontWeight: fontWeight,
             ),
@@ -198,7 +197,7 @@ class _FormatIconButton extends StatelessWidget {
         width: 50,
         height: 50,
         decoration: BoxDecoration(
-          color: Colors.grey[200], // Light grey button background
+          color: AppColors.border.withOpacity(0.3),
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: Alignment.center,

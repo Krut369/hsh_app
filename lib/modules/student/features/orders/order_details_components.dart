@@ -21,7 +21,7 @@ class OrderInfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final color = Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
+    final color = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0), // Increased spacing
@@ -116,14 +116,14 @@ class LaundryItemTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: scheme.outlineVariant.withOpacity(0.5)),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: scheme.primary.withOpacity(0.1),
+              color: scheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(item.icon, color: scheme.primary, size: 24),

@@ -4,6 +4,7 @@ import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_stats_model.dart';
 import 'package:hsh_app/modules/complain/domain/usecases/get_complaints_usecase.dart';
 import 'package:hsh_app/modules/complain/domain/repositories/complain_repository.dart';
+import 'package:uitoolkit/uitoolkit.dart';
 
 class ComplainController extends GetxController {
   final GetComplaintsUseCase _getComplaintsUseCase;
@@ -42,20 +43,47 @@ class ComplainController extends GetxController {
     try {
       final fetchedList = await _getComplaintsUseCase.execute();
       complaints.assignAll(fetchedList);
+      _calculateStatsLocally();
     } catch (e) {
+      print('=== COMPLAINTS FETCH ERROR ===');
+      print(e);
       error.value = e.toString();
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> fetchStats() async {
-    try {
-      final fetchedStats = await _repository.getComplaintStats();
-      stats.value = fetchedStats;
-    } catch (e) {
-      print('Error fetching stats: $e');
+  void _calculateStatsLocally() {
+    int pending = 0;
+    int resolved = 0;
+    int inProgress = 0;
+
+    for (var complaint in complaints) {
+      switch (complaint.status) {
+        case ComplaintStatus.pending:
+          pending++;
+          break;
+        case ComplaintStatus.resolved:
+          resolved++;
+          break;
+        case ComplaintStatus.underReview:
+        case ComplaintStatus.awaitingFeedback:
+          inProgress++;
+          break;
+      }
     }
+
+    stats.value = ComplaintStats(
+      total: complaints.length,
+      pending: pending,
+      resolved: resolved,
+      inProgress: inProgress,
+    );
+  }
+
+  Future<void> fetchStats() async {
+    // Rely on local calculation to ensure stats are perfectly synced with the complaints list
+    _calculateStatsLocally();
   }
 
   void setFilter(ComplaintStatus? newFilter) {
@@ -100,9 +128,10 @@ class ComplainController extends GetxController {
     );
   }
 
-  Future<void> submitComplaint() async {
+  Future<void> submitComplaint(BuildContext context) async {
     if (selectedType.value == null) return;
 
+    UIController.to.showLoading();
     isLoading.value = true;
     try {
       // Collect issues
@@ -114,7 +143,7 @@ class ComplainController extends GetxController {
           final issue = issues[sub.name];
           if (issue != null) {
             issuesData.add({
-              'sub_complaint': sub.name,
+              'sub_category': sub.name,
               'description': issue.description,
               'imagePath': issue.imagePath,
             });
@@ -141,16 +170,16 @@ class ComplainController extends GetxController {
 
       await _repository.createComplaint(complaint);
 
-      Get.snackbar('Success', 'Complaint submitted successfully!',
-          backgroundColor: Get.theme.colorScheme.primary.withOpacity(0.1));
+      UIController.to.showSuccess('Complaint submitted successfully!');
+      Get.back(); // Return to main screen
+      
       fetchComplaints();
       fetchStats();
       resetAddDraft();
-      Get.back(); // Return from add screen
     } catch (e) {
-      Get.snackbar('Error', 'Failed to submit complaint: $e',
-          backgroundColor: Colors.red.withOpacity(0.1));
+      UIController.to.showError('Failed to submit complaint: $e');
     } finally {
+      UIController.to.hideLoading();
       isLoading.value = false;
     }
   }
@@ -163,11 +192,13 @@ class ComplainController extends GetxController {
 
   Future<void> updateStatus(String id, ComplaintStatus status) async {
     try {
+      debugPrint('🔄 Updating complaint $id to ${status.toBackendString}');
       await _repository.updateComplaintStatus(id, status);
+      debugPrint('✅ Status updated successfully');
       fetchComplaints(); // Refresh
       fetchStats();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update status: $e');
+      UIController.to.showError('Failed to update status: $e');
     }
   }
 

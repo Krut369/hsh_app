@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:hsh_app/core/constants/app_text.dart';
-import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/models/student_profile_model.dart';
+import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
 
 class ProfileCard extends StatelessWidget {
   final StudentProfile profile;
 
-  // Unused params kept for backward compatibility if needed, or remove them.
-  // The caller (ProfileScreen) might still be passing them, so we can make them optional or ignore them.
-  // Ideally, we should update the caller to stop passing animations.
-  // For now, I'll update the constructor to accept them as optional/ignored to avoid breaking the build immediately,
-  // but I plan to clean up ProfileScreen too.
-
   const ProfileCard({
     required this.profile,
-    // Animations are no longer needed
     super.key,
   });
 
@@ -22,94 +14,190 @@ class ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                  color: AppColors.primary.withOpacity(0.2), width: 2),
-            ),
-            padding: const EdgeInsets.all(2),
-            child: CircleAvatar(
-              radius: 35,
-              backgroundColor: const Color(0xFFFFF3E0),
-              backgroundImage: AssetImage(profile.imagePath),
-              onBackgroundImageError: (_, __) => const Icon(Icons.person),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Row: Active Badge and Photo
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '${AppText.goodMorning}, ${profile.name.split(' ').first}',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.meeting_room_outlined,
-                              size: 14, color: AppColors.primary),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Room ${profile.room}',
-                            style: const TextStyle(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFBEB), // Light Yellow
+                    borderRadius: BorderRadius.circular(20),
+                    border:
+                        Border.all(color: const Color(0xFFFEF3C7), width: 1),
+                  ),
+                  child: const Text(
+                    'ID : 345',
+                    style: TextStyle(
+                      color: Color(0xFFD97706),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
                     ),
-                    const SizedBox(width: 12),
-                    const Flexible(
-                      child: Text(
-                        AppText.premiumResident,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
+                  ),
+                ),
+
+                // Rounded Square Photo
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
-                    )
-                  ],
+                    ],
+                    border: Border.all(color: Colors.white, width: 3),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
+                    child: Image.network(
+                      profile.imagePath.contains("http")
+                          ? profile.imagePath
+                          : "https://i.pravatar.cc/150?u=${profile.id}",
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.grey.shade200,
+                          child: const Icon(Icons.person)),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
+
+            // const SizedBox(height: 8),
+
+            // Name and Subtitle
+            ModernText(
+              profile.name.split(' ').first,
+              color: const Color(0xFF111827),
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+            ),
+            const SizedBox(height: 2),
+            ModernText(
+              profile.college,
+              color: const Color(0xFF6B7280),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+
+            const SizedBox(height: 16),
+
+            // Bottom Data Segment (Light Blue)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0F7FF), // Exact light blue tint
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  // Room Data
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'ROOM',
+                          style: TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        ModernText(
+                          profile.room,
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        // Row(
+                        //   children: [
+                        //     ModernText(
+                        //       profile.room,
+                        //       color: Colors.black,
+                        //       fontSize: 16,
+                        //       fontWeight: FontWeight.bold,
+                        //     ),
+                        //     const SizedBox(width: 8),
+                        //     Container(
+                        //       padding: const EdgeInsets.symmetric(
+                        //           horizontal: 6, vertical: 2),
+                        //       decoration: BoxDecoration(
+                        //         color: Colors.white,
+                        //         borderRadius: BorderRadius.circular(4),
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                      ],
+                    ),
+                  ),
+
+                  // Vertical Divider
+                  Container(
+                    width: 1,
+                    height: 40,
+                    color: Colors.blue.shade100.withOpacity(0.5),
+                  ),
+                  const SizedBox(width: 20),
+
+                  // Valid Data
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Group',
+                          style: TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const ModernText(
+                          'Pavitra',
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

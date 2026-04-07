@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hsh_app/core/theme/app_colors.dart';
+import 'package:uitoolkit/uitoolkit.dart';
 import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
+import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:get/get.dart';
 
 class CostManagementScreen extends StatefulWidget {
@@ -12,138 +13,279 @@ class CostManagementScreen extends StatefulWidget {
 
 class _CostManagementScreenState extends State<CostManagementScreen> {
   final LaundryController controller = Get.find<LaundryController>();
-  late TextEditingController _washController;
-  late TextEditingController _pressController;
-  late TextEditingController _bothController;
-
-  @override
-  void initState() {
-    super.initState();
-    _washController = TextEditingController(
-        text: controller.washPrice.value.toStringAsFixed(0));
-    _pressController = TextEditingController(
-        text: controller.pressPrice.value.toStringAsFixed(0));
-    _bothController = TextEditingController(
-        text: controller.bothPrice.value.toStringAsFixed(0));
-  }
-
-  @override
-  void dispose() {
-    _washController.dispose();
-    _pressController.dispose();
-    _bothController.dispose();
-    super.dispose();
-  }
 
   void _saveCosts() {
-    final wash = double.tryParse(_washController.text);
-    final press = double.tryParse(_pressController.text);
-    final both = double.tryParse(_bothController.text);
+    controller.updateLaundryCost(
+      wash: controller.washPrice.value,
+      press: controller.pressPrice.value,
+      both: controller.bothPrice.value,
+    );
 
-    controller.updateLaundryCost(wash: wash, press: press, both: both);
-
-    Get.snackbar(
-      'Success',
-      'Costs updated successfully!',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
+    ModernToast.show(
+      message: 'Costs updated successfully!',
+      type: ToastType.success,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFE3F2FD),
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: const [
-            Icon(Icons.settings_suggest, color: Colors.white),
-            SizedBox(width: 8),
-            Text(
-              "Cost Management",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return ModernScaffold(
+      title: 'Cost Management',
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Set Service Prices",
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 22,
+        child: Obx(() {
+          // Calculate real revenue data from orders
+          final now = DateTime.now();
+          final thisMonthOrders = controller.orders
+              .where(
+                  (o) => o.date.month == now.month && o.date.year == now.year)
+              .toList();
+          final completedThisMonth = thisMonthOrders
+              .where((o) => o.status == OrderStatus.completed)
+              .toList();
+
+          // Calculate total revenue from completed orders
+          double totalRevenue = 0;
+          for (final order in completedThisMonth) {
+            for (final item in order.items) {
+              switch (item.selectedService) {
+                case LaundryServiceType.wash:
+                  totalRevenue += item.quantity * controller.washPrice.value;
+                  break;
+                case LaundryServiceType.press:
+                  totalRevenue += item.quantity * controller.pressPrice.value;
+                  break;
+                case LaundryServiceType.both:
+                  totalRevenue += item.quantity * controller.bothPrice.value;
+                  break;
+              }
+            }
+          }
+
+          final totalOrders = thisMonthOrders.length;
+          final avgOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0.0;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Revenue Overview Section
+              const ModernText(
+                'Revenue Overview',
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
+              const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildStatCard(
+                        title: 'This Month',
+                        value: '₹${totalRevenue.toStringAsFixed(0)}',
+                        icon: Icons.currency_rupee,
+                        color: Colors.tealAccent.shade700,
+                      ),
+                      const SizedBox(width: 12),
+                      _buildStatCard(
+                        title: 'Orders',
+                        value: totalOrders.toString(),
+                        icon: Icons.inventory_2_outlined,
+                        color: Colors.indigoAccent,
+                      ),
+                      const SizedBox(width: 12),
+                      _buildStatCard(
+                        title: 'Avg. Order',
+                        value: '₹${avgOrder.toStringAsFixed(0)}',
+                        icon: Icons.trending_up,
+                        color: Colors.orange,
+                      ),
+                    ],
+                  ),
+              const SizedBox(height: 32),
+
+              // Service Prices Section
+              const ModernText(
+                'Service Prices',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              const ModernText(
+                'Set cost per cloth for each service',
+                fontSize: 12,
+                isSecondary: true,
+              ),
+              const SizedBox(height: 24),
+              _buildServicePriceCard(
+                title: 'Washing',
+                subtitle: 'Wash only',
+                icon: Icons.local_laundry_service_outlined,
+                price: controller.washPrice.value,
+                accentColor: Colors.blue,
+                onChanged: (val) => controller.washPrice.value = val,
+              ),
+              const SizedBox(height: 16),
+              _buildServicePriceCard(
+                title: 'Pressing (Iron)',
+                subtitle: 'Iron only',
+                icon: Icons.auto_awesome_outlined,
+                price: controller.pressPrice.value,
+                accentColor: Colors.tealAccent.shade700,
+                onChanged: (val) => controller.pressPrice.value = val,
+              ),
+              const SizedBox(height: 16),
+              _buildServicePriceCard(
+                title: 'Both (Wash + Press)',
+                subtitle: 'Full service',
+                icon: Icons.checkroom_outlined,
+                price: controller.bothPrice.value,
+                accentColor: Colors.orange,
+                onChanged: (val) => controller.bothPrice.value = val,
+              ),
+              const SizedBox(height: 32),
+              ModernButton(
+                text: 'Save Changes',
+                icon: Icons.save_outlined,
+                onPressed: _saveCosts,
+              ),
+              const SizedBox(height: 20),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      width: 110,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              "Update the cost per cloth for each service type.",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 12),
+          ModernText(
+            value,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+          const SizedBox(height: 4),
+          ModernText(
+            title,
+            fontSize: 10,
+            isSecondary: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServicePriceCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required double price,
+    required Color accentColor,
+    required Function(double) onChanged,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Container(
+              width: 5,
+              decoration: BoxDecoration(
+                color: accentColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  bottomLeft: Radius.circular(20),
+                ),
               ),
             ),
-            const SizedBox(height: 24),
-            _buildCostCard(
-              title: "Washing",
-              icon: Icons.local_laundry_service_outlined,
-              iconBgColor: const Color(0xFFD1E4F9),
-              iconColor: const Color(0xFF1976D2),
-              controller: _washController,
-            ),
-            const SizedBox(height: 16),
-            _buildCostCard(
-              title: "Pressing (Iron)",
-              icon: Icons.iron,
-              iconBgColor: const Color(0xFFD1FBF9),
-              iconColor: const Color(0xFF0097A7),
-              controller: _pressController,
-            ),
-            const SizedBox(height: 16),
-            _buildCostCard(
-              title: "Both (Wash + Press)",
-              icon: Icons.checkroom,
-              iconBgColor: const Color(0xFFFFEBD4),
-              iconColor: const Color(0xFFE65100),
-              controller: _bothController,
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _saveCosts,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 2,
-                ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.save_outlined, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text(
-                      "Save Changes",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(14),
                       ),
+                      child: Icon(icon, color: accentColor, size: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ModernText(
+                            title,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          const SizedBox(height: 2),
+                          ModernText(
+                            subtitle,
+                            fontSize: 11,
+                            isSecondary: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        _PriceStepperButton(
+                          icon: Icons.remove,
+                          onPressed: () => onChanged(price > 0 ? price - 1 : 0),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: ModernText(
+                            '₹${price.toStringAsFixed(0)}',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        _PriceStepperButton(
+                          icon: Icons.add,
+                          isPrimary: true,
+                          onPressed: () => onChanged(price + 1),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -154,92 +296,35 @@ class _CostManagementScreenState extends State<CostManagementScreen> {
       ),
     );
   }
+}
 
-  Widget _buildCostCard({
-    required String title,
-    required IconData icon,
-    required Color iconBgColor,
-    required Color iconColor,
-    required TextEditingController controller,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(icon, color: iconColor, size: 28),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF7F8FC),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      const Text(
-                        "₹",
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: controller,
-                          keyboardType: TextInputType.number,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+class _PriceStepperButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final bool isPrimary;
+
+  const _PriceStepperButton({
+    required this.icon,
+    required this.onPressed,
+    this.isPrimary = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: isPrimary ? const Color(0xFF1E293B) : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 18,
+          color: isPrimary ? Colors.white : Colors.grey.shade600,
+        ),
       ),
     );
   }

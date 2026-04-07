@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hsh_app/core/constants/font.dart';
+import 'package:get/get.dart';
+import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:hsh_app/widgets/custom_app_bar.dart';
-import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
-import 'package:hsh_app/widgets/custom_button.dart';
-import 'package:hsh_app/widgets/custom_text_field.dart';
 import 'package:hsh_app/modules/student/features/vehicle/vehicle_dropdown.dart';
 import 'package:hsh_app/modules/student/features/common/upload_container.dart';
 import '../../../../models/vehicle_request_model.dart';
@@ -72,16 +69,12 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       if (_selectedVehicleType == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(AppText.errorVehicleType)),
-        );
+        Get.snackbar('Error', 'Please select vehicle type');
         return;
       }
 
       if (_pickedFile == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please upload registration papers')),
-        );
+        Get.snackbar('Error', 'Please upload registration papers');
         return;
       }
 
@@ -101,9 +94,8 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
       // TODO: Call your provider/repo here to save 'request'
       debugPrint('Submitting Vehicle Request: $request');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppText.vehicleRegisteredSuccess)),
-      );
+      Get.snackbar(
+          'Success', 'Vehicle registration application submitted successfully');
 
       Navigator.of(context).pop();
     }
@@ -111,153 +103,206 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ... theme variables ...
-    final vertical = ResponsiveUtil.verticalSpacing(context);
-    final padding = ResponsiveUtil.responsivePadding(context);
-
     return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: CustomAppBar(
-        title: AppText.vehicleRegistration,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
+      backgroundColor: AppColors.mainBackground,
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(padding),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppText.registerYourVehicleTitle,
-                style: AppFonts.heading2(context),
+        child: Column(
+          children: [
+            // Custom Rounded Header
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 20,
+                bottom: 32,
+                left: 12,
+                right: 12,
               ),
-              const SizedBox(height: 8),
-              Text(
-                AppText.vehicleRegistrationSubtitle,
-                style: AppFonts.bodyRegular(context).copyWith(
-                  color: AppColors.textSecondary,
+              decoration: const BoxDecoration(
+                color: AppColors.headerBlue,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
                 ),
               ),
-              SizedBox(height: vertical * 1.5),
-
-              // Vehicle Type
-              Text(AppText.vehicleType, style: AppFonts.bodyBold(context)),
-              const SizedBox(height: 8),
-              VehicleDropdown(
-                hint: AppText.vehicleTypeHint,
-                value: _selectedVehicleType,
-                items: _vehicleTypes,
-                onChanged: (val) => setState(() => _selectedVehicleType = val),
-              ),
-              SizedBox(height: vertical),
-
-              // Plate Number
-              CustomTextField(
-                labelText: AppText.plateNumber,
-                hintText: AppText.plateNumberHint,
-                controller: _plateNumberController,
-                validator: (value) => value == null || value.isEmpty
-                    ? AppText.errorRegistrationNumber
-                    : null,
-                borderRadius: 12,
-              ),
-              SizedBox(height: vertical),
-
-              // Model / Make
-              CustomTextField(
-                labelText: AppText.modelMake,
-                hintText: AppText.modelMakeHint,
-                controller: _modelController,
-                validator: (value) => value == null || value.isEmpty
-                    ? AppText.errorVehicleModel
-                    : null,
-                borderRadius: 12,
-              ),
-              SizedBox(height: vertical),
-
-              // Parking Preference
-              Text(AppText.parkingPreference, style: AppFonts.bodyBold(context)),
-              const SizedBox(height: 8),
-              VehicleDropdown(
-                hint: AppText.parkingPreferenceHint,
-                value: _selectedParkingPreference,
-                items: _parkingPreferences,
-                onChanged: (val) =>
-                    setState(() => _selectedParkingPreference = val),
-              ),
-              SizedBox(height: vertical),
-
-              // Upload Registration Papers
-              Text(AppText.uploadPapers, style: AppFonts.bodyBold(context)),
-              const SizedBox(height: 8),
-              if (_pickedFile == null)
-                FileUploadCard(
-                  title: 'Upload Registration Papers',
-                  subtitle: 'PDF, PNG or JPG (Max 5MB)',
-                  onTap: _pickFile,
-                )
-              else
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.insert_drive_file,
-                          color: AppColors.primary, size: 32),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(width: 4),
+                  const ModernText(
+                    'Vehicle Registration',
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Form Content Card
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ModernText(
+                      'Register your vehicle',
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.headerBlue,
+                    ),
+                    const SizedBox(height: 8),
+                    const ModernText(
+                      'Provide your details to secure a permit.',
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Vehicle Type
+                    const ModernText('Vehicle Type',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
+                    const SizedBox(height: 8),
+                    VehicleDropdown(
+                      hint: 'Select vehicle type',
+                      value: _selectedVehicleType,
+                      items: _vehicleTypes,
+                      onChanged: (val) =>
+                          setState(() => _selectedVehicleType = val),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Plate Number
+                    const ModernText('Plate Number',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
+                    const SizedBox(height: 8),
+                    ModernTextField(
+                      controller: _plateNumberController,
+                      hint: 'E.G. ABC-1234',
+                      label: '',
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Model / Make
+                    const ModernText('Model / Make',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
+                    const SizedBox(height: 8),
+                    ModernTextField(
+                      controller: _modelController,
+                      hint: 'e.g. Toyota Camry',
+                      label: '',
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Parking Preference
+                    const ModernText('Parking Preference',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey),
+                    const SizedBox(height: 8),
+                    VehicleDropdown(
+                      hint: 'Select slot preference',
+                      value: _selectedParkingPreference,
+                      items: _parkingPreferences,
+                      onChanged: (val) =>
+                          setState(() => _selectedParkingPreference = val),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Upload Registration Papers
+                    const ModernText('Upload Registration Papers',
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey),
+                    const SizedBox(height: 12),
+                    if (_pickedFile == null)
+                      FileUploadCard(
+                        title: 'Upload Registration Papers',
+                        subtitle: 'PDF, PNG or JPG (Max 5MB)',
+                        onTap: _pickFile,
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9FAFB),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Row(
                           children: [
-                            Text(
-                              _pickedFile!.name,
-                              style: AppFonts.bodyBold(context),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            const Icon(Icons.insert_drive_file,
+                                color: AppColors.headerBlue, size: 32),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ModernText(
+                                    _pickedFile!.name,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.headerBlue,
+                                  ),
+                                  Text(
+                                    '${(_pickedFile!.size / 1024).toStringAsFixed(1)} KB',
+                                    style: TextStyle(
+                                        color: Colors.grey[500], fontSize: 11),
+                                  ),
+                                ],
+                              ),
                             ),
-                            Text(
-                              '${(_pickedFile!.size / 1024).toStringAsFixed(1)} KB',
-                              style: TextStyle(
-                                  color: Colors.grey[600], fontSize: 12),
+                            IconButton(
+                              icon: const Icon(Icons.close,
+                                  color: Colors.red, size: 20),
+                              onPressed: _clearFile,
                             ),
                           ],
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.red),
-                        onPressed: _clearFile,
-                      ),
-                    ],
-                  ),
-                ),
-              SizedBox(height: vertical * 2),
 
-              // Submit Button
-              SafeArea(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: CustomButton(
-                    text: AppText.submitApplication,
-                    onPressed: _submitForm,
-                    backgroundColor: AppColors.primary,
-                    borderRadius: 16,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    fontSize: 16,
-                    elevation: 0,
-                  ),
+                    const SizedBox(height: 32),
+
+                    // Submit Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ModernButton(
+                        text: 'Submit Application',
+                        onPressed: _submitForm,
+                        icon: Icons.near_me_outlined,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: vertical),
-            ],
-          ),
+            ),
+            const SizedBox(height: 48),
+          ],
         ),
       ),
     );

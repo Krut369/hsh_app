@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
 
 class NoteTag extends StatelessWidget {
   final String label;
@@ -16,22 +17,30 @@ class NoteTag extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFE3F2FD)
-              : Colors.transparent, // Light blue selection
-          borderRadius: BorderRadius.circular(20),
+              ? AppColors.primary.withOpacity(0.1)
+              : AppColors.white,
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? Colors.blue : Colors.transparent,
-            width: 1,
+            color: isSelected ? AppColors.primary : AppColors.border,
+            width: 1.5,
           ),
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            )
+          ] : null,
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.blue : const Color(0xFF757575),
+            color: isSelected ? AppColors.primary : AppColors.textSecondary,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
             fontSize: 14,
           ),

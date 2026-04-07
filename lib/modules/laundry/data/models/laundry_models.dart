@@ -6,18 +6,18 @@ part 'laundry_models.g.dart';
 
 @JsonSerializable()
 class LaundryItemModel {
-  final String id;
+  final String? id;
   final String name;
-  final int iconCodePoint;
+  final int? iconCodePoint;
   final String? iconFontFamily;
   final String? iconFontPackage;
   final int quantity;
   final String selectedService;
 
   LaundryItemModel({
-    required this.id,
+    this.id,
     required this.name,
-    required this.iconCodePoint,
+    this.iconCodePoint,
     this.iconFontFamily,
     this.iconFontPackage,
     required this.quantity,
@@ -29,14 +29,18 @@ class LaundryItemModel {
   Map<String, dynamic> toJson() => _$LaundryItemModelToJson(this);
 
   LaundryItemEntity toEntity() => LaundryItemEntity(
-        id: id,
+        id: id ?? '',
         name: name,
-        icon: IconData(iconCodePoint,
-            fontFamily: iconFontFamily, fontPackage: iconFontPackage),
+        icon: IconData(
+          iconCodePoint ?? Icons.local_laundry_service.codePoint,
+          fontFamily: iconFontFamily,
+          fontPackage: iconFontPackage,
+        ),
         quantity: quantity,
         selectedService: LaundryServiceType.values.firstWhere(
-            (e) => e.name == selectedService,
-            orElse: () => LaundryServiceType.wash),
+          (e) => e.name == selectedService,
+          orElse: () => LaundryServiceType.wash,
+        ),
       );
 
   factory LaundryItemModel.fromEntity(LaundryItemEntity entity) =>
@@ -53,9 +57,12 @@ class LaundryItemModel {
 
 @JsonSerializable()
 class LaundryOrderModel {
-  final String id;
+  final String? id;
   final String orderId;
-  final DateTime date;
+  
+  @JsonKey(name: 'date')
+  final DateTime? date;
+  
   final int totalItems;
   final String serviceType;
   final String status;
@@ -63,9 +70,9 @@ class LaundryOrderModel {
   final String? note;
 
   LaundryOrderModel({
-    required this.id,
+    this.id,
     required this.orderId,
-    required this.date,
+    this.date,
     required this.totalItems,
     required this.serviceType,
     required this.status,
@@ -73,18 +80,26 @@ class LaundryOrderModel {
     this.note,
   });
 
-  factory LaundryOrderModel.fromJson(Map<String, dynamic> json) =>
-      _$LaundryOrderModelFromJson(json);
+  factory LaundryOrderModel.fromJson(Map<String, dynamic> json) {
+    // Custom handling for date if 'date' is missing but 'createdAt' is present
+    if (json['date'] == null && json['createdAt'] != null) {
+      json['date'] = json['createdAt'];
+    }
+    return _$LaundryOrderModelFromJson(json);
+  }
+  
   Map<String, dynamic> toJson() => _$LaundryOrderModelToJson(this);
 
   LaundryOrderEntity toEntity() => LaundryOrderEntity(
-        id: id,
+        id: id ?? orderId,
         orderId: orderId,
-        date: date,
+        date: date ?? DateTime.now(),
         totalItems: totalItems,
         serviceType: serviceType,
-        status: OrderStatus.values.firstWhere((e) => e.name == status,
-            orElse: () => OrderStatus.requested),
+        status: OrderStatus.values.firstWhere(
+          (e) => e.name == status,
+          orElse: () => OrderStatus.requested,
+        ),
         items: items.map((i) => i.toEntity()).toList(),
         note: note,
       );

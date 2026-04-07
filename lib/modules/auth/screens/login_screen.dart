@@ -31,6 +31,62 @@ class _LoginScreenState extends State<LoginScreen> {
     await authController.login(
       _emailOrPhoneController.text.trim(),
       _passwordController.text,
+    if (email.isEmpty || password.isEmpty) {
+      ModernToast.show(
+        message: 'Please enter both email and password.',
+        type: ToastType.error,
+      );
+      return;
+    }
+
+    await authController.login(email, password);
+
+    if (authController.error.value != null) {
+      ModernToast.show(
+        message: _friendlyError(authController.error.value!),
+        type: ToastType.error,
+      );
+    } else if (authController.isAuthenticated.value) {
+      Get.offAllNamed('/');
+    }
+  }
+
+  InputDecoration _pillDecoration({
+    required String hintText,
+    required Widget prefixIcon,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: const TextStyle(
+        color: _LoginScreenColors.hint,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.18),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(999),
+        borderSide:
+            BorderSide(color: _LoginScreenColors.darkBlue.withOpacity(0.22)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(999),
+        borderSide:
+            BorderSide(color: _LoginScreenColors.darkBlue.withOpacity(0.28)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(999),
+        borderSide: const BorderSide(
+          color: _LoginScreenColors.darkBlue,
+          width: 2,
+        ),
+      ),
     );
   }
 

@@ -8,14 +8,23 @@ class NotesService {
   NotesService(this._apiClient);
 
   /// Get student notes
-  Future<ApiResponse> getNotes() async {
-    return await _apiClient.get(ApiConstants.notes);
+  Future<ApiResponse> getNotes({
+    String? query,
+    String? category,
+    int page = 1,
+  }) async {
+    final queryParams = {
+      if (query != null && query.isNotEmpty) 'q': query,
+      if (category != null && category.isNotEmpty) 'category': category,
+      'page': page,
+    };
+    return await _apiClient.get(ApiConstants.notes, queryParameters: queryParams);
   }
 
   /// Create note
   Future<ApiResponse> createNote({
     required String title,
-    required String content,
+    required String body,
     String? category,
     bool isPinned = false,
   }) async {
@@ -23,9 +32,9 @@ class NotesService {
       ApiConstants.notes,
       body: {
         'title': title,
-        'content': content,
+        'body': body,
         if (category != null) 'category': category,
-        'is_pinned': isPinned,
+        'isPinned': isPinned,
       },
     );
   }
@@ -34,17 +43,17 @@ class NotesService {
   Future<ApiResponse> updateNote({
     required String noteId,
     String? title,
-    String? content,
+    String? body,
     String? category,
     bool? isPinned,
   }) async {
-    return await _apiClient.put(
+    return await _apiClient.patch(
       '${ApiConstants.notes}/$noteId',
       body: {
         if (title != null) 'title': title,
-        if (content != null) 'content': content,
+        if (body != null) 'body': body,
         if (category != null) 'category': category,
-        if (isPinned != null) 'is_pinned': isPinned,
+        if (isPinned != null) 'isPinned': isPinned,
       },
     );
   }

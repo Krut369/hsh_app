@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uuid/uuid.dart';
 
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
-import 'package:hsh_app/widgets/custom_app_bar.dart';
-import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
+import 'package:uitoolkit/uitoolkit.dart' as ui;
 
 class SelectItemsScreen extends StatefulWidget {
   final String orderId;
@@ -24,13 +22,9 @@ class SelectItemsScreen extends StatefulWidget {
 
 class _SelectItemsScreenState extends State<SelectItemsScreen> {
   final LaundryController controller = Get.find<LaundryController>();
-  final Uuid _uuid = const Uuid();
   final TextEditingController _noteController = TextEditingController();
 
-  // Selected tab index (category)
   int _selectedIndex = 0;
-
-  // Basket state: ItemID -> { ServiceType -> Quantity }
   final Map<String, Map<LaundryServiceType, int>> _basket = {};
 
   @override
@@ -58,12 +52,6 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
         itemMap[type] = newQty;
       }
     });
-  }
-
-  int _getTotalForItem(String itemId) {
-    final itemMap = _basket[itemId];
-    if (itemMap == null) return 0;
-    return itemMap.values.fold(0, (sum, qty) => sum + qty);
   }
 
   int _getBasketTotal() {
@@ -94,13 +82,14 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
     return 'N/A';
   }
 
-  void _placeOrder() {
+  Future<void> _placeOrder() async {
     if (_basket.isEmpty) {
       Get.snackbar('Error', 'Please select at least one item.',
           snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
+    // Support multiple items of same category but different service types
     final List<LaundryItemEntity> orderItems = [];
     final allItems = controller.selectableItems;
 
@@ -118,14 +107,13 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
       });
     });
 
-    final totalItems = _getBasketTotal();
     final serviceTypeStr = _getCombinedServiceTypeString();
 
-    final newOrder = LaundryOrderEntity(
-      id: _uuid.v4(),
-      orderId: widget.orderId,
-      date: widget.orderDate,
-      totalItems: totalItems,
+    final order = LaundryOrderEntity(
+      id: '',
+      orderId: '',
+      date: DateTime.now(),
+      totalItems: _getBasketTotal(),
       serviceType: serviceTypeStr,
       status: OrderStatus.requested,
       items: orderItems,
@@ -134,323 +122,340 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
           : _noteController.text.trim(),
     );
 
-    controller.addOrder(newOrder);
-
-    Get.snackbar('Success', 'Order placed successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white);
-
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    // Call the controller's submit method which uses the CreateOrderUseCase
+    await controller.submitOrderFromItems(order);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final items = controller.selectableItems;
+    return ui.ModernScaffold(
+      backgroundColor: const Color(0xFFF3F7F9),
+      body: Obx(() {
+        final items = controller.selectableItems;
+        if (items.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      if (items.isEmpty) {
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
-      }
+        final selectedItem = items[_selectedIndex];
 
-      final selectedItem = items[_selectedIndex];
-      final totalInBasket = _getTotalForItem(selectedItem.id);
-
-      return Scaffold(
-        backgroundColor: AppColors.surface,
-        appBar: CustomAppBar(
-          title: 'Select Items',
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ),
-        body: Column(
+        return Column(
           children: [
-            // 1. Categories Tabs
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: List.generate(items.length, (index) {
-                    final item = items[index];
-                    final isSelected = index == _selectedIndex;
-                    return GestureDetector(
-                      onTap: () => setState(() => _selectedIndex = index),
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 16),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          border: isSelected
-                              ? const Border(
-                                  bottom: BorderSide(
-                                      color: AppColors.primary, width: 2))
-                              : null,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? AppColors.primary
-                                    : Colors.white,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: AppColors.border),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                            color: AppColors.primary
-                                                .withOpacity(0.4),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4))
-                                      ]
-                                    : [],
-                              ),
-                              child: Icon(item.icon,
-                                  color:
-                                      isSelected ? Colors.white : Colors.grey,
-                                  size: 24),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(item.name,
-                                style: TextStyle(
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color: isSelected
-                                        ? AppColors.primary
-                                        : Colors.grey,
-                                    fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-            ),
-
+            _buildHeader(context),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 2. Main Item Card
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10))
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: AppColors.secondary.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: const Icon(Icons.dry_cleaning,
-                                    size: 40, color: AppColors.secondary),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      selectedItem.name,
-                                      style: AppFonts.heading2(context),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Total in basket: $totalInBasket Items',
-                                      style: AppFonts.bodyRegular(context)
-                                          .copyWith(
-                                              color: AppColors.textSecondary),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 32),
-
-                          // 3. Service Options Rows
-                          Obx(() => Column(
+                    // Category List
+                    SizedBox(
+                      height: 120,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: items.length,
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          final isSelected = index == _selectedIndex;
+                          return GestureDetector(
+                            onTap: () => setState(() => _selectedIndex = index),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 20),
+                              child: Column(
                                 children: [
-                                  _buildServiceRow(
-                                      selectedItem,
-                                      LaundryServiceType.wash,
-                                      'Wash Only',
-                                      '₹${controller.washPrice.value.toStringAsFixed(0)} per unit',
-                                      AppColors.primary,
-                                      Icons.water_drop),
-                                  const SizedBox(height: 20),
-                                  _buildServiceRow(
-                                      selectedItem,
-                                      LaundryServiceType.press,
-                                      'Press Only',
-                                      '₹${controller.pressPrice.value.toStringAsFixed(0)} per unit',
-                                      AppColors.primary,
-                                      Icons.iron),
-                                  const SizedBox(height: 20),
-                                  _buildServiceRow(
-                                      selectedItem,
-                                      LaundryServiceType.both,
-                                      'Wash & Press',
-                                      '₹${controller.bothPrice.value.toStringAsFixed(0)} per unit',
-                                      AppColors.primary,
-                                      Icons.dry_cleaning),
+                                  Container(
+                                    width: 70,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? AppColors.headerBlue
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withValues(alpha: 0.04),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        )
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      _getCategoryIcon(item.name),
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFF94A3B8),
+                                      size: 32,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ui.ModernText(
+                                    item.name,
+                                    fontSize: 12,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.w500,
+                                    color: isSelected
+                                        ? AppColors.headerBlue
+                                        : const Color(0xFF64748B),
+                                  ),
                                 ],
-                              )),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24),
+                      child: ui.ModernText(
+                        "Service Options",
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.headerBlue,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Service Cards
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          _buildServiceCard(
+                            selectedItem,
+                            LaundryServiceType.wash,
+                            "Wash Only",
+                            controller.washPrice.value,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildServiceCard(
+                            selectedItem,
+                            LaundryServiceType.press,
+                            "Press Only",
+                            controller.pressPrice.value,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildServiceCard(
+                            selectedItem,
+                            LaundryServiceType.both,
+                            "Wash & Press",
+                            controller.bothPrice.value,
+                          ),
                         ],
                       ),
                     ),
 
                     const SizedBox(height: 24),
-
-                    TextField(
-                      controller: _noteController,
-                      decoration: InputDecoration(
-                        hintText: 'Add a note (e.g. starch levels)',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none),
-                        contentPadding: const EdgeInsets.all(16),
-                        prefixIcon:
-                            const Icon(Icons.edit_note, color: Colors.grey),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24),
+                      child: ui.ModernText(
+                        "Special Instructions",
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.headerBlue,
                       ),
                     ),
+                    const SizedBox(height: 16),
+
+                    // Notes Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: TextField(
+                        controller: _noteController,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          hintText:
+                              'e.g. Use mild detergent, fold carefully...',
+                          hintStyle: const TextStyle(
+                              color: Color(0xFFCBD5E1), fontSize: 14),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.all(20),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Obx(() => SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: controller.isLoading.value
+                                  ? null
+                                  : _placeOrder,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.headerBlue,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                elevation: 0,
+                              ),
+                              child: controller.isLoading.value
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white)
+                                  : const ui.ModernText(
+                                      'Add Laundry Items',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                            ),
+                          )),
+                    ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
             ),
-
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: Colors.white,
-              child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (_getBasketTotal() > 0)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Text(
-                          '${_getBasketTotal()} items selected',
-                          style: TextStyle(
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: _placeOrder,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
-                          elevation: 0,
-                        ),
-                        child: Text('Add Laundry',
-                            style: AppFonts.buttonText(context)),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
           ],
-        ),
-      );
-    });
-  }
-
-  Widget _buildServiceRow(LaundryItemEntity item, LaundryServiceType type,
-      String title, String subtitle, Color color, IconData icon) {
-    final qty = _getQuantity(item.id, type);
-
-    return Row(
-      children: [
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: color, size: 24),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: AppFonts.bodyBold(context)),
-              Text(subtitle,
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12)),
-            ],
-          ),
-        ),
-        Row(
-          children: [
-            _buildStepperButton(
-                Icons.remove, () => _updateQuantity(item.id, type, -1),
-                isAdd: false),
-            SizedBox(
-              width: 32,
-              child: Text('$qty',
-                  textAlign: TextAlign.center,
-                  style: AppFonts.bodyBold(context)),
-            ),
-            _buildStepperButton(
-                Icons.add, () => _updateQuantity(item.id, type, 1),
-                isAdd: true),
-          ],
-        )
-      ],
+        );
+      }),
     );
   }
 
-  Widget _buildStepperButton(IconData icon, VoidCallback onTap,
-      {required bool isAdd}) {
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 20,
+        bottom: 14,
+        left: 16,
+        right: 24,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.headerBlue,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          const SizedBox(width: 8),
+          const ui.ModernText(
+            "Select Items",
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceCard(LaundryItemEntity item, LaundryServiceType type,
+      String title, double price) {
+    final qty = _getQuantity(item.id, type);
+    final isSelected = qty > 0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isSelected ? AppColors.headerBlue : Colors.white,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ui.ModernText(
+                  title,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.headerBlue,
+                ),
+                ui.ModernText(
+                  "₹${price.toStringAsFixed(0)} / piece",
+                  fontSize: 13,
+                  color: const Color(0xFF94A3B8),
+                ),
+              ],
+            ),
+          ),
+
+          // Stepper
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Row(
+              children: [
+                _buildStepperButton(Icons.remove_rounded,
+                    () => _updateQuantity(item.id, type, -1), false),
+                SizedBox(
+                  width: 32,
+                  child: ui.ModernText(
+                    "$qty",
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.headerBlue,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                _buildStepperButton(Icons.add_rounded,
+                    () => _updateQuantity(item.id, type, 1), true),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepperButton(IconData icon, VoidCallback onTap, bool isAdd) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: 36,
-        height: 36,
+        width: 32,
+        height: 32,
         decoration: BoxDecoration(
-          color: isAdd ? AppColors.primary : Colors.transparent,
+          color: isAdd ? AppColors.headerBlue : Colors.white,
           shape: BoxShape.circle,
-          border: isAdd ? null : Border.all(color: AppColors.border),
         ),
-        child: Icon(icon, size: 18, color: isAdd ? Colors.white : Colors.grey),
+        child: Icon(
+          icon,
+          size: 18,
+          color: isAdd ? Colors.white : AppColors.headerBlue,
+        ),
       ),
     );
+  }
+
+  IconData _getCategoryIcon(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('shirt')) return Icons.dry_cleaning_rounded;
+    if (lower.contains('pant')) return Icons.checkroom_rounded;
+    if (lower.contains('jacket')) return Icons.checkroom_rounded;
+    return Icons.local_laundry_service_rounded;
   }
 }
