@@ -10,8 +10,8 @@ class ApiConstants {
   static String get apiBaseUrl => '$baseUrl$apiVersion';
 
   // Timeout Duration
-  static const Duration connectionTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
+  static const Duration connectionTimeout = Duration(seconds: 10);
+  static const Duration receiveTimeout = Duration(seconds: 10);
 
   // Authentication Endpoints
   static const String login = '/auth/login';

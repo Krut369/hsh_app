@@ -6,7 +6,7 @@ import 'qr_attendance_screen.dart';
 import 'manual_attendance_screen.dart';
 import 'widgets/event_type_chip.dart';
 
-class AttendanceController extends GetxController {
+class LeaderAttendanceController extends GetxController {
   final selectedEvent = AttendanceEventType.lunch.obs;
   final isQrView = true.obs;
 
@@ -24,7 +24,7 @@ class AttendanceMainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(AttendanceController());
+    final controller = Get.put(LeaderAttendanceController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFD6ECF7),
@@ -74,7 +74,7 @@ class AttendanceMainScreen extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: const Color(0xFF2D507B).withOpacity(0.2))),
+                      color: const Color(0xFF2D507B).withValues(alpha: 0.2))),
               child: Obx(() => Row(
                     children: [
                       Expanded(

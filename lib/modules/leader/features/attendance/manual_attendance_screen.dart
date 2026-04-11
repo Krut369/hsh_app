@@ -48,7 +48,6 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          
           Row(
             children: [
               Expanded(
@@ -73,7 +72,8 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D507B),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -82,9 +82,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
               ),
             ],
           ),
-
           const SizedBox(height: 32),
-
           if (_showStudentDetail) ...[
             StudentDetailCard(
               student: _mockStudent,
@@ -102,12 +100,15 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
               },
             ),
           ] else ...[
+            const SizedBox(height: 60),
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(40.0),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.person_search, size: 80, color: Color(0xFFD6ECF7)),
+                    Icon(Icons.person_search,
+                        size: 80, color: Color(0xFFD6ECF7)),
                     SizedBox(height: 16),
                     Text(
                       'Search for a student to mark attendance',

@@ -48,6 +48,9 @@ class AuthController extends GetxController {
   Future<void> login(String email, String password) async {
     isLoading.value = true;
     error.value = null;
+
+    debugPrint('AUTH: login attempt for email: "$email"');
+
     try {
       final loggedInUser = await _loginUseCase.execute(email, password);
       if (loggedInUser != null) {
@@ -75,5 +78,6 @@ class AuthController extends GetxController {
     user.value = null;
     isAuthenticated.value = false;
     error.value = null;
+    Get.offAllNamed('/login');
   }
 }

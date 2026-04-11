@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/enums/user_role.dart';
 import 'auth_controller.dart';
+import '../../../student/presentation/routes/student_routes.dart';
 
 class SplashController extends GetxController with GetTickerProviderStateMixin {
   late AnimationController logoController;
@@ -71,7 +72,7 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
           Get.offAllNamed('/leader_module');
         } else {
           // Changed to student shell instead of profile directly
-          Get.offAllNamed('/student'); 
+          Get.offAllNamed(StudentRoutes.shell); 
         }
       } else {
         Get.offAllNamed('/login');
