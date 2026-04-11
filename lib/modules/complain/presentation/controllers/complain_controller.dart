@@ -23,6 +23,8 @@ class ComplainController extends GetxController {
   final isLoading = false.obs;
   final error = RxnString();
   final filter = Rxn<ComplaintStatus>();
+  final categoryFilter = RxnString();
+  final categoryCounts = <String, int>{}.obs;
   final tabIndex = 0.obs;
 
   // Selection/Draft State (for Add Complaint)
@@ -45,8 +47,8 @@ class ComplainController extends GetxController {
       complaints.assignAll(fetchedList);
       _calculateStatsLocally();
     } catch (e) {
-      print('=== COMPLAINTS FETCH ERROR ===');
-      print(e);
+      debugPrint('=== COMPLAINTS FETCH ERROR ===');
+      debugPrint(e.toString());
       error.value = e.toString();
     } finally {
       isLoading.value = false;
@@ -59,6 +61,7 @@ class ComplainController extends GetxController {
     int inProgress = 0;
 
     for (var complaint in complaints) {
+      // Status Stats
       switch (complaint.status) {
         case ComplaintStatus.pending:
           pending++;
@@ -71,6 +74,10 @@ class ComplainController extends GetxController {
           inProgress++;
           break;
       }
+
+      // Category Stats
+      final cat = complaint.complaintType;
+      categoryCounts[cat] = (categoryCounts[cat] ?? 0) + 1;
     }
 
     stats.value = ComplaintStats(
@@ -90,9 +97,22 @@ class ComplainController extends GetxController {
     filter.value = newFilter;
   }
 
+  void setCategoryFilter(String? categoryName) {
+    categoryFilter.value = categoryName;
+    changeTab(1); // Navigate to list
+  }
+
+  void clearAllFilters() {
+    filter.value = null;
+    categoryFilter.value = null;
+  }
+
   List<Complaint> get filteredComplaints {
-    if (filter.value == null) return complaints;
-    return complaints.where((c) => c.status == filter.value).toList();
+    return complaints.where((c) {
+      final statusMatch = filter.value == null || c.status == filter.value;
+      final categoryMatch = categoryFilter.value == null || c.complaintType == categoryFilter.value;
+      return statusMatch && categoryMatch;
+    }).toList();
   }
 
   // --- Add Complaint Logic ---

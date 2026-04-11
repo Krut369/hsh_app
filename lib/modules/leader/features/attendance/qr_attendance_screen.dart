@@ -26,13 +26,15 @@ class _QrAttendanceScreenState extends State<QrAttendanceScreen> {
     _timer?.cancel();
     _secondsRemaining = 60;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_secondsRemaining > 0) {
-          _secondsRemaining--;
-        } else {
-          _secondsRemaining = 60; // Refresh
-        }
-      });
+      if (mounted) {
+        setState(() {
+          if (_secondsRemaining > 0) {
+            _secondsRemaining--;
+          } else {
+            _secondsRemaining = 60; // Refresh
+          }
+        });
+      }
     });
   }
 
@@ -64,7 +66,7 @@ class _QrAttendanceScreenState extends State<QrAttendanceScreen> {
             style: TextStyle(color: Color(0xFF5D90B3)),
           ),
           const SizedBox(height: 40),
-          
+
           // QR Code Mock
           Container(
             padding: const EdgeInsets.all(20),
@@ -73,7 +75,7 @@ class _QrAttendanceScreenState extends State<QrAttendanceScreen> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -89,11 +91,10 @@ class _QrAttendanceScreenState extends State<QrAttendanceScreen> {
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Stack(
+                  child: const Stack(
                     alignment: Alignment.center,
                     children: [
-                      Icon(Icons.qr_code_2, size: 200, color: const Color(0xFF2D507B)),
-                      // Animated scanning line or border could go here
+                      Icon(Icons.qr_code_2, size: 200, color: Color(0xFF2D507B)),
                     ],
                   ),
                 ),
@@ -101,7 +102,8 @@ class _QrAttendanceScreenState extends State<QrAttendanceScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.refresh, size: 16, color: Color(0xFF5D90B3)),
+                    const Icon(Icons.refresh,
+                        size: 16, color: Color(0xFF5D90B3)),
                     const SizedBox(width: 8),
                     Text(
                       'Refreshing in ${_secondsRemaining}s',
@@ -117,7 +119,7 @@ class _QrAttendanceScreenState extends State<QrAttendanceScreen> {
           ),
 
           const SizedBox(height: 40),
-          
+
           // Stats Row
           const AttendanceStatsCard(
             present: '124',

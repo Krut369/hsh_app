@@ -121,6 +121,68 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
                 onFilterPressed: () => _showFilterSheet(context),
               ),
             ),
+
+          // --- Compact Category Grid ---
+          Obx(() => Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const ModernText(
+                      'Categories',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      isSecondary: true,
+                    ),
+                    if (controller.categoryFilter.value != null)
+                      GestureDetector(
+                        onTap: () => controller.categoryFilter.value = null,
+                        child: const ModernText(
+                          'Clear Filter',
+                          fontSize: 12,
+                          color: Color(0xFF3B82F6),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 2.2,
+                  ),
+                  itemCount: complaintTypes.length,
+                  itemBuilder: (context, index) {
+                    final type = complaintTypes[index];
+                    final count = controller.categoryCounts[type.name] ?? 0;
+                    final isSelected = controller.categoryFilter.value == type.name;
+
+                    return _CategoryCard(
+                      name: type.name,
+                      count: count,
+                      isSelected: isSelected,
+                      onTap: () {
+                        if (isSelected) {
+                          controller.categoryFilter.value = null;
+                        } else {
+                          controller.categoryFilter.value = type.name;
+                        }
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          )),
+
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value && controller.complaints.isEmpty) {
@@ -626,6 +688,89 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
             );
           },
         ),
+    );
+  }
+}
+
+class _CategoryCard extends StatelessWidget {
+  final String name;
+  final int count;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _CategoryCard({
+    required this.name,
+    required this.count,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  IconData _getIcon() {
+    switch (name) {
+      case 'Carpentry': return Icons.handyman_rounded;
+      case 'Electrical': return Icons.bolt_rounded;
+      case 'Plumbing': return Icons.plumbing_rounded;
+      case 'Housekeeping': return Icons.cleaning_services_rounded;
+      case 'Construction': return Icons.foundation_rounded;
+      default: return Icons.construction_rounded;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ModernCard(
+      padding: EdgeInsets.zero,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF1E293B) : Colors.white,
+          borderRadius: BorderRadius.circular(20), // Standard ModernCard radius usually 20
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(
+                  _getIcon(),
+                  color: isSelected ? Colors.white : const Color(0xFF1E293B),
+                  size: 20,
+                ),
+                if (count > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.white24 : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      count.toString(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? Colors.white : const Color(0xFF1E293B),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: isSelected ? Colors.white : const Color(0xFF1E293B),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

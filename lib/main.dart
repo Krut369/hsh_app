@@ -13,7 +13,7 @@ import 'package:hsh_app/providers/bottom_nav_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uitoolkit/uitoolkit.dart';
 import 'package:hsh_app/routes/app_pages.dart';
-import 'package:hsh_app/splash_screen.dart';
+import 'package:hsh_app/modules/auth/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

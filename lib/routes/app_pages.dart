@@ -6,7 +6,7 @@ import 'package:hsh_app/modules/student/presentation/routes/student_routes.dart'
 import 'package:hsh_app/modules/laundry/presentation/laundry_routes.dart';
 import 'package:hsh_app/modules/complain/presentation/complain_routes.dart';
 import 'package:hsh_app/modules/leader/presentation/leader_routes.dart';
-import 'package:hsh_app/splash_screen.dart';
+import 'package:hsh_app/modules/auth/screens/splash_screen.dart';
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
 import 'package:hsh_app/core/enums/user_role.dart';
 
@@ -61,7 +61,12 @@ class AuthMiddleware extends GetMiddleware {
     }
 
     final user = authController.user.value;
-    if (user == null) return const RouteSettings(name: '/login');
+    if (user == null) {
+      debugPrint('Middleware: User is null, redirecting to /login');
+      return const RouteSettings(name: '/login');
+    }
+
+    debugPrint('Middleware: Authenticated as ${user.role}, redirecting from $route');
 
     if (route == '/' || route == '/login') {
       switch (user.role) {
