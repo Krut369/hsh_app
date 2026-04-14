@@ -11,6 +11,8 @@ import 'package:hsh_app/widgets/premium_app_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:appflowy_editor/appflowy_editor.dart';
 import 'dart:convert';
+import 'custom_numbered_list_builder.dart';
+import 'format_bottom_sheet.dart';
 import 'note_toolbar.dart';
 
 class NoteEditorScreen extends StatefulWidget {
@@ -32,6 +34,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   Selection? _lastSelection;
 
   late bool _isChecklistMode;
+  bool _isBoldActive = false;
+  bool _isItalicActive = false;
+  bool _isUnderlineActive = false;
+  bool _isBulletActive = false;
 
   bool get _isEditing => widget.noteToEdit != null;
 
@@ -196,6 +202,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       child: AppFlowyEditor(
                         editorState: _editorState,
                         focusNode: _bodyFocusNode,
+                        blockComponentBuilders: {
+                          ...standardBlockComponentBuilderMap,
+                          NumberedListBlockKeys.type: buildCustomNumberedListBuilder(),
+                        },
                         editorStyle: EditorStyle(
                           padding: EdgeInsets.zero,
                           cursorColor: AppColors.primary,
@@ -222,6 +232,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   NoteToolbar(
                     onFormat: _handleFormat,
                     onOpenFormatSheet: _showFormatSheet,
+                    isBoldActive: _isBoldActive,
+                    isItalicActive: _isItalicActive,
+                    isUnderlineActive: _isUnderlineActive,
+                    isBulletActive: _isBulletActive,
                   ),
               ],
             ),
@@ -233,7 +247,18 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   void _showFormatSheet() {
-    // Custom logic to show more options if needed
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => FormatBottomSheet(
+        selectedFormat: _currentListFormat(),
+        onFormat: (type) {
+          Navigator.of(context).pop();
+          _handleFormat(type);
+        },
+      ),
+    );
   }
 
   void _cacheSelection() {
@@ -241,6 +266,115 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     if (selection != null) {
       _lastSelection = selection;
     }
+    _updateFormattingState(selection);
+  }
+
+  void _updateFormattingState([Selection? selection]) {
+    final currentSelection = selection ?? _editorState.selection ?? _lastSelection;
+    final isBoldActive = _hasTextAttribute(
+      AppFlowyRichTextKeys.bold,
+      currentSelection,
+    );
+    final isItalicActive = _hasTextAttribute(
+      AppFlowyRichTextKeys.italic,
+      currentSelection,
+    );
+    final isUnderlineActive = _hasTextAttribute(
+      AppFlowyRichTextKeys.underline,
+      currentSelection,
+    );
+    final isBulletActive = _hasListSelection(currentSelection);
+
+    if (!mounted) return;
+    if (_isBoldActive == isBoldActive &&
+        _isItalicActive == isItalicActive &&
+        _isUnderlineActive == isUnderlineActive &&
+        _isBulletActive == isBulletActive) {
+      return;
+    }
+
+    setState(() {
+      _isBoldActive = isBoldActive;
+      _isItalicActive = isItalicActive;
+      _isUnderlineActive = isUnderlineActive;
+      _isBulletActive = isBulletActive;
+    });
+  }
+
+  bool _hasListSelection(Selection? selection) {
+    if (selection == null) return false;
+    final nodes = _editorState.getNodesInSelection(selection);
+    return nodes.any(
+      (node) =>
+          node.type == BulletedListBlockKeys.type ||
+          node.type == NumberedListBlockKeys.type ||
+          node.type == TodoListBlockKeys.type,
+    );
+  }
+
+  String _currentListFormat([Selection? selection]) {
+    final currentSelection = selection ?? _editorState.selection ?? _lastSelection;
+    if (currentSelection == null) return 'paragraph';
+
+    final node = _editorState.getNodeAtPath(currentSelection.normalized.start.path);
+    switch (node?.type) {
+      case BulletedListBlockKeys.type:
+        return 'bullet';
+      case NumberedListBlockKeys.type:
+        final style = node?.attributes[CustomNumberedListStyles.styleKey]
+                as String? ??
+            CustomNumberedListStyles.decimal;
+        switch (style) {
+          case CustomNumberedListStyles.alpha:
+            return 'numbered_alpha';
+          case CustomNumberedListStyles.roman:
+            return 'numbered_roman';
+          case CustomNumberedListStyles.decimal:
+          default:
+            return 'numbered_decimal';
+        }
+      case TodoListBlockKeys.type:
+        return 'checkbox';
+      default:
+        return 'paragraph';
+    }
+  }
+
+  bool _hasTextAttribute(String attributeKey, Selection? selection) {
+    if (selection == null) return false;
+
+    final normalized = selection.normalized;
+    final nodes = _editorState.getNodesInSelection(normalized);
+
+    for (final node in nodes) {
+      final delta = node.delta;
+      if (delta == null) continue;
+
+      if (selection.isCollapsed && node.path.equals(normalized.start.path)) {
+        final attributes =
+            appflowyEditorSliceAttributes?.call(delta, normalized.start.offset);
+        if (attributes?[attributeKey] == true) {
+          return true;
+        }
+        continue;
+      }
+
+      final startIndex =
+          node.path.equals(normalized.start.path) ? normalized.startIndex : 0;
+      final endIndex = node.path.equals(normalized.end.path)
+          ? normalized.endIndex
+          : delta.length;
+      if (endIndex <= startIndex) continue;
+
+      final sliced = delta.slice(startIndex, endIndex);
+      for (final operation in sliced) {
+        if (operation.attributes?[attributeKey] == true) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   Widget _buildTag(String label) {
@@ -323,20 +457,89 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         );
         break;
       case 'bullet':
-        final nodes = _editorState.getNodesInSelection(selection);
-        final transaction = _editorState.transaction;
-        for (final node in nodes) {
-          final isBullet = node.type == BulletedListBlockKeys.type;
-          final newType =
-              isBullet ? ParagraphBlockKeys.type : BulletedListBlockKeys.type;
-          transaction.insertNode(
-            node.path,
-            node.copyWith(type: newType),
-          );
-          transaction.deleteNode(node);
-        }
-        await _editorState.apply(transaction);
+        await _applyListFormat(selection, BulletedListBlockKeys.type);
+        break;
+      case 'numbered_decimal':
+        await _applyListFormat(
+          selection,
+          NumberedListBlockKeys.type,
+          attributes: {
+            CustomNumberedListStyles.styleKey:
+                CustomNumberedListStyles.decimal,
+          },
+        );
+        break;
+      case 'numbered_alpha':
+        await _applyListFormat(
+          selection,
+          NumberedListBlockKeys.type,
+          attributes: {
+            CustomNumberedListStyles.styleKey:
+                CustomNumberedListStyles.alpha,
+          },
+        );
+        break;
+      case 'numbered_roman':
+        await _applyListFormat(
+          selection,
+          NumberedListBlockKeys.type,
+          attributes: {
+            CustomNumberedListStyles.styleKey:
+                CustomNumberedListStyles.roman,
+          },
+        );
+        break;
+      case 'checkbox':
+        await _applyListFormat(
+          selection,
+          TodoListBlockKeys.type,
+          attributes: {
+            TodoListBlockKeys.checked: false,
+          },
+        );
+        break;
+      case 'paragraph':
+        await _applyListFormat(selection, ParagraphBlockKeys.type);
         break;
     }
+
+    _updateFormattingState(_editorState.selection ?? selection);
+  }
+
+  Future<void> _applyListFormat(
+    Selection selection,
+    String targetType, {
+    Map<String, dynamic>? attributes,
+  }) async {
+    await _editorState.formatNode(
+      selection,
+      (node) {
+        final sameType = node.type == targetType;
+        final requestedStyle = attributes?[CustomNumberedListStyles.styleKey];
+        final existingStyle =
+            node.attributes[CustomNumberedListStyles.styleKey];
+        final sameStyle = requestedStyle == null || requestedStyle == existingStyle;
+        final nextType =
+            sameType && sameStyle ? ParagraphBlockKeys.type : targetType;
+        final nextAttributes = Map<String, dynamic>.from(node.attributes)
+          ..remove(TodoListBlockKeys.checked)
+          ..remove(NumberedListBlockKeys.number)
+          ..remove(CustomNumberedListStyles.styleKey);
+
+        if (attributes != null) {
+          nextAttributes.addAll(attributes);
+        }
+        if (nextType == TodoListBlockKeys.type ||
+            node.type == TodoListBlockKeys.type) {
+          nextAttributes[ParagraphBlockKeys.delta] =
+              (node.delta ?? Delta()).toJson();
+        }
+
+        return node.copyWith(
+          type: nextType,
+          attributes: nextAttributes,
+        );
+      },
+    );
   }
 }
