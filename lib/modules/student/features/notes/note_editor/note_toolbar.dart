@@ -17,7 +17,8 @@ class NoteToolbar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.primary.withOpacity(0.05))),
+        border:
+            Border(top: BorderSide(color: AppColors.primary.withOpacity(0.05))),
       ),
       child: SafeArea(
         top: false,
@@ -35,23 +36,29 @@ class NoteToolbar extends StatelessWidget {
               onTap: () => onFormat('italic'),
             ),
             _ToolbarButton(
+              label: 'U',
+              isText: true,
+              isUnderline: true,
+              onTap: () => onFormat('underline'),
+            ),
+            _ToolbarButton(
               icon: Icons.format_list_bulleted_rounded,
               onTap: () => onFormat('bullet'),
             ),
             const VerticalDivider(width: 24, indent: 8, endIndent: 8),
-            _ToolbarButton(
-              icon: Icons.image_outlined,
-              onTap: () {},
-            ),
-            _ToolbarButton(
-              icon: Icons.mic_none_outlined,
-              onTap: () {},
-            ),
-            const Spacer(),
-            _ToolbarButton(
-              icon: Icons.more_horiz_rounded,
-              onTap: onOpenFormatSheet,
-            ),
+            // _ToolbarButton(
+            //   icon: Icons.image_outlined,
+            //   onTap: () {},
+            // ),
+            // _ToolbarButton(
+            //   icon: Icons.mic_none_outlined,
+            //   onTap: () {},
+            // ),
+            // const Spacer(),
+            // _ToolbarButton(
+            //   icon: Icons.more_horiz_rounded,
+            //   onTap: onOpenFormatSheet,
+            // ),
           ],
         ),
       ),
@@ -65,6 +72,7 @@ class _ToolbarButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool isText;
   final bool isItalic;
+  final bool isUnderline;
 
   const _ToolbarButton({
     this.icon,
@@ -72,6 +80,7 @@ class _ToolbarButton extends StatelessWidget {
     required this.onTap,
     this.isText = false,
     this.isItalic = false,
+    this.isUnderline = false,
   });
 
   @override
@@ -91,12 +100,15 @@ class _ToolbarButton extends StatelessWidget {
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+                    decoration: isUnderline
+                        ? TextDecoration.underline
+                        : TextDecoration.none,
                   ),
                 )
               : Icon(
                   icon,
                   color: AppColors.headerBlue.withOpacity(0.7),
-                  size: 24, 
+                  size: 24,
                 ),
         ),
       ),
