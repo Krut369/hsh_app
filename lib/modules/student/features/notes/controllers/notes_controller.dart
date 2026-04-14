@@ -5,7 +5,8 @@ import 'package:get/get.dart';
 import 'package:hsh_app/models/note_model.dart';
 import 'package:hsh_app/services/service_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:uitoolkit/uitoolkit.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart';
+// import 'package:scroll_controller/scroll_controller.dart'
 
 class NotesController extends GetxController {
   final notes = <Note>[].obs;

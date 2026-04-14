@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uitoolkit/uitoolkit.dart' as ui;
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 import '../../../core/constants/app_text.dart';
 import 'presentation/controllers/student_main_controller.dart';
 import 'features/profile/bindings/profile_binding.dart';

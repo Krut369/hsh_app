@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:uitoolkit/uitoolkit.dart' as ui;
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 
 class SelectItemsScreen extends StatefulWidget {
   final String orderId;

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
 
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_components.dart';
 import 'package:hsh_app/controllers/chat_controller.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -58,7 +58,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   autofocus: true,
                   decoration: InputDecoration(
                     hintText: 'Search message...',
-                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
+                    hintStyle:
+                        TextStyle(color: Colors.grey.shade400, fontSize: 15),
                     prefixIcon:
                         const Icon(Icons.search, color: AppColors.headerBlue),
                     filled: true,

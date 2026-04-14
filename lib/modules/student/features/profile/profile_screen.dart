@@ -7,7 +7,7 @@ import 'package:hsh_app/modules/student/features/profile/controllers/profile_con
 import 'package:hsh_app/modules/student/features/profile/profile_card.dart';
 import 'package:hsh_app/modules/student/features/common/activity_tile.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
 class ProfileScreen extends GetView<ProfileController> {
   const ProfileScreen({super.key});

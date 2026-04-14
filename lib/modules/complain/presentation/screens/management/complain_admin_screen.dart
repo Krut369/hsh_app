@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:uitoolkit/uitoolkit.dart';
-import 'package:hsh_app/core/theme/app_colors.dart' as hsh;
+// import 'package:hsh_app/core/theme/app_colors.dart' as hsh;
 import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/complain/presentation/controllers/complain_controller.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart';
 import 'complaint_detail_view_screen.dart';
 
 class ComplaintAdminScreen extends StatefulWidget {
   final String? initialCategory;
-  
+
   const ComplaintAdminScreen({super.key, this.initialCategory});
 
   @override
@@ -102,14 +102,22 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
     return ModernScaffold(
       backgroundColor: const Color(0xFFF1F6F9),
       appBar: ModernAppBar(
-        title: widget.initialCategory != null ? (widget.initialCategory == 'All Complaints' ? 'All Complaints' : '${widget.initialCategory} Complaints') : 'Complaint Management',
-        onSearchPressed: widget.initialCategory != null ? () {
-          setState(() {
-            _isSearchVisible = !_isSearchVisible;
-            if (!_isSearchVisible) _searchController.clear();
-          });
-        } : null,
-        onFilterPressed: widget.initialCategory != null ? () => _showFilterSheet(context) : null,
+        title: widget.initialCategory != null
+            ? (widget.initialCategory == 'All Complaints'
+                ? 'All Complaints'
+                : '${widget.initialCategory} Complaints')
+            : 'Complaint Management',
+        onSearchPressed: widget.initialCategory != null
+            ? () {
+                setState(() {
+                  _isSearchVisible = !_isSearchVisible;
+                  if (!_isSearchVisible) _searchController.clear();
+                });
+              }
+            : null,
+        onFilterPressed: widget.initialCategory != null
+            ? () => _showFilterSheet(context)
+            : null,
       ),
       body: Obx(() {
         // Ensure GetX registers changes by accessing observables synchronously.
@@ -119,14 +127,15 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
         final isLoadingObx = controller.isLoading.value;
         // ignore: unused_local_variable
         final complaintsLenObx = controller.complaints.length;
-        
+
         final content = <Widget>[];
 
         if (_isSearchVisible) {
           content.add(
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ModernSearchField(
                   hint: 'Search by ID, type, or description...',
                   onChanged: (val) => setState(() {}),
@@ -162,7 +171,8 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
@@ -171,14 +181,15 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
                       itemCount: complaintTypes.length + 1,
                       itemBuilder: (context, index) {
                         if (index == 0) {
-                            return _CategoryCard(
-                              name: 'All Complaints',
-                              count: controller.complaints.length,
-                              onTap: () {
+                          return _CategoryCard(
+                            name: 'All Complaints',
+                            count: controller.complaints.length,
+                            onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const ComplaintAdminScreen(initialCategory: 'All Complaints'),
+                                  builder: (_) => const ComplaintAdminScreen(
+                                      initialCategory: 'All Complaints'),
                                 ),
                               );
                             },
@@ -195,7 +206,8 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ComplaintAdminScreen(initialCategory: type.name),
+                                builder: (_) => ComplaintAdminScreen(
+                                    initialCategory: type.name),
                               ),
                             );
                           },
@@ -209,9 +221,11 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
           );
         }
 
-        if (widget.initialCategory != null || _searchController.text.isNotEmpty) {
+        if (widget.initialCategory != null ||
+            _searchController.text.isNotEmpty) {
           if (controller.isLoading.value && controller.complaints.isEmpty) {
-            content.add(const SliverFillRemaining(child: Center(child: ModernLoader())));
+            content.add(const SliverFillRemaining(
+                child: Center(child: ModernLoader())));
           } else if (controller.error.value != null) {
             content.add(
               SliverFillRemaining(
@@ -227,7 +241,9 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
           } else {
             final searchQuery = _searchController.text.toLowerCase();
             final list = controller.filteredComplaints.where((complaint) {
-              if (widget.initialCategory != null && widget.initialCategory != 'All Complaints' && complaint.complaintType != widget.initialCategory) {
+              if (widget.initialCategory != null &&
+                  widget.initialCategory != 'All Complaints' &&
+                  complaint.complaintType != widget.initialCategory) {
                 return false;
               }
               if (searchQuery.isEmpty) return true;
@@ -249,7 +265,8 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.inbox_rounded, size: 64, color: Colors.grey.shade400),
+                        Icon(Icons.inbox_rounded,
+                            size: 64, color: Colors.grey.shade400),
                         const SizedBox(height: 12),
                         ModernText(
                           searchQuery.isNotEmpty
@@ -266,10 +283,12 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
             } else {
               content.add(
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      (context, index) => _buildComplaintCard(context, list[index]),
+                      (context, index) =>
+                          _buildComplaintCard(context, list[index]),
                       childCount: list.length,
                     ),
                   ),
@@ -307,103 +326,103 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
           ),
         ),
         child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Colored left border
-              Container(width: 6, color: accentColor),
-              // Card content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Row 1: Title + Status badge
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: ModernText(
-                              complaint.complaintType,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: badgeColor,
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                            child: Text(
-                              _statusBadgeLabel(complaint.status),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
+          borderRadius: BorderRadius.circular(20),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Colored left border
+                Container(width: 6, color: accentColor),
+                // Card content
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Row 1: Title + Status badge
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: ModernText(
+                                complaint.complaintType,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w700,
-                                letterSpacing: 0.5,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-
-                      // Row 2: Complaint ID + location
-                      ModernText(
-                        location.isNotEmpty ? '$idStr • $location' : idStr,
-                        fontSize: 13,
-                        isSecondary: true,
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Row 3: Description
-                      if (description.isNotEmpty)
-                        ModernText(
-                          description,
-                          fontSize: 14,
-                          color: const Color(0xFF4B5563),
-                          height: 1.45,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: badgeColor,
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              child: Text(
+                                _statusBadgeLabel(complaint.status),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      // Divider
-                      const SizedBox(height: 16),
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: Colors.grey.shade200,
-                      ),
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 4),
 
-                      // Row 4: Date + Action button
-                      Row(
-                        children: [
-                          Icon(Icons.access_time_rounded,
-                              size: 15, color: Colors.grey.shade500),
-                          const SizedBox(width: 5),
+                        // Row 2: Complaint ID + location
+                        ModernText(
+                          location.isNotEmpty ? '$idStr • $location' : idStr,
+                          fontSize: 13,
+                          isSecondary: true,
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Row 3: Description
+                        if (description.isNotEmpty)
                           ModernText(
-                            dateStr,
-                            fontSize: 13,
-                            color: Colors.grey.shade500,
+                            description,
+                            fontSize: 14,
+                            color: const Color(0xFF4B5563),
+                            height: 1.45,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const Spacer(),
-                          _buildActionButton(context, complaint, isResolved),
-                        ],
-                      ),
-                    ],
+                        // Divider
+                        const SizedBox(height: 16),
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Colors.grey.shade200,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Row 4: Date + Action button
+                        Row(
+                          children: [
+                            Icon(Icons.access_time_rounded,
+                                size: 15, color: Colors.grey.shade500),
+                            const SizedBox(width: 5),
+                            ModernText(
+                              dateStr,
+                              fontSize: 13,
+                              color: Colors.grey.shade500,
+                            ),
+                            const Spacer(),
+                            _buildActionButton(context, complaint, isResolved),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -521,7 +540,8 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
           color: isSelected ? const Color(0xFFF8FAFC) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? const Color(0xFF1E293B) : const Color(0xFFF3F4F6),
+            color:
+                isSelected ? const Color(0xFF1E293B) : const Color(0xFFF3F4F6),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -543,22 +563,30 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
                 children: [
                   Row(
                     children: [
-                      ModernText(title, fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+                      ModernText(title,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1E293B)),
                       if (isCurrent) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: const Color(0xFFE2E8F0),
                             borderRadius: BorderRadius.circular(100),
                           ),
-                          child: ModernText('CURRENT', fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.surfaceDark),
+                          child: ModernText('CURRENT',
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.surfaceDark),
                         ),
                       ],
                     ],
                   ),
                   const SizedBox(height: 4),
-                  ModernText(subtitle, fontSize: 13, color: const Color(0xFF6B7280)),
+                  ModernText(subtitle,
+                      fontSize: 13, color: const Color(0xFF6B7280)),
                 ],
               ),
             ),
@@ -569,7 +597,9 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+                  color: isSelected
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFCBD5E1),
                   width: isSelected ? 7 : 2,
                 ),
                 color: Colors.white,
@@ -638,52 +668,53 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
       },
       child: StatefulBuilder(
         builder: (context, setState) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Filter by Status ──
-                ModernText(
-                  'Filter by Status',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF4B5563),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Filter by Status ──
+              ModernText(
+                'Filter by Status',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF4B5563),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<ComplaintStatus?>(
-                      isExpanded: true,
-                      value: tempStatus,
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF6B7280)),
-                      items: [
-                        DropdownMenuItem(
-                          value: null,
-                          child: ModernText('All Statuses', fontSize: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<ComplaintStatus?>(
+                    isExpanded: true,
+                    value: tempStatus,
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                        color: Color(0xFF6B7280)),
+                    items: [
+                      DropdownMenuItem(
+                        value: null,
+                        child: ModernText('All Statuses', fontSize: 15),
+                      ),
+                      ...ComplaintStatus.values.map(
+                        (status) => DropdownMenuItem(
+                          value: status,
+                          child: ModernText(status.label, fontSize: 15),
                         ),
-                        ...ComplaintStatus.values.map(
-                          (status) => DropdownMenuItem(
-                            value: status,
-                            child: ModernText(status.label, fontSize: 15),
-                          ),
-                        ),
-                      ],
-                      onChanged: (val) {
-                        setState(() {
-                          tempStatus = val;
-                        });
-                      },
-                    ),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        tempStatus = val;
+                      });
+                    },
                   ),
                 ),
-              ],
-            );
-          },
-        ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -701,37 +732,58 @@ class _CategoryCard extends StatelessWidget {
 
   IconData _getIcon() {
     switch (name) {
-      case 'All Complaints': return Icons.all_inbox_rounded;
-      case 'Carpentry': return Icons.handyman_rounded;
-      case 'Electrical': return Icons.bolt_rounded;
-      case 'Plumbing': return Icons.plumbing_rounded;
-      case 'Housekeeping': return Icons.cleaning_services_rounded;
-      case 'Construction': return Icons.foundation_rounded;
-      default: return Icons.construction_rounded;
+      case 'All Complaints':
+        return Icons.all_inbox_rounded;
+      case 'Carpentry':
+        return Icons.handyman_rounded;
+      case 'Electrical':
+        return Icons.bolt_rounded;
+      case 'Plumbing':
+        return Icons.plumbing_rounded;
+      case 'Housekeeping':
+        return Icons.cleaning_services_rounded;
+      case 'Construction':
+        return Icons.foundation_rounded;
+      default:
+        return Icons.construction_rounded;
     }
   }
 
   Color _getIconColor() {
     switch (name) {
-      case 'All Complaints': return const Color(0xFF4285F4);
-      case 'Carpentry': return const Color(0xFF8E24AA);
-      case 'Electrical': return const Color(0xFFE53935);
-      case 'Plumbing': return const Color(0xFF039BE5);
-      case 'Housekeeping': return const Color(0xFF34A853);
-      case 'Construction': return const Color(0xFFF2994A);
-      default: return const Color(0xFF7A869A);
+      case 'All Complaints':
+        return const Color(0xFF4285F4);
+      case 'Carpentry':
+        return const Color(0xFF8E24AA);
+      case 'Electrical':
+        return const Color(0xFFE53935);
+      case 'Plumbing':
+        return const Color(0xFF039BE5);
+      case 'Housekeeping':
+        return const Color(0xFF34A853);
+      case 'Construction':
+        return const Color(0xFFF2994A);
+      default:
+        return const Color(0xFF7A869A);
     }
   }
 
   Color _getBgColor() {
     switch (name) {
-      case 'All Complaints': return const Color(0xFFE8F0FE);
-      case 'Carpentry': return const Color(0xFFF3E5F5);
-      case 'Electrical': return const Color(0xFFFFEBEE);
-      case 'Plumbing': return const Color(0xFFE1F5FE);
-      case 'Housekeeping': return const Color(0xFFE6F4EA);
-      case 'Construction': return const Color(0xFFFDF0E3);
-      default: return const Color(0xFFF1F5F9);
+      case 'All Complaints':
+        return const Color(0xFFE8F0FE);
+      case 'Carpentry':
+        return const Color(0xFFF3E5F5);
+      case 'Electrical':
+        return const Color(0xFFFFEBEE);
+      case 'Plumbing':
+        return const Color(0xFFE1F5FE);
+      case 'Housekeeping':
+        return const Color(0xFFE6F4EA);
+      case 'Construction':
+        return const Color(0xFFFDF0E3);
+      default:
+        return const Color(0xFFF1F5F9);
     }
   }
 
@@ -767,7 +819,8 @@ class _CategoryCard extends StatelessWidget {
                 onTap: onTap,
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

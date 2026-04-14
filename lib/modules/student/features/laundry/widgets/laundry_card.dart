@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/modules/student/features/laundry/laundry_utils.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
 class LaundryCard extends StatelessWidget {
   final LaundryOrderEntity order;
@@ -128,8 +128,7 @@ class LaundryCard extends StatelessWidget {
                           ),
                           if (order.items.length > 1)
                             Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 8, left: 28),
+                              padding: const EdgeInsets.only(top: 8, left: 28),
                               child: ModernText(
                                 '+ ${order.items.length - 1} more items',
                                 fontSize: 13,

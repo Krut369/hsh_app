@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/modules/student/features/laundry/laundry_utils.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
-/// Reusable laundry status chip using uitoolkit [ModernText].
+/// Reusable laundry status chip using modern_ui_toolkit [ModernText].
 class LaundryStatusChip extends StatelessWidget {
   final OrderStatus status;
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/modules/student/features/vehicle/vehicle_dropdown.dart';
