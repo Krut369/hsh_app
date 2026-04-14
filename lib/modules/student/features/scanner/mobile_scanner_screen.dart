@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'dart:math' as math;
-import 'package:uitoolkit/uitoolkit.dart' as ui;
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 import 'controllers/mobile_scanner_controller.dart';
 
 class AppScannerScreen extends StatelessWidget {
@@ -26,7 +26,8 @@ class AppScannerScreen extends StatelessWidget {
               // 1. Mobile Scanner (Background)
               MobileScanner(
                 controller: controller.nativeScannerController,
-                onDetect: (BarcodeCapture capture) => controller.onDetect(capture, context),
+                onDetect: (BarcodeCapture capture) =>
+                    controller.onDetect(capture, context),
                 scanWindow: Rect.fromCenter(
                   center: Offset(
                     MediaQuery.of(context).size.width / 2,
@@ -53,7 +54,9 @@ class AppScannerScreen extends StatelessWidget {
                   width: scanAreaSize,
                   height: scanAreaSize,
                   decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFF4169E1).withOpacity(0.5), width: 1),
+                    border: Border.all(
+                        color: const Color(0xFF4169E1).withOpacity(0.5),
+                        width: 1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Stack(
@@ -67,7 +70,8 @@ class AppScannerScreen extends StatelessWidget {
                         builder: (context, child) {
                           const double lineHeight = 2.0;
                           return Positioned(
-                            top: controller.scanLineAnimation.value * (scanAreaSize - lineHeight),
+                            top: controller.scanLineAnimation.value *
+                                (scanAreaSize - lineHeight),
                             left: 0,
                             right: 0,
                             child: Container(
@@ -75,7 +79,8 @@ class AppScannerScreen extends StatelessWidget {
                               decoration: BoxDecoration(
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF4169E1).withOpacity(0.5),
+                                    color: const Color(0xFF4169E1)
+                                        .withOpacity(0.5),
                                     blurRadius: 4,
                                     spreadRadius: 1,
                                   ),
@@ -108,11 +113,15 @@ class AppScannerScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, left: 16, right: 16),
+                padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top,
+                    left: 16,
+                    right: 16),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                      icon: const Icon(Icons.close,
+                          color: Colors.white, size: 28),
                       onPressed: () {
                         Navigator.pop(context);
                       },
@@ -126,7 +135,8 @@ class AppScannerScreen extends StatelessWidget {
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: const Icon(Icons.help_outline, color: Colors.white, size: 28),
+                      icon: const Icon(Icons.help_outline,
+                          color: Colors.white, size: 28),
                       onPressed: () {
                         // Help dialog
                       },
@@ -148,7 +158,8 @@ class AppScannerScreen extends StatelessWidget {
                         child: Column(
                           children: [
                             ValueListenableBuilder<TorchState>(
-                              valueListenable: controller.nativeScannerController.torchState,
+                              valueListenable:
+                                  controller.nativeScannerController.torchState,
                               builder: (context, state, child) {
                                 final isOn = state == TorchState.on;
                                 return Container(
@@ -166,7 +177,9 @@ class AppScannerScreen extends StatelessWidget {
                                     ],
                                   ),
                                   child: Icon(
-                                    isOn ? Icons.flashlight_on : Icons.flashlight_off,
+                                    isOn
+                                        ? Icons.flashlight_on
+                                        : Icons.flashlight_off,
                                     color: const Color(0xFF1D3557),
                                     size: 24,
                                   ),
@@ -219,8 +232,10 @@ class ScannerOverlayPainter extends CustomPainter {
 
     final double holeLeft = (size.width - scanAreaSize) / 2;
     final double holeTop = (size.height - scanAreaSize) / 2;
-    final Rect holeRect = Rect.fromLTWH(holeLeft, holeTop, scanAreaSize, scanAreaSize);
-    final RRect holeRRect = RRect.fromRectAndRadius(holeRect, const Radius.circular(12));
+    final Rect holeRect =
+        Rect.fromLTWH(holeLeft, holeTop, scanAreaSize, scanAreaSize);
+    final RRect holeRRect =
+        RRect.fromRectAndRadius(holeRect, const Radius.circular(12));
 
     final Path cutOutPath = Path.combine(
       PathOperation.difference,
@@ -255,8 +270,10 @@ class ScannerCornersPainter extends CustomPainter {
       false,
       paint,
     );
-    canvas.drawLine(const Offset(radius, 0), const Offset(radius + cornerLength, 0), paint);
-    canvas.drawLine(const Offset(0, radius), const Offset(0, radius + cornerLength), paint);
+    canvas.drawLine(
+        const Offset(radius, 0), const Offset(radius + cornerLength, 0), paint);
+    canvas.drawLine(
+        const Offset(0, radius), const Offset(0, radius + cornerLength), paint);
 
     // Top Right
     canvas.drawArc(
@@ -266,8 +283,10 @@ class ScannerCornersPainter extends CustomPainter {
       false,
       paint,
     );
-    canvas.drawLine(Offset(size.width - radius, 0), Offset(size.width - radius - cornerLength, 0), paint);
-    canvas.drawLine(Offset(size.width, radius), Offset(size.width, radius + cornerLength), paint);
+    canvas.drawLine(Offset(size.width - radius, 0),
+        Offset(size.width - radius - cornerLength, 0), paint);
+    canvas.drawLine(Offset(size.width, radius),
+        Offset(size.width, radius + cornerLength), paint);
 
     // Bottom Left
     canvas.drawArc(
@@ -277,19 +296,24 @@ class ScannerCornersPainter extends CustomPainter {
       false,
       paint,
     );
-    canvas.drawLine(Offset(radius, size.height), Offset(radius + cornerLength, size.height), paint);
-    canvas.drawLine(Offset(0, size.height - radius), Offset(0, size.height - radius - cornerLength), paint);
+    canvas.drawLine(Offset(radius, size.height),
+        Offset(radius + cornerLength, size.height), paint);
+    canvas.drawLine(Offset(0, size.height - radius),
+        Offset(0, size.height - radius - cornerLength), paint);
 
     // Bottom Right
     canvas.drawArc(
-      Rect.fromLTWH(size.width - radius * 2, size.height - radius * 2, radius * 2, radius * 2),
+      Rect.fromLTWH(size.width - radius * 2, size.height - radius * 2,
+          radius * 2, radius * 2),
       0,
       math.pi / 2,
       false,
       paint,
     );
-    canvas.drawLine(Offset(size.width - radius, size.height), Offset(size.width - radius - cornerLength, size.height), paint);
-    canvas.drawLine(Offset(size.width, size.height - radius), Offset(size.width, size.height - radius - cornerLength), paint);
+    canvas.drawLine(Offset(size.width - radius, size.height),
+        Offset(size.width - radius - cornerLength, size.height), paint);
+    canvas.drawLine(Offset(size.width, size.height - radius),
+        Offset(size.width, size.height - radius - cornerLength), paint);
   }
 
   @override

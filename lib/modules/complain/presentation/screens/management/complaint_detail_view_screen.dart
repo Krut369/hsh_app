@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/complain/presentation/controllers/complain_controller.dart';
-import 'package:uitoolkit/uitoolkit.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
-import '../../../../../core/theme/app_colors.dart' as hsh;
+import 'package:hsh_app/core/theme/app_colors.dart';
 
 class ComplaintDetailViewScreen extends StatefulWidget {
   final Complaint complaint;
@@ -175,6 +175,7 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
     );
   }
 
+  /* 
   void _showStatusUpdateSheet() {
     ComplaintStatus? tempStatus = selectedStatus;
 
@@ -210,6 +211,7 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
       ),
     );
   }
+  */
 
   Widget _buildTimelineStep(String title, String date, IconData iconData,
       bool isActive, bool isPast, bool isLast) {
@@ -284,9 +286,11 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
       currentIndex = 0;
     } else if (currentStatus == ComplaintStatus.underReview) {
       currentIndex = 1;
-    }else if (currentStatus == ComplaintStatus.awaitingFeedback)
+    } else if (currentStatus == ComplaintStatus.awaitingFeedback) {
       currentIndex = 2; // Treat as "IN REVIEW" for the design match
-    else if (currentStatus == ComplaintStatus.resolved) currentIndex = 3;
+    } else if (currentStatus == ComplaintStatus.resolved) {
+      currentIndex = 3;
+    }
 
     final dateStr = DateFormat('MMM dd').format(widget.complaint.dateTime);
 
@@ -482,7 +486,8 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
         //   )
         // ],
       ),
-      backgroundColor: const Color(0xFFF1F6F9), // Overall white background to match image exactly (Wait, design shows slightly offwhite behind card? Or card has border? No, background is purely white except for Card.) - Let's use white for everything or F9FAFB if top card stands out
+      backgroundColor: const Color(
+          0xFFF1F6F9), // Overall white background to match image exactly (Wait, design shows slightly offwhite behind card? Or card has border? No, background is purely white except for Card.) - Let's use white for everything or F9FAFB if top card stands out
       // bottomNavigationBar: ModernBottomBar(
       //   text: 'Update Status',
       //   icon: Icons.sort,
@@ -501,7 +506,7 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

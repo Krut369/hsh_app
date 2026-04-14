@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui hide AppColors;
 import 'package:uuid/uuid.dart';
 
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
@@ -9,7 +10,7 @@ import 'package:hsh_app/modules/student/features/orders/order_details_screen.dar
 import 'package:hsh_app/modules/student/features/orders/select_items_screen.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/student/features/laundry/widgets/laundry_card.dart';
-import 'package:uitoolkit/uitoolkit.dart' as ui;
+// import 'package:flutter/material.dart' as ui;
 
 class LaundryScreen extends StatelessWidget {
   const LaundryScreen({super.key});

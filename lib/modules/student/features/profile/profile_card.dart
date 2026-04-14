@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hsh_app/models/student_profile_model.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
 class ProfileCard extends StatelessWidget {
   final StudentProfile profile;

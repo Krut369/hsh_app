@@ -6,7 +6,7 @@ import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/providers/holiday_provider.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/modules/student/features/holiday/holiday_components.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
 class HolidayScreen extends ConsumerWidget {
   const HolidayScreen({super.key});

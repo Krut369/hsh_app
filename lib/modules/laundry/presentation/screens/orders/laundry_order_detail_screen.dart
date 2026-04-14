@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 
@@ -9,7 +9,8 @@ class LaundryOrderDetailScreen extends StatefulWidget {
   const LaundryOrderDetailScreen({super.key, required this.order});
 
   @override
-  State<LaundryOrderDetailScreen> createState() => _LaundryOrderDetailScreenState();
+  State<LaundryOrderDetailScreen> createState() =>
+      _LaundryOrderDetailScreenState();
 }
 
 class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
@@ -61,11 +62,14 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _StepIndicator(label: "REQUESTED", isCompleted: true, isActive: false),
+          _StepIndicator(
+              label: "REQUESTED", isCompleted: true, isActive: false),
           _StepLine(isCompleted: true),
-          _StepIndicator(label: "PICKED UP", isCompleted: true, isActive: false),
+          _StepIndicator(
+              label: "PICKED UP", isCompleted: true, isActive: false),
           _StepLine(isCompleted: true),
-          _StepIndicator(label: "PROCESSING", isCompleted: false, isActive: true),
+          _StepIndicator(
+              label: "PROCESSING", isCompleted: false, isActive: true),
           _StepLine(isCompleted: false),
           _StepIndicator(label: "READY", isCompleted: false, isActive: false),
         ],
@@ -111,17 +115,24 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
             children: [
               const Text(
                 'Order Items',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: const Color(0xFFE0E7FF),
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: const Text(
                   'IN PROGRESS',
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF4F46E5)),
+                  style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4F46E5)),
                 ),
               ),
             ],
@@ -140,11 +151,17 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
               const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Total Amount', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text('Total Amount',
+                      style: TextStyle(fontSize: 12, color: Colors.grey)),
                   SizedBox(height: 4),
-                  Text('\$24.50', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  Text('\$24.50',
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary)),
                   SizedBox(height: 4),
-                  Text('Includes \$4.50 Service Fee', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                  Text('Includes \$4.50 Service Fee',
+                      style: TextStyle(fontSize: 10, color: Colors.grey)),
                 ],
               ),
               ElevatedButton(
@@ -152,8 +169,10 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
                 child: const Text('Help?'),
               ),
@@ -171,12 +190,21 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            Text(name,
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary)),
             const SizedBox(height: 4),
-            Text(type, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+            Text(type,
+                style: const TextStyle(fontSize: 14, color: Colors.grey)),
           ],
         ),
-        Text(price, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        Text(price,
+            style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary)),
       ],
     );
   }
@@ -193,15 +221,24 @@ class _LaundryOrderDetailScreenState extends State<LaundryOrderDetailScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.access_time_filled_rounded, color: Colors.white, size: 20),
+              const Icon(Icons.access_time_filled_rounded,
+                  color: Colors.white, size: 20),
               const SizedBox(width: 12),
-              Text('Estimated Delivery', style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.8))),
+              Text('Estimated Delivery',
+                  style: TextStyle(
+                      fontSize: 14, color: Colors.white.withOpacity(0.8))),
             ],
           ),
           const SizedBox(height: 16),
-          const Text('Oct 24, 2023', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+          const Text('Oct 24, 2023',
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
           const SizedBox(height: 4),
-          Text('By 10:00 AM', style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.8))),
+          Text('By 10:00 AM',
+              style: TextStyle(
+                  fontSize: 14, color: Colors.white.withOpacity(0.8))),
         ],
       ),
     );
@@ -212,19 +249,27 @@ class _StepIndicator extends StatelessWidget {
   final String label;
   final bool isCompleted;
   final bool isActive;
-  const _StepIndicator({required this.label, required this.isCompleted, required this.isActive});
+  const _StepIndicator(
+      {required this.label, required this.isCompleted, required this.isActive});
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
-          isCompleted ? Icons.check_circle : (isActive ? Icons.radio_button_checked : Icons.radio_button_off),
-          color: (isCompleted || isActive) ? AppColors.primary : Colors.grey.shade300,
+          isCompleted
+              ? Icons.check_circle
+              : (isActive
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_off),
+          color: (isCompleted || isActive)
+              ? AppColors.primary
+              : Colors.grey.shade300,
           size: 24,
         ),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 7, fontWeight: FontWeight.bold)),
+        Text(label,
+            style: const TextStyle(fontSize: 7, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -235,6 +280,9 @@ class _StepLine extends StatelessWidget {
   const _StepLine({required this.isCompleted});
   @override
   Widget build(BuildContext context) {
-    return Container(width: 25, height: 2, color: isCompleted ? AppColors.primary : Colors.grey.shade200);
+    return Container(
+        width: 25,
+        height: 2,
+        color: isCompleted ? AppColors.primary : Colors.grey.shade200);
   }
 }

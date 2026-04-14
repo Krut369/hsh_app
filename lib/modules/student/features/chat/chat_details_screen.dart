@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_components.dart';
 import 'package:hsh_app/controllers/chat_controller.dart';
 import 'package:hsh_app/models/chat_conversation_model.dart';
 import 'dart:async';
+
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
 class ChatDetailsScreen extends StatefulWidget {
   final String? conversationId;
@@ -74,9 +75,9 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(12, 50, 20, 32),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.headerBlue,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(32),
                   bottomRight: Radius.circular(32),
                 ),
@@ -99,7 +100,8 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                           border: Border.all(color: Colors.white, width: 1.5),
                         ),
                         child: ClipOval(
-                          child: Icon(Icons.person, color: Colors.white, size: 28),
+                          child:
+                              Icon(Icons.person, color: Colors.white, size: 28),
                         ),
                       ),
                       Positioned(
@@ -111,7 +113,8 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                           decoration: BoxDecoration(
                             color: const Color(0xFF10B981), // Modern Green
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.headerBlue, width: 2),
+                            border: Border.all(
+                                color: AppColors.headerBlue, width: 2),
                           ),
                         ),
                       ),
@@ -142,11 +145,12 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                 ],
               ),
             ),
-            
+
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemCount: conversation.messages.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {
