@@ -14,24 +14,24 @@ class LaundryBinding extends Bindings {
   @override
   void dependencies() {
     // 1. Sources
-    Get.lazyPut(() => LaundryRemoteDataSource());
-    Get.lazyPut(() => LaundryLocalDataSource(Get.find<SharedPreferences>()));
+    Get.lazyPut(() => LaundryRemoteDataSource(), fenix: true);
+    Get.lazyPut(() => LaundryLocalDataSource(Get.find<SharedPreferences>()), fenix: true);
 
     // 2. Repository
     Get.lazyPut(() => LaundryRepositoryImpl(
           Get.find<LaundryRemoteDataSource>(),
           Get.find<LaundryLocalDataSource>(),
-        ));
+        ), fenix: true);
 
     // 3. Usecases
     Get.lazyPut(
-        () => GetLaundryOrdersUseCase(Get.find<LaundryRepositoryImpl>()));
+        () => GetLaundryOrdersUseCase(Get.find<LaundryRepositoryImpl>()), fenix: true);
     Get.lazyPut(
-        () => UpdateOrderStatusUseCase(Get.find<LaundryRepositoryImpl>()));
+        () => UpdateOrderStatusUseCase(Get.find<LaundryRepositoryImpl>()), fenix: true);
     Get.lazyPut(
-        () => CreateLaundryOrderUseCase(Get.find<LaundryRepositoryImpl>()));
+        () => CreateLaundryOrderUseCase(Get.find<LaundryRepositoryImpl>()), fenix: true);
     Get.lazyPut(
-        () => ManageLaundryCostUseCase(Get.find<LaundryRepositoryImpl>()));
+        () => ManageLaundryCostUseCase(Get.find<LaundryRepositoryImpl>()), fenix: true);
 
     // 4. Controller (Lazy for better resource management)
     Get.lazyPut(() => LaundryController(
@@ -39,6 +39,6 @@ class LaundryBinding extends Bindings {
           updateStatusUseCase: Get.find<UpdateOrderStatusUseCase>(),
           createOrderUseCase: Get.find<CreateLaundryOrderUseCase>(),
           costUseCase: Get.find<ManageLaundryCostUseCase>(),
-        ));
+        ), fenix: true);
   }
 }

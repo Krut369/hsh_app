@@ -59,6 +59,8 @@ class ComplainController extends GetxController {
     int pending = 0;
     int resolved = 0;
     int inProgress = 0;
+    
+    categoryCounts.clear();
 
     for (var complaint in complaints) {
       // Status Stats

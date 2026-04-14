@@ -482,7 +482,7 @@ class _ComplaintDetailViewScreenState extends State<ComplaintDetailViewScreen> {
         //   )
         // ],
       ),
-      backgroundColor: hsh.AppColors.background, // Overall white background to match image exactly (Wait, design shows slightly offwhite behind card? Or card has border? No, background is purely white except for Card.) - Let's use white for everything or F9FAFB if top card stands out
+      backgroundColor: const Color(0xFFF1F6F9), // Overall white background to match image exactly (Wait, design shows slightly offwhite behind card? Or card has border? No, background is purely white except for Card.) - Let's use white for everything or F9FAFB if top card stands out
       // bottomNavigationBar: ModernBottomBar(
       //   text: 'Update Status',
       //   icon: Icons.sort,

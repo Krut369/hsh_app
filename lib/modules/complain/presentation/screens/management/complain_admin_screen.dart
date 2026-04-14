@@ -8,7 +8,9 @@ import 'package:hsh_app/modules/complain/presentation/controllers/complain_contr
 import 'complaint_detail_view_screen.dart';
 
 class ComplaintAdminScreen extends StatefulWidget {
-  const ComplaintAdminScreen({super.key});
+  final String? initialCategory;
+  
+  const ComplaintAdminScreen({super.key, this.initialCategory});
 
   @override
   State<ComplaintAdminScreen> createState() => _ComplaintAdminScreenState();
@@ -98,149 +100,189 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
   @override
   Widget build(BuildContext context) {
     return ModernScaffold(
-      backgroundColor: hsh.AppColors.background,
+      backgroundColor: const Color(0xFFF1F6F9),
       appBar: ModernAppBar(
-        title: 'Complaint Management',
-        onSearchPressed: () {
+        title: widget.initialCategory != null ? (widget.initialCategory == 'All Complaints' ? 'All Complaints' : '${widget.initialCategory} Complaints') : 'Complaint Management',
+        onSearchPressed: widget.initialCategory != null ? () {
           setState(() {
             _isSearchVisible = !_isSearchVisible;
             if (!_isSearchVisible) _searchController.clear();
           });
-        },
-        onFilterPressed: () => _showFilterSheet(context),
+        } : null,
+        onFilterPressed: widget.initialCategory != null ? () => _showFilterSheet(context) : null,
       ),
-      body: Column(
-        children: [
-          if (_isSearchVisible)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ModernSearchField(
-                hint: 'Search by ID, type, or description...',
-                onChanged: (val) => setState(() {}),
-                controller: _searchController,
-                onFilterPressed: () => _showFilterSheet(context),
+      body: Obx(() {
+        // Ensure GetX registers changes by accessing observables synchronously.
+        // This prevents the "improper use of GetX" error when the only observable
+        // accesses were inside the lazy GridView/ListView builders.
+        // ignore: unused_local_variable
+        final isLoadingObx = controller.isLoading.value;
+        // ignore: unused_local_variable
+        final complaintsLenObx = controller.complaints.length;
+        
+        final content = <Widget>[];
+
+        if (_isSearchVisible) {
+          content.add(
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ModernSearchField(
+                  hint: 'Search by ID, type, or description...',
+                  onChanged: (val) => setState(() {}),
+                  controller: _searchController,
+                  onFilterPressed: () => _showFilterSheet(context),
+                ),
               ),
             ),
+          );
+        }
 
-          // --- Compact Category Grid ---
-          Obx(() => Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // --- Compact Category Grid ---
+        if (widget.initialCategory == null) {
+          content.add(
+            SliverToBoxAdapter(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const ModernText(
-                      'Categories',
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      isSecondary: true,
-                    ),
-                    if (controller.categoryFilter.value != null)
-                      GestureDetector(
-                        onTap: () => controller.categoryFilter.value = null,
-                        child: const ModernText(
-                          'Clear Filter',
-                          fontSize: 12,
-                          color: Color(0xFF3B82F6),
-                          fontWeight: FontWeight.bold,
-                        ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //   children: [
+                    //     const ModernText(
+                    //       'Categories',
+                    //       fontSize: 14,
+                    //       fontWeight: FontWeight.bold,
+                    //       isSecondary: true,
+                    //     ),
+                    //   ],
+                    // ),
+                    const SizedBox(height: 12),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 1.6,
                       ),
+                      itemCount: complaintTypes.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                            return _CategoryCard(
+                              name: 'All Complaints',
+                              count: controller.complaints.length,
+                              onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ComplaintAdminScreen(initialCategory: 'All Complaints'),
+                                ),
+                              );
+                            },
+                          );
+                        }
+
+                        final type = complaintTypes[index - 1];
+                        final count = controller.categoryCounts[type.name] ?? 0;
+
+                        return _CategoryCard(
+                          name: type.name,
+                          count: count,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ComplaintAdminScreen(initialCategory: type.name),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 2.2,
-                  ),
-                  itemCount: complaintTypes.length,
-                  itemBuilder: (context, index) {
-                    final type = complaintTypes[index];
-                    final count = controller.categoryCounts[type.name] ?? 0;
-                    final isSelected = controller.categoryFilter.value == type.name;
-
-                    return _CategoryCard(
-                      name: type.name,
-                      count: count,
-                      isSelected: isSelected,
-                      onTap: () {
-                        if (isSelected) {
-                          controller.categoryFilter.value = null;
-                        } else {
-                          controller.categoryFilter.value = type.name;
-                        }
-                      },
-                    );
-                  },
-                ),
-              ],
+              ),
             ),
-          )),
+          );
+        }
 
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value && controller.complaints.isEmpty) {
-                return const Center(child: ModernLoader());
-              }
-              if (controller.error.value != null) {
-                return Center(
+        if (widget.initialCategory != null || _searchController.text.isNotEmpty) {
+          if (controller.isLoading.value && controller.complaints.isEmpty) {
+            content.add(const SliverFillRemaining(child: Center(child: ModernLoader())));
+          } else if (controller.error.value != null) {
+            content.add(
+              SliverFillRemaining(
+                child: Center(
                   child: Text(
                     'Error loading complaints:\n${controller.error.value}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.red),
                   ),
-                );
+                ),
+              ),
+            );
+          } else {
+            final searchQuery = _searchController.text.toLowerCase();
+            final list = controller.filteredComplaints.where((complaint) {
+              if (widget.initialCategory != null && widget.initialCategory != 'All Complaints' && complaint.complaintType != widget.initialCategory) {
+                return false;
               }
+              if (searchQuery.isEmpty) return true;
+              final idStr = _complaintIdStr(complaint).toLowerCase();
+              final type = complaint.complaintType.toLowerCase();
+              final desc = _descriptionText(complaint).toLowerCase();
+              final location = _locationText(complaint).toLowerCase();
+              return idStr.contains(searchQuery) ||
+                  type.contains(searchQuery) ||
+                  desc.contains(searchQuery) ||
+                  location.contains(searchQuery);
+            }).toList();
 
-              final searchQuery = _searchController.text.toLowerCase();
-              final list = controller.filteredComplaints.where((complaint) {
-                if (searchQuery.isEmpty) return true;
-                final idStr = _complaintIdStr(complaint).toLowerCase();
-                final type = complaint.complaintType.toLowerCase();
-                final desc = _descriptionText(complaint).toLowerCase();
-                final location = _locationText(complaint).toLowerCase();
-                return idStr.contains(searchQuery) ||
-                    type.contains(searchQuery) ||
-                    desc.contains(searchQuery) ||
-                    location.contains(searchQuery);
-              }).toList();
-
-              if (list.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.inbox_rounded,
-                          size: 64, color: Colors.grey.shade400),
-                      const SizedBox(height: 12),
-                      ModernText(
-                        searchQuery.isNotEmpty
-                            ? 'No complaints matching "$searchQuery"'
-                            : 'No complaints found',
-                        fontSize: 16,
-                        color: Colors.grey.shade500,
-                      ),
-                    ],
+            if (list.isEmpty) {
+              content.add(
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.inbox_rounded, size: 64, color: Colors.grey.shade400),
+                        const SizedBox(height: 12),
+                        ModernText(
+                          searchQuery.isNotEmpty
+                              ? 'No complaints matching "$searchQuery"'
+                              : 'No complaints found',
+                          fontSize: 16,
+                          color: Colors.grey.shade500,
+                        ),
+                      ],
+                    ),
                   ),
-                );
-              }
-
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                itemCount: list.length,
-                itemBuilder: (context, index) =>
-                    _buildComplaintCard(context, list[index]),
+                ),
               );
-            }),
-          ),
-        ],
-      ),
+            } else {
+              content.add(
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildComplaintCard(context, list[index]),
+                      childCount: list.length,
+                    ),
+                  ),
+                ),
+              );
+            }
+          }
+        }
+
+        return CustomScrollView(
+          slivers: content,
+        );
+      }),
     );
   }
 
@@ -638,52 +680,6 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-
-                // ── Filter by Type ──
-                ModernText(
-                  'Filter by Type',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF4B5563),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String?>(
-                      isExpanded: true,
-                      value: null, // Hardcoded for now since controller doesn't support type filtering
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF6B7280)),
-                      hint: ModernText('All Types', fontSize: 15),
-                      items: const [
-                        DropdownMenuItem(
-                          value: null,
-                          child: ModernText('All Types', fontSize: 15),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Electrical',
-                          child: ModernText('Electrical', fontSize: 15),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Plumbing',
-                          child: ModernText('Plumbing', fontSize: 15),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Carpentry',
-                          child: ModernText('Carpentry', fontSize: 15),
-                        ),
-                      ],
-                      onChanged: (val) {
-                        // Implementation for type filter goes here when added to controller
-                      },
-                    ),
-                  ),
-                ),
               ],
             );
           },
@@ -695,18 +691,17 @@ class _ComplaintAdminScreenState extends State<ComplaintAdminScreen> {
 class _CategoryCard extends StatelessWidget {
   final String name;
   final int count;
-  final bool isSelected;
   final VoidCallback onTap;
 
   const _CategoryCard({
     required this.name,
     required this.count,
-    required this.isSelected,
     required this.onTap,
   });
 
   IconData _getIcon() {
     switch (name) {
+      case 'All Complaints': return Icons.all_inbox_rounded;
       case 'Carpentry': return Icons.handyman_rounded;
       case 'Electrical': return Icons.bolt_rounded;
       case 'Plumbing': return Icons.plumbing_rounded;
@@ -716,61 +711,113 @@ class _CategoryCard extends StatelessWidget {
     }
   }
 
+  Color _getIconColor() {
+    switch (name) {
+      case 'All Complaints': return const Color(0xFF4285F4);
+      case 'Carpentry': return const Color(0xFF8E24AA);
+      case 'Electrical': return const Color(0xFFE53935);
+      case 'Plumbing': return const Color(0xFF039BE5);
+      case 'Housekeeping': return const Color(0xFF34A853);
+      case 'Construction': return const Color(0xFFF2994A);
+      default: return const Color(0xFF7A869A);
+    }
+  }
+
+  Color _getBgColor() {
+    switch (name) {
+      case 'All Complaints': return const Color(0xFFE8F0FE);
+      case 'Carpentry': return const Color(0xFFF3E5F5);
+      case 'Electrical': return const Color(0xFFFFEBEE);
+      case 'Plumbing': return const Color(0xFFE1F5FE);
+      case 'Housekeeping': return const Color(0xFFE6F4EA);
+      case 'Construction': return const Color(0xFFFDF0E3);
+      default: return const Color(0xFFF1F5F9);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ModernCard(
-      padding: EdgeInsets.zero,
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF1E293B) : Colors.white,
-          borderRadius: BorderRadius.circular(20), // Standard ModernCard radius usually 20
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              color: _getBgColor(),
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Icon(
-                  _getIcon(),
-                  color: isSelected ? Colors.white : const Color(0xFF1E293B),
-                  size: 20,
+        Padding(
+          padding: const EdgeInsets.only(left: 6),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
-                if (count > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.white24 : Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      count.toString(),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.white : const Color(0xFF1E293B),
-                      ),
-                    ),
-                  ),
               ],
             ),
-            Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : const Color(0xFF1E293B),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        name.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF7A869A),
+                          letterSpacing: 0.5,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            count.toString(),
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF1D3557),
+                              height: 1.0,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: _getBgColor(),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              _getIcon(),
+                              color: _getIconColor(),
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }
