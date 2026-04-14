@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
-import 'package:hsh_app/splash_screen.dart';
 import 'package:hsh_app/modules/auth/screens/login_screen.dart';
 import 'package:hsh_app/modules/complain/presentation/complain_routes.dart';
 import 'package:hsh_app/modules/laundry/presentation/laundry_routes.dart';
@@ -20,6 +19,8 @@ import 'package:hsh_app/modules/student/features/orders/order_details_screen.dar
 import 'package:hsh_app/modules/student/features/holiday/holiday_form.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_details_screen.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
+
+import '../modules/auth/screens/splash_screen.dart';
 
 // ---------------------------------------------------------------------------
 // RouterNotifier

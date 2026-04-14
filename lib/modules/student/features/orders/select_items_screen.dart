@@ -62,6 +62,36 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
     return total;
   }
 
+  int _getBasketTotalForItem(String itemId) {
+    if (!_basket.containsKey(itemId)) return 0;
+    return _basket[itemId]!.values.fold(0, (sum, qty) => sum + qty);
+  }
+
+  double _getTotalPriceForItem(String itemId) {
+    if (!_basket.containsKey(itemId)) return 0.0;
+    double total = 0;
+    final serviceMap = _basket[itemId]!;
+    for (var type in serviceMap.keys) {
+      final qty = serviceMap[type]!;
+      if (type == LaundryServiceType.wash) {
+        total += qty * controller.washPrice.value;
+      } else if (type == LaundryServiceType.press) {
+        total += qty * controller.pressPrice.value;
+      } else if (type == LaundryServiceType.both) {
+        total += qty * controller.bothPrice.value;
+      }
+    }
+    return total;
+  }
+
+  double _getTotalPrice() {
+    double total = 0;
+    for (var itemId in _basket.keys) {
+      total += _getTotalPriceForItem(itemId);
+    }
+    return total;
+  }
+
   String _getCombinedServiceTypeString() {
     final Set<LaundryServiceType> services = {};
     for (var itemMap in _basket.values) {
@@ -170,7 +200,7 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                                       color: isSelected
                                           ? AppColors.headerBlue
                                           : Colors.white,
-                                      borderRadius: BorderRadius.circular(16),
+                                      shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.black
@@ -199,6 +229,12 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                                         ? AppColors.headerBlue
                                         : const Color(0xFF64748B),
                                   ),
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    height: 2,
+                                    width: 30,
+                                    color: isSelected ? AppColors.headerBlue : Colors.transparent,
+                                  ),
                                 ],
                               ),
                             ),
@@ -208,20 +244,88 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                     ),
 
                     const SizedBox(height: 10),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24),
-                      child: ui.ModernText(
-                        "Service Options",
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.headerBlue,
+                    // Container 1: Summary of Selected Category
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          )
+                        ]
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              _getCategoryIcon(selectedItem.name),
+                              color: AppColors.headerBlue,
+                              size: 32,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    ui.ModernText(
+                                      selectedItem.name,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.headerBlue,
+                                    ),
+                                    if (_getBasketTotalForItem(selectedItem.id) > 0)
+                                      ui.ModernText(
+                                        "₹${_getTotalPriceForItem(selectedItem.id).toStringAsFixed(2)}",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.headerBlue,
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                ui.ModernText(
+                                  "Total in basket:  ${_getBasketTotalForItem(selectedItem.id)} Items",
+                                  fontSize: 14,
+                                  color: const Color(0xFF64748B),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
-                    // Service Cards
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                    // Container 2: Service Cards
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          )
+                        ]
+                      ),
                       child: Column(
                         children: [
                           _buildServiceCard(
@@ -230,14 +334,14 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                             "Wash Only",
                             controller.washPrice.value,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           _buildServiceCard(
                             selectedItem,
                             LaundryServiceType.press,
                             "Press Only",
                             controller.pressPrice.value,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           _buildServiceCard(
                             selectedItem,
                             LaundryServiceType.both,
@@ -248,69 +352,86 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24),
-                      child: ui.ModernText(
-                        "Special Instructions",
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.headerBlue,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
-                    // Notes Section
+                    // Container 3: Notes
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: TextField(
-                        controller: _noteController,
-                        maxLines: 3,
-                        decoration: InputDecoration(
-                          hintText:
-                              'e.g. Use mild detergent, fold carefully...',
-                          hintStyle: const TextStyle(
-                              color: Color(0xFFCBD5E1), fontSize: 14),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            )
+                          ]
+                        ),
+                        child: TextField(
+                          controller: _noteController,
+                          decoration: InputDecoration(
+                            hintText: 'Add a note (e.g. starch levels)',
+                            hintStyle: const TextStyle(
+                                color: Color(0xFF94A3B8), fontSize: 14),
+                            prefixIcon: const Icon(Icons.sort, color: Color(0xFF94A3B8)),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                           ),
-                          contentPadding: const EdgeInsets.all(20),
                         ),
                       ),
                     ),
 
                     const SizedBox(height: 32),
 
-                    // Button
+                    // Container 4: Button
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Obx(() => SizedBox(
-                            width: double.infinity,
-                            height: 56,
-                            child: ElevatedButton(
-                              onPressed: controller.isLoading.value
-                                  ? null
-                                  : _placeOrder,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.headerBlue,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                                elevation: 0,
-                              ),
-                              child: controller.isLoading.value
-                                  ? const CircularProgressIndicator(
-                                      color: Colors.white)
-                                  : const ui.ModernText(
-                                      'Add Laundry Items',
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
+                      child: Obx(() {
+                        final totalPrice = _getTotalPrice();
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: controller.isLoading.value
+                                ? null
+                                : _placeOrder,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.headerBlue,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
                             ),
-                          )),
+                            child: controller.isLoading.value
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white)
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const ui.ModernText(
+                                        'Add Laundry',
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                      if (totalPrice > 0)
+                                        ui.ModernText(
+                                          '  •  ₹${totalPrice.toStringAsFixed(2)}',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                    ],
+                                  ),
+                          ),
+                        );
+                      }),
                     ),
                     const SizedBox(height: 20),
                   ],
@@ -352,6 +473,11 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.white),
+            onPressed: () {},
+          ),
         ],
       ),
     );
@@ -360,74 +486,68 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
   Widget _buildServiceCard(LaundryItemEntity item, LaundryServiceType type,
       String title, double price) {
     final qty = _getQuantity(item.id, type);
-    final isSelected = qty > 0;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isSelected ? AppColors.headerBlue : Colors.white,
-          width: 2,
+    IconData getServiceIcon() {
+      if (type == LaundryServiceType.wash) return Icons.water_drop_outlined;
+      if (type == LaundryServiceType.press) return Icons.air_outlined;
+      return Icons.checkroom_outlined;
+    }
+
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: const BoxDecoration(
+            color: Color(0xFFEFF6FF),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            getServiceIcon(),
+            color: AppColors.headerBlue,
+            size: 20,
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ui.ModernText(
-                  title,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.headerBlue,
-                ),
-                ui.ModernText(
-                  "₹${price.toStringAsFixed(0)} / piece",
-                  fontSize: 13,
-                  color: const Color(0xFF94A3B8),
-                ),
-              ],
-            ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ui.ModernText(
+                title,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.headerBlue,
+              ),
+              const SizedBox(height: 2),
+              ui.ModernText(
+                "₹${price.toStringAsFixed(2)} per unit",
+                fontSize: 12,
+                color: const Color(0xFF94A3B8),
+              ),
+            ],
           ),
-
-          // Stepper
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(30),
+        ),
+        // Stepper
+        Row(
+          children: [
+            _buildStepperButton(Icons.remove_rounded,
+                () => _updateQuantity(item.id, type, -1), false),
+            SizedBox(
+              width: 32,
+              child: ui.ModernText(
+                "$qty",
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.headerBlue,
+                textAlign: TextAlign.center,
+              ),
             ),
-            child: Row(
-              children: [
-                _buildStepperButton(Icons.remove_rounded,
-                    () => _updateQuantity(item.id, type, -1), false),
-                SizedBox(
-                  width: 32,
-                  child: ui.ModernText(
-                    "$qty",
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.headerBlue,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                _buildStepperButton(Icons.add_rounded,
-                    () => _updateQuantity(item.id, type, 1), true),
-              ],
-            ),
-          ),
-        ],
-      ),
+            _buildStepperButton(Icons.add_rounded,
+                () => _updateQuantity(item.id, type, 1), true),
+          ],
+        ),
+      ],
     );
   }
 
@@ -436,16 +556,17 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: 32,
-        height: 32,
+        width: 30,
+        height: 30,
         decoration: BoxDecoration(
           color: isAdd ? AppColors.headerBlue : Colors.white,
           shape: BoxShape.circle,
+          border: isAdd ? null : Border.all(color: const Color(0xFFE2E8F0), width: 1),
         ),
         child: Icon(
           icon,
           size: 18,
-          color: isAdd ? Colors.white : AppColors.headerBlue,
+          color: isAdd ? Colors.white : const Color(0xFF94A3B8),
         ),
       ),
     );
@@ -454,8 +575,9 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
   IconData _getCategoryIcon(String name) {
     final lower = name.toLowerCase();
     if (lower.contains('shirt')) return Icons.dry_cleaning_rounded;
-    if (lower.contains('pant')) return Icons.checkroom_rounded;
+    if (lower.contains('pant') || lower.contains('short')) return Icons.checkroom_rounded;
     if (lower.contains('jacket')) return Icons.checkroom_rounded;
+    if (lower.contains('towel')) return Icons.sanitizer_rounded;
     return Icons.local_laundry_service_rounded;
   }
 }
