@@ -31,12 +31,13 @@ class LaundryController extends GetxController {
 
   // Selection logic for student module
   final selectableItems = <LaundryItemEntity>[
-    const LaundryItemEntity(
-        id: 't1', name: 'T-Shirts', icon: Icons.content_cut),
-    const LaundryItemEntity(
-        id: 'c1', name: 'Coats', icon: Icons.accessibility_new),
-    const LaundryItemEntity(
-        id: 'o1', name: 'Others', icon: Icons.devices_other),
+    const LaundryItemEntity(id: 's1', name: 'Shirts', icon: Icons.dry_cleaning),
+    const LaundryItemEntity(id: 'p1', name: 'Pants', icon: Icons.checkroom),
+    const LaundryItemEntity(id: 'ts', name: 'T-Shirts', icon: Icons.dry_cleaning),
+    const LaundryItemEntity(id: 'j1', name: 'Jackets', icon: Icons.checkroom),
+    const LaundryItemEntity(id: 'sh', name: 'Shorts', icon: Icons.checkroom),
+    const LaundryItemEntity(id: 'tw', name: 'Towel', icon: Icons.sanitizer),
+    const LaundryItemEntity(id: 'o1', name: 'Others', icon: Icons.devices_other),
   ].obs;
 
   // Cost Observables
