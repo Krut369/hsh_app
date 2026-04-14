@@ -21,6 +21,8 @@ import 'package:hsh_app/modules/student/features/holiday/holiday_form.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_details_screen.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 
+import '../modules/auth/screens/splash_screen.dart';
+
 // ---------------------------------------------------------------------------
 // RouterNotifier
 // ---------------------------------------------------------------------------

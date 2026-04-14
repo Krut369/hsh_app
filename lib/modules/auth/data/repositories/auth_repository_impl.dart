@@ -3,7 +3,7 @@ import '../../domain/repositories/auth_repository.dart';
 import '../models/auth_user_model.dart';
 import '../sources/auth_local_data_source.dart';
 import '../sources/auth_remote_data_source.dart';
-import '../../../../core/enums/user_role.dart';
+
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remoteDataSource;
@@ -13,30 +13,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<UserEntity?> login(String email, String password) async {
-    final normalizedEmail = email.toLowerCase().trim();
-
-    // Check for static "Test" accounts
-    if (password == '123456') {
-      AuthUserModel? staticUser;
-      if (normalizedEmail == 'student@gmail.com') {
-        staticUser = _createMockUser(normalizedEmail, 'Static Student', UserRole.student);
-      } else if (normalizedEmail == 'laundry@gmail.com') {
-        staticUser = _createMockUser(normalizedEmail, 'Static Laundry', UserRole.laundry);
-      } else if (normalizedEmail == 'complain@gmail.com') {
-        staticUser = _createMockUser(normalizedEmail, 'Static Complaint', UserRole.complain);
-      } else if (normalizedEmail == 'leader@gmail.com') {
-        staticUser = _createMockUser(normalizedEmail, 'Static Leader', UserRole.leader);
-      }
-
-      if (staticUser != null) {
-        await _localDataSource.saveUser(staticUser);
-        if (staticUser.token != null) {
-          await _localDataSource.saveToken(staticUser.token!);
-          await _remoteDataSource.setToken(staticUser.token!);
-        }
-        return staticUser.toEntity();
-      }
-    }
+    // (Removed static "Test" account overriding to ensure real tokens from the backend)
 
     final AuthUserModel userModel =
         await _remoteDataSource.login(email, password);
@@ -96,13 +73,4 @@ class AuthRepositoryImpl implements AuthRepository {
     return token != null && token.isNotEmpty;
   }
 
-  AuthUserModel _createMockUser(String email, String name, UserRole role) {
-    return AuthUserModel(
-      email: email,
-      username: name,
-      name: name,
-      role: role,
-      token: 'static_token_${role.toBackendString}_$email',
-    );
-  }
 }

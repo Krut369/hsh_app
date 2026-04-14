@@ -6,7 +6,7 @@ import '../data/sources/attendance_service.dart';
 class AttendanceBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => AttendanceService(Get.find<ApiClient>()));
-    Get.lazyPut(() => AttendanceController());
+    Get.lazyPut(() => AttendanceService(Get.find<ApiClient>()), fenix: true);
+    Get.lazyPut(() => AttendanceController(), fenix: true);
   }
 }

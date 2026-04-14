@@ -16,34 +16,34 @@ class AuthBinding extends Bindings {
     // SharedPreferences is already initialized in main.dart
 
     // 2. Core API Client
-    Get.lazyPut<ApiClient>(() => ApiClient());
+    Get.lazyPut<ApiClient>(() => ApiClient(), fenix: true);
 
     // AuthApiService needs Dio from ApiClient
     Get.lazyPut<AuthApiService>(
-        () => AuthApiService(Get.find<ApiClient>().dio));
+        () => AuthApiService(Get.find<ApiClient>().dio), fenix: true);
 
     // 3. Data Sources
     Get.lazyPut<AuthRemoteDataSource>(
-        () => AuthRemoteDataSourceImpl(Get.find<AuthApiService>()));
+        () => AuthRemoteDataSourceImpl(Get.find<AuthApiService>()), fenix: true);
 
     // AuthLocalDataSource needs SharedPreferences.
     // Use Get.find<SharedPreferences>() once available.
     Get.lazyPut<AuthLocalDataSource>(
-        () => AuthLocalDataSourceImpl(Get.find<SharedPreferences>()));
+        () => AuthLocalDataSourceImpl(Get.find<SharedPreferences>()), fenix: true);
 
     // 4. Repositories
     Get.lazyPut<AuthRepository>(() => AuthRepositoryImpl(
           Get.find<AuthRemoteDataSource>(),
           Get.find<AuthLocalDataSource>(),
-        ));
+        ), fenix: true);
 
     // 5. Use Case
-    Get.lazyPut<LoginUseCase>(() => LoginUseCase(Get.find<AuthRepository>()));
+    Get.lazyPut<LoginUseCase>(() => LoginUseCase(Get.find<AuthRepository>()), fenix: true);
 
     // 6. Controller
     Get.put<AuthController>(AuthController(
       loginUseCase: Get.find<LoginUseCase>(),
       authRepository: Get.find<AuthRepository>(),
-    ));
+    ), permanent: true);
   }
 }
