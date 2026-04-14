@@ -37,7 +37,7 @@ dependencies:
   flutter_riverpod: ^2.5.1
   mobile_scanner: ^3.5.3
   image_picker: ^1.1.2 # Or the latest version
-  intl: ^0.19.0 # For date formatting
+  intl: ^0.20.2 # For date formatting
   uuid: ^4.4.0 # For generating unique IDs
   shared_preferences: ^2.2.2
   collection: ^1.18.0
@@ -53,6 +53,9 @@ dependencies:
   uitoolkit:
     git:
       url: https://github.com/AVDAPPLICATIONS/uitoolkit.git
+  appflowy_editor: ^6.2.0
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

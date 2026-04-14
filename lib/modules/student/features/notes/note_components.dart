@@ -19,30 +19,24 @@ class NoteTag extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withOpacity(0.1)
-              : AppColors.white,
-          borderRadius: BorderRadius.circular(24),
+              ? AppColors.primary.withOpacity(0.15)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: 1.5,
+            color: isSelected ? AppColors.primary.withOpacity(0.3) : AppColors.border,
+            width: 1,
           ),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            )
-          ] : null,
         ),
         child: Text(
-          label,
+          label.toUpperCase(),
           style: TextStyle(
             color: isSelected ? AppColors.primary : AppColors.textSecondary,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            fontSize: 11,
+            letterSpacing: 0.5,
           ),
         ),
       ),
