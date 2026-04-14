@@ -1,109 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:hsh_app/core/constants/app_text.dart';
-import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/student/features/notes/controllers/notes_controller.dart';
 import 'package:hsh_app/modules/student/features/notes/note_editor/note_editor_screen.dart';
 import 'package:hsh_app/widgets/premium_app_bar.dart';
-import 'dart:convert';
-import 'package:flutter_markdown/flutter_markdown.dart';
 
-class NotesScreen extends StatefulWidget {
+class NotesScreen extends GetView<NotesController> {
   const NotesScreen({super.key});
 
   @override
-  State<NotesScreen> createState() => _NotesScreenState();
-}
-
-class _NotesScreenState extends State<NotesScreen> {
-  final NotesController controller = Get.put(NotesController());
-  final ScrollController _scrollController = ScrollController();
-  final TextEditingController _searchController = TextEditingController();
-  bool _isSearching = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      controller.fetchNotes();
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _searchController.dispose();
-    super.dispose();
-  }
+  NotesController get controller => Get.put(NotesController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.mainBackground,
-      appBar: PremiumAppBar(
-        title: _isSearching ? '' : 'My Notes',
-        titleWidget: _isSearching
-            ? Container(
-                height: 44,
-                decoration: BoxDecoration(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(75),
+        child: Obx(
+          () => PremiumAppBar(
+            leading: BackButton(color: AppColors.white),
+            title: controller.isSearching.value ? '' : 'My Notes',
+            titleWidget: controller.isSearching.value
+                ? Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: controller.searchController,
+                      builder: (context, value, _) {
+                        return TextField(
+                          controller: controller.searchController,
+                          autofocus: true,
+                          style: const TextStyle(color: AppColors.textPrimary),
+                          cursorColor: AppColors.primary,
+                          decoration: InputDecoration(
+                            hintText: 'Search notes...',
+                            hintStyle: TextStyle(
+                              color:
+                                  AppColors.textSecondary.withValues(alpha: 0.5),
+                            ),
+                            prefixIcon: const Icon(
+                              Icons.search,
+                              color: AppColors.textSecondary,
+                            ),
+                            suffixIcon: value.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(
+                                      Icons.clear,
+                                      color: AppColors.textSecondary,
+                                      size: 20,
+                                    ),
+                                    onPressed: controller.clearSearch,
+                                  )
+                                : null,
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                          ),
+                          onChanged: controller.onSearchChanged,
+                        );
+                      },
+                    ),
+                  )
+                : null,
+            actions: [
+              IconButton(
+                icon: Icon(
+                  controller.isSearching.value ? Icons.close : Icons.search,
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(22),
                 ),
-                child: TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  style: const TextStyle(color: AppColors.textPrimary),
-                  cursorColor: AppColors.primary,
-                  decoration: InputDecoration(
-                    hintText: 'Search notes...',
-                    hintStyle: TextStyle(
-                        color: AppColors.textSecondary.withOpacity(0.5)),
-                    prefixIcon: const Icon(Icons.search,
-                        color: AppColors.textSecondary),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear,
-                                color: AppColors.textSecondary, size: 20),
-                            onPressed: () {
-                              _searchController.clear();
-                              controller.fetchNotes(refresh: true, query: '');
-                            },
-                          )
-                        : null,
-                    border: InputBorder.none,
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  ),
-                  onChanged: (value) {
-                    controller.fetchNotes(refresh: true, query: value);
-                  },
-                ),
-              )
-            : null,
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search,
-                color: AppColors.white),
-            onPressed: () {
-              setState(() {
-                if (_isSearching) {
-                  _isSearching = false;
-                  _searchController.clear();
-                  controller.fetchNotes(refresh: true, query: '');
-                } else {
-                  _isSearching = true;
-                }
-              });
-            },
+                onPressed: controller.toggleSearch,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.notes.isEmpty) {
@@ -123,7 +98,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     borderRadius: BorderRadius.circular(40),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.08),
+                        color: AppColors.primary.withValues(alpha: 0.08),
                         blurRadius: 30,
                         offset: const Offset(0, 15),
                       ),
@@ -135,7 +110,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       Icon(
                         Icons.notes_rounded,
                         size: 80,
-                        color: AppColors.primary.withOpacity(0.2),
+                        color: AppColors.primary.withValues(alpha: 0.2),
                       ),
                       Transform.translate(
                         offset: const Offset(20, 20),
@@ -163,7 +138,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     'Tap + to create your first note and start capturing your thoughts.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: AppColors.textSecondary.withOpacity(0.7),
+                      color: AppColors.textSecondary.withValues(alpha: 0.7),
                       fontSize: 16,
                       height: 1.5,
                     ),
@@ -194,7 +169,7 @@ class _NotesScreenState extends State<NotesScreen> {
                         .format(DateTime.now())
                         .toUpperCase(),
                     style: TextStyle(
-                      color: AppColors.textSecondary.withOpacity(0.6),
+                      color: AppColors.textSecondary.withValues(alpha: 0.6),
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1,
@@ -205,7 +180,8 @@ class _NotesScreenState extends State<NotesScreen> {
             ),
             Expanded(
               child: ListView.builder(
-                controller: _scrollController,
+                physics: BouncingScrollPhysics(),
+                controller: controller.scrollController,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemCount: controller.notes.length +
@@ -228,7 +204,7 @@ class _NotesScreenState extends State<NotesScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         alignment: Alignment.centerLeft,
                         decoration: BoxDecoration(
-                          color: AppColors.successGreen.withOpacity(0.8),
+                          color: AppColors.successGreen.withValues(alpha: 0.8),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Icon(Icons.edit_outlined,
@@ -238,7 +214,8 @@ class _NotesScreenState extends State<NotesScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         alignment: Alignment.centerRight,
                         decoration: BoxDecoration(
-                          color: AppColors.cancelledRed.withOpacity(0.8),
+                          color:
+                              AppColors.cancelledRed.withValues(alpha: 0.8),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Icon(Icons.delete_outline,
@@ -249,7 +226,7 @@ class _NotesScreenState extends State<NotesScreen> {
                           Get.to(() => NoteEditorScreen(noteToEdit: note));
                           return false;
                         } else {
-                          return await _confirmDelete(context);
+                          return controller.confirmDelete(context);
                         }
                       },
                       onDismissed: (direction) {
@@ -266,9 +243,7 @@ class _NotesScreenState extends State<NotesScreen> {
                           preview: note.body,
                           tag: note.category,
                           date: DateFormat('MMM d').format(note.date),
-                          modifiedDate: note.updatedAt != null
-                              ? DateFormat('MMM d').format(note.updatedAt!)
-                              : DateFormat('MMM d').format(note.date),
+                          modifiedDate: controller.formatModifiedDate(note),
                           isPinned: note.isPinned,
                         ),
                       ),
@@ -297,64 +272,6 @@ class _NotesScreenState extends State<NotesScreen> {
     );
   }
 
-  Future<bool?> _confirmDelete(BuildContext context) async {
-    return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Note'),
-        content: const Text('Are you sure you want to delete this note?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style:
-                TextButton.styleFrom(foregroundColor: AppColors.cancelledRed),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    if (date.day == DateTime.now().day &&
-        date.month == DateTime.now().month &&
-        date.year == DateTime.now().year) {
-      return 'Today, ${DateFormat('h:mm a').format(date)}';
-    }
-    return DateFormat('MMM d, yyyy').format(date);
-  }
-
-  String _getPreviewText(String body) {
-    try {
-      final json = jsonDecode(body);
-      if (json is Map && json.containsKey('document')) {
-        final Map document = json['document'];
-        final List children = document['children'] ?? [];
-        String preview = '';
-        for (var child in children) {
-          if (child is Map && child['type'] == 'paragraph') {
-            final List delta = child['data']?['delta'] ?? [];
-            for (var segment in delta) {
-              if (segment is Map && segment.containsKey('insert')) {
-                preview += segment['insert'].toString();
-              }
-            }
-          }
-          if (preview.length > 150) break;
-          preview += ' ';
-        }
-        return preview.trim();
-      }
-    } catch (_) {
-      return body.replaceAll(RegExp(r'#+\s*'), '').replaceAll(RegExp(r'-\s\[(x|\s)\]\s'), '').trim();
-    }
-    return body.trim();
-  }
-
   Widget _buildNoteCard(
     BuildContext context, {
     required String title,
@@ -364,7 +281,7 @@ class _NotesScreenState extends State<NotesScreen> {
     required String modifiedDate,
     bool isPinned = false,
   }) {
-    final String cleanPreview = _getPreviewText(preview);
+    final String cleanPreview = controller.getPreviewText(preview);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -373,7 +290,7 @@ class _NotesScreenState extends State<NotesScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.06),
+            color: AppColors.primary.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -403,13 +320,13 @@ class _NotesScreenState extends State<NotesScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   tag.toUpperCase(),
                   style: TextStyle(
-                    color: AppColors.primary.withOpacity(0.7),
+                    color: AppColors.primary.withValues(alpha: 0.7),
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
@@ -425,7 +342,7 @@ class _NotesScreenState extends State<NotesScreen> {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 15,
-              color: AppColors.textSecondary.withOpacity(0.8),
+              color: AppColors.textSecondary.withValues(alpha: 0.8),
               height: 1.5,
             ),
           ),
@@ -439,7 +356,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   Text(
                     'CREATED: $date'.toUpperCase(),
                     style: TextStyle(
-                      color: AppColors.textSecondary.withOpacity(0.4),
+                      color: AppColors.textSecondary.withValues(alpha: 0.4),
                       fontSize: 9,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.3,
@@ -449,7 +366,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   Text(
                     'MODIFIED: $modifiedDate'.toUpperCase(),
                     style: TextStyle(
-                      color: AppColors.textSecondary.withOpacity(0.4),
+                      color: AppColors.textSecondary.withValues(alpha: 0.4),
                       fontSize: 9,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.3,
@@ -459,9 +376,9 @@ class _NotesScreenState extends State<NotesScreen> {
               ),
               CircleAvatar(
                 radius: 12,
-                backgroundColor: AppColors.primary.withOpacity(0.1),
+                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                 child: Icon(
-                  _getCategoryIcon(tag),
+                  controller.getCategoryIcon(tag),
                   size: 14,
                   color: AppColors.primary,
                 ),
@@ -471,20 +388,5 @@ class _NotesScreenState extends State<NotesScreen> {
         ],
       ),
     );
-  }
-
-  IconData _getCategoryIcon(String tag) {
-    switch (tag.toLowerCase()) {
-      case 'strategy':
-        return Icons.trending_up;
-      case 'design':
-        return Icons.palette_outlined;
-      case 'systems':
-        return Icons.star_border_rounded;
-      case 'personal':
-        return Icons.access_time_rounded;
-      default:
-        return Icons.notes_rounded;
-    }
   }
 }
