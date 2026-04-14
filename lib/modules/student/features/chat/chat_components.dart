@@ -103,7 +103,8 @@ class ChatListTile extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: const Center(
-                        child: Icon(Icons.person, color: Color(0xFF9CA3AF), size: 28),
+                        child: Icon(Icons.person,
+                            color: Color(0xFF9CA3AF), size: 28),
                       ),
                     ),
                     if (isOnline)
@@ -156,8 +157,12 @@ class ChatListTile extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: unreadCount > 0 ? const Color(0xFF374151) : Colors.grey.shade500,
-                                fontWeight: unreadCount > 0 ? FontWeight.w600 : FontWeight.normal,
+                                color: unreadCount > 0
+                                    ? const Color(0xFF374151)
+                                    : Colors.grey.shade500,
+                                fontWeight: unreadCount > 0
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
                                 fontSize: 14,
                               ),
                             ),
@@ -165,7 +170,8 @@ class ChatListTile extends StatelessWidget {
                           if (unreadCount > 0) ...[
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: AppColors.headerBlue,
                                 borderRadius: BorderRadius.circular(12),
@@ -247,7 +253,8 @@ class ChatGridTile extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: const Center(
-                        child: Icon(Icons.person, color: Color(0xFF9CA3AF), size: 32),
+                        child: Icon(Icons.person,
+                            color: Color(0xFF9CA3AF), size: 32),
                       ),
                     ),
                     if (isOnline)
@@ -284,15 +291,19 @@ class ChatGridTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: unreadCount > 0 ? const Color(0xFF374151) : Colors.grey.shade500,
-                    fontWeight: unreadCount > 0 ? FontWeight.w500 : FontWeight.normal,
+                    color: unreadCount > 0
+                        ? const Color(0xFF374151)
+                        : Colors.grey.shade500,
+                    fontWeight:
+                        unreadCount > 0 ? FontWeight.w500 : FontWeight.normal,
                     fontSize: 12,
                   ),
                 ),
                 if (unreadCount > 0) ...[
                   const SizedBox(height: 10),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.headerBlue,
                       borderRadius: BorderRadius.circular(12),
@@ -360,7 +371,6 @@ class ChatBubble extends StatelessWidget {
                   ),
                 ),
               if (!isMe) const SizedBox(width: 12),
-
               Flexible(
                 child: Container(
                   padding:
@@ -408,7 +418,8 @@ class ChatBubble extends StatelessWidget {
                 ),
                 if (isMe) ...[
                   const SizedBox(width: 4),
-                  const Icon(Icons.done_all, color: Color(0xFF3B82F6), size: 16),
+                  const Icon(Icons.done_all,
+                      color: Color(0xFF3B82F6), size: 16),
                 ],
               ],
             ),
@@ -434,11 +445,11 @@ class DateChip extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
-             BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-             )
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            )
           ],
         ),
         child: Text(
@@ -486,12 +497,14 @@ class _ChatInputState extends State<ChatInput> {
     setState(() {
       final text = _controller.text;
       final selection = _controller.selection;
-      
+
       if (selection.start >= 0) {
-        final newText = text.replaceRange(selection.start, selection.end, emoji);
+        final newText =
+            text.replaceRange(selection.start, selection.end, emoji);
         _controller.value = _controller.value.copyWith(
           text: newText,
-          selection: TextSelection.collapsed(offset: selection.start + emoji.length),
+          selection:
+              TextSelection.collapsed(offset: selection.start + emoji.length),
         );
       } else {
         _controller.text += emoji;
@@ -512,99 +525,106 @@ class _ChatInputState extends State<ChatInput> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 18),
           color: Colors.transparent,
           child: SafeArea(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(32),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.attach_file_rounded,
-                              color: Colors.grey.shade400, size: 22),
-                          onPressed: () {},
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: _controller,
-                            focusNode: _focusNode,
-                            onTap: () {
-                              if (_showEmojiPicker) {
-                                setState(() => _showEmojiPicker = false);
-                              }
-                            },
-                            decoration: InputDecoration(
-                              hintText: 'Type a message...',
-                              hintStyle: TextStyle(
-                                  color: Colors.grey.shade400, fontSize: 15),
-                              border: InputBorder.none,
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                            ),
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            _showEmojiPicker
-                                ? Icons.keyboard_rounded
-                                : Icons.sentiment_satisfied_rounded,
-                            color: _showEmojiPicker
-                                ? AppColors.headerBlue
-                                : Colors.grey.shade400,
-                            size: 24,
-                          ),
-                          onPressed: () {
-                            setState(() => _showEmojiPicker = !_showEmojiPicker);
-                            if (_showEmojiPicker) {
-                              _focusNode.unfocus();
-                            } else {
-                              _focusNode.requestFocus();
-                            }
-                          },
-                        ),
-                      ],
-                    ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(34),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: const BoxDecoration(
-                    color: AppColors.headerBlue,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadiusGeometry.only(
+                        topLeft: Radius.circular(34),
+                        bottomLeft: Radius.circular(34)
                       ),
-                    ],
-                  ),
-                  child: Center(
-                    child: IconButton(
-                      icon: const Icon(Icons.send_rounded,
-                          color: Colors.white, size: 24),
-                      onPressed: _handleSend,
+                      child: TextField(
+                        clipBehavior: Clip.antiAliasWithSaveLayer,
+                        controller: _controller,
+                        focusNode: _focusNode,
+                        onTap: () {
+                          if (_showEmojiPicker) {
+                            setState(() => _showEmojiPicker = false);
+                          }
+                        },
+                                        
+                        decoration: InputDecoration(
+                          enabledBorder: InputBorder.none,
+                        
+                          hintText: 'Type a message...',
+                          hintStyle: TextStyle(
+                            color:
+                                const Color(0xFF6B7280).withValues(alpha: 0.95),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          isCollapsed: true,
+                        ),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.headerBlue,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  IconButton(
+                    constraints: const BoxConstraints(),
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(4),
+                    icon: Icon(
+                      _showEmojiPicker
+                          ? Icons.keyboard_rounded
+                          : Icons.sentiment_satisfied_alt_rounded,
+                      color: const Color(0xFF667085),
+                      size: 28,
+                    ),
+                    onPressed: () {
+                      setState(() => _showEmojiPicker = !_showEmojiPicker);
+                      if (_showEmojiPicker) {
+                        _focusNode.unfocus();
+                      } else {
+                        _focusNode.requestFocus();
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: _handleSend,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: AppColors.headerBlue,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -621,9 +641,26 @@ class SimpleEmojiPicker extends StatelessWidget {
   const SimpleEmojiPicker({super.key, required this.onEmojiSelected});
 
   static const List<String> _emojis = [
-    '😊', '😂', '🔥', '👍', '❤️', '🙌', '✨', '🙏', 
-    '😎', '🎉', '💡', '✅', '🚀', '👋', '👀', '💯', 
-    '🤔', '😅', '💪', '📍'
+    '😊',
+    '😂',
+    '🔥',
+    '👍',
+    '❤️',
+    '🙌',
+    '✨',
+    '🙏',
+    '😎',
+    '🎉',
+    '💡',
+    '✅',
+    '🚀',
+    '👋',
+    '👀',
+    '💯',
+    '🤔',
+    '😅',
+    '💪',
+    '📍'
   ];
 
   @override
