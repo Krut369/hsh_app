@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
+import 'package:hsh_app/modules/auth/screens/splash_screen.dart';
 import 'package:hsh_app/modules/auth/screens/login_screen.dart';
 import 'package:hsh_app/modules/complain/presentation/complain_routes.dart';
 import 'package:hsh_app/modules/laundry/presentation/laundry_routes.dart';

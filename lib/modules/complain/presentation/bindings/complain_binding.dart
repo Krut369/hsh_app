@@ -8,17 +8,17 @@ class ComplainBinding extends Bindings {
   @override
   void dependencies() {
     // 1. Repository
-    Get.lazyPut<ComplainRepositoryImpl>(() => ComplainRepositoryImpl());
+    Get.lazyPut<ComplainRepositoryImpl>(() => ComplainRepositoryImpl(), fenix: true);
 
     // 2. Use Cases
-    Get.lazyPut(() => GetComplaintsUseCase(Get.find<ComplainRepositoryImpl>()));
+    Get.lazyPut(() => GetComplaintsUseCase(Get.find<ComplainRepositoryImpl>()), fenix: true);
     Get.lazyPut(
-        () => GetComplaintStatsUseCase(Get.find<ComplainRepositoryImpl>()));
+        () => GetComplaintStatsUseCase(Get.find<ComplainRepositoryImpl>()), fenix: true);
 
     // 3. Controller
     Get.lazyPut(() => ComplainController(
           getComplaintsUseCase: Get.find<GetComplaintsUseCase>(),
           repository: Get.find<ComplainRepositoryImpl>(),
-        ));
+        ), fenix: true);
   }
 }

@@ -4,7 +4,7 @@ import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/models/attendance_record_model.dart';
 import 'package:hsh_app/modules/student/features/attendance/controllers/attendance_controller.dart';
-import 'package:uitoolkit/uitoolkit.dart' as ui;
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 
 class AttendanceScreen extends GetView<AttendanceController> {
   const AttendanceScreen({super.key});
@@ -99,17 +99,21 @@ class AttendanceScreen extends GetView<AttendanceController> {
       itemBuilder: (context, index) {
         final type = types[index];
         final config = controller.eventConfig[type]!;
-        
+
         return Obx(() {
           final isSelected = controller.selectedType.value == type;
           return Container(
-            decoration: isSelected ? BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.primary, width: 2),
-            ) : null,
+            decoration: isSelected
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.primary, width: 2),
+                  )
+                : null,
             child: ui.ModernStatCard(
               layout: ui.StatCardLayout.iconTop,
-              title: type == AttendanceEventType.nightAttendance ? "Night Attd." : type.displayName,
+              title: type == AttendanceEventType.nightAttendance
+                  ? "Night Attd."
+                  : type.displayName,
               iconSize: 22,
               iconBgSize: 44,
               icon: config.$1,
@@ -139,24 +143,26 @@ class AttendanceScreen extends GetView<AttendanceController> {
                   color: Color(0xFF1D3557),
                 ),
                 Obx(() => ui.ModernBadge(
-                  text: '${controller.scanCount.value}/2 scans',
-                  type: ui.BadgeType.info,
-                )),
+                      text: '${controller.scanCount.value}/2 scans',
+                      type: ui.BadgeType.info,
+                    )),
               ],
             ),
             const SizedBox(height: 24),
             Obx(() => _buildTimelineItem(
-              title: "First Scan",
-              status: controller.scanCount.value >= 1 ? "Completed" : "Pending",
-              isCompleted: controller.scanCount.value >= 1,
-              isLast: false,
-            )),
+                  title: "First Scan",
+                  status:
+                      controller.scanCount.value >= 1 ? "Completed" : "Pending",
+                  isCompleted: controller.scanCount.value >= 1,
+                  isLast: false,
+                )),
             Obx(() => _buildTimelineItem(
-              title: "Second Scan",
-              status: controller.scanCount.value >= 2 ? "Completed" : "Confirm",
-              isCompleted: controller.scanCount.value >= 2,
-              isLast: true,
-            )),
+                  title: "Second Scan",
+                  status:
+                      controller.scanCount.value >= 2 ? "Completed" : "Confirm",
+                  isCompleted: controller.scanCount.value >= 2,
+                  isLast: true,
+                )),
             const SizedBox(height: 30),
             ui.ModernButton(
               text: "Open Scanner",
@@ -189,21 +195,22 @@ class AttendanceScreen extends GetView<AttendanceController> {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: isCompleted ? AppColors.primary : const Color(0xFFE9F1F8),
+                  color:
+                      isCompleted ? AppColors.primary : const Color(0xFFE9F1F8),
                   shape: BoxShape.circle,
                 ),
-                child: isCompleted 
-                  ? const Icon(Icons.check, color: Colors.white, size: 14)
-                  : Center(
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF5D90B3),
-                          shape: BoxShape.circle,
+                child: isCompleted
+                    ? const Icon(Icons.check, color: Colors.white, size: 14)
+                    : Center(
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF5D90B3),
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ),
-                    ),
               ),
               if (!isLast)
                 Expanded(

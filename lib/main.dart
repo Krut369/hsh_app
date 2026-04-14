@@ -10,10 +10,12 @@ import 'package:hsh_app/modules/student/features/attendance/bindings/attendance_
 import 'package:hsh_app/modules/student/features/scanner/bindings/mobile_scanner_binding.dart';
 import 'package:hsh_app/controllers/chat_controller.dart';
 import 'package:hsh_app/providers/bottom_nav_provider.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uitoolkit/uitoolkit.dart';
 import 'package:hsh_app/routes/app_pages.dart';
 import 'package:hsh_app/modules/auth/screens/splash_screen.dart';
+import 'package:appflowy_editor/appflowy_editor.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,12 +38,17 @@ void main() async {
 
   runApp(
     ProviderScope(
-      
       child: ModernApp(
         title: 'HSH App',
         debugShowCheckedModeBanner: false,
         getPages: AppPages.pages,
-        home: const SplashScreen(), 
+        home: const SplashScreen(),
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          AppFlowyEditorLocalizations.delegate,
+        ],
       ),
     ),
   );

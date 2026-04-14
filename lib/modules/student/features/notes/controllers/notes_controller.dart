@@ -1,13 +1,22 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hsh_app/models/note_model.dart';
 import 'package:hsh_app/services/service_provider.dart';
-import 'package:uitoolkit/uitoolkit.dart';
+import 'package:intl/intl.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart';
+// import 'package:scroll_controller/scroll_controller.dart'
 
 class NotesController extends GetxController {
   final notes = <Note>[].obs;
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
   final hasMore = true.obs;
+  final isSearching = false.obs;
+
+  final ScrollController scrollController = ScrollController();
+  final TextEditingController searchController = TextEditingController();
 
   int _currentPage = 1;
   String _currentQuery = '';
@@ -16,7 +25,114 @@ class NotesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    scrollController.addListener(_onScroll);
     fetchNotes(refresh: true);
+  }
+
+  @override
+  void onClose() {
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
+    searchController.dispose();
+    super.onClose();
+  }
+
+  void _onScroll() {
+    if (!scrollController.hasClients) return;
+
+    if (scrollController.position.pixels >=
+        scrollController.position.maxScrollExtent - 200) {
+      fetchNotes();
+    }
+  }
+
+  void onSearchChanged(String value) {
+    fetchNotes(refresh: true, query: value);
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    fetchNotes(refresh: true, query: '');
+  }
+
+  void toggleSearch() {
+    if (isSearching.value) {
+      isSearching.value = false;
+      clearSearch();
+      return;
+    }
+
+    isSearching.value = true;
+  }
+
+  Future<bool?> confirmDelete(BuildContext context) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Note'),
+        content: const Text('Are you sure you want to delete this note?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String getPreviewText(String body) {
+    try {
+      final json = jsonDecode(body);
+      if (json is Map && json.containsKey('document')) {
+        final Map document = json['document'];
+        final List children = document['children'] ?? [];
+        String preview = '';
+        for (final child in children) {
+          if (child is Map && child['type'] == 'paragraph') {
+            final List delta = child['data']?['delta'] ?? [];
+            for (final segment in delta) {
+              if (segment is Map && segment.containsKey('insert')) {
+                preview += segment['insert'].toString();
+              }
+            }
+          }
+          if (preview.length > 150) break;
+          preview += ' ';
+        }
+        return preview.trim();
+      }
+    } catch (_) {
+      return body
+          .replaceAll(RegExp(r'#+\s*'), '')
+          .replaceAll(RegExp(r'-\s\[(x|\s)\]\s'), '')
+          .trim();
+    }
+    return body.trim();
+  }
+
+  String formatModifiedDate(Note note) {
+    return DateFormat('MMM d').format(note.updatedAt ?? note.date);
+  }
+
+  IconData getCategoryIcon(String tag) {
+    switch (tag.toLowerCase()) {
+      case 'strategy':
+        return Icons.trending_up;
+      case 'design':
+        return Icons.palette_outlined;
+      case 'systems':
+        return Icons.star_border_rounded;
+      case 'personal':
+        return Icons.access_time_rounded;
+      default:
+        return Icons.notes_rounded;
+    }
   }
 
   Future<void> fetchNotes({

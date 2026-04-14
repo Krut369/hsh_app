@@ -14,43 +14,51 @@ class NoteToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: const BoxDecoration(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
         color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.border)),
+        border:
+            Border(top: BorderSide(color: AppColors.primary.withOpacity(0.05))),
       ),
       child: SafeArea(
         top: false,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-             _ToolbarButton(
-              icon: Icons.text_format, // "Aa" icon equivalent
-              label: 'Aa',
+            _ToolbarButton(
+              label: 'B',
               isText: true,
-              onTap: onOpenFormatSheet,
-              tooltip: 'Format',
+              onTap: () => onFormat('bold'),
             ),
             _ToolbarButton(
-              icon: Icons.checklist,
-              onTap: () => onFormat('checkbox'),
-              tooltip: 'Checklist',
+              label: 'I',
+              isText: true,
+              isItalic: true,
+              onTap: () => onFormat('italic'),
             ),
             _ToolbarButton(
-              icon: Icons.format_list_numbered, 
-              onTap: () => onFormat('numbered'),
-              tooltip: 'Numbered List',
+              label: 'U',
+              isText: true,
+              isUnderline: true,
+              onTap: () => onFormat('underline'),
             ),
             _ToolbarButton(
-              icon: Icons.attach_file,
-              onTap: () {}, 
-              tooltip: 'Attach',
+              icon: Icons.format_list_bulleted_rounded,
+              onTap: () => onFormat('bullet'),
             ),
-            _ToolbarButton(
-              icon: Icons.auto_awesome, // AI/Magic placeholder
-              onTap: () {},
-              tooltip: 'Magic',
-            ),
+            const VerticalDivider(width: 24, indent: 8, endIndent: 8),
+            // _ToolbarButton(
+            //   icon: Icons.image_outlined,
+            //   onTap: () {},
+            // ),
+            // _ToolbarButton(
+            //   icon: Icons.mic_none_outlined,
+            //   onTap: () {},
+            // ),
+            // const Spacer(),
+            // _ToolbarButton(
+            //   icon: Icons.more_horiz_rounded,
+            //   onTap: onOpenFormatSheet,
+            // ),
           ],
         ),
       ),
@@ -62,44 +70,46 @@ class _ToolbarButton extends StatelessWidget {
   final IconData? icon;
   final String? label;
   final VoidCallback onTap;
-  final String tooltip;
   final bool isText;
+  final bool isItalic;
+  final bool isUnderline;
 
   const _ToolbarButton({
     this.icon,
     this.label,
     required this.onTap,
-    this.tooltip = '',
     this.isText = false,
+    this.isItalic = false,
+    this.isUnderline = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: isText
-                ? Text(
-                    label!,
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                : Icon(
-                    icon,
-                    color: AppColors.primary,
-                    size: 24, 
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: isText
+              ? Text(
+                  label!,
+                  style: TextStyle(
+                    color: AppColors.headerBlue.withOpacity(0.7),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+                    decoration: isUnderline
+                        ? TextDecoration.underline
+                        : TextDecoration.none,
                   ),
-          ),
+                )
+              : Icon(
+                  icon,
+                  color: AppColors.headerBlue.withOpacity(0.7),
+                  size: 24,
+                ),
         ),
       ),
     );

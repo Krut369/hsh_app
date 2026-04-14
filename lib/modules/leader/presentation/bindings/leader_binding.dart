@@ -4,6 +4,6 @@ import 'package:hsh_app/modules/leader/presentation/controllers/leader_controlle
 class LeaderBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<LeaderController>(() => LeaderController());
+    Get.lazyPut<LeaderController>(() => LeaderController(), fenix: true);
   }
 }

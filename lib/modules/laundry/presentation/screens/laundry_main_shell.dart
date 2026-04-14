@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
-import 'package:uitoolkit/uitoolkit.dart';
 
 import 'package:hsh_app/modules/laundry/presentation/screens/management/cost_management_screen.dart';
 import 'package:hsh_app/modules/laundry/presentation/screens/orders/laundry_detail_screen.dart';
 import 'package:hsh_app/modules/laundry/presentation/screens/home/laundry_home_screen.dart';
 import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart';
 
 class LaundryMainShell extends StatefulWidget {
   const LaundryMainShell({super.key});
@@ -27,9 +27,11 @@ class _LaundryMainShellState extends State<LaundryMainShell> {
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is UserScrollNotification) {
-      if (notification.direction == ScrollDirection.reverse && _isBottomNavVisible) {
+      if (notification.direction == ScrollDirection.reverse &&
+          _isBottomNavVisible) {
         setState(() => _isBottomNavVisible = false);
-      } else if (notification.direction == ScrollDirection.forward && !_isBottomNavVisible) {
+      } else if (notification.direction == ScrollDirection.forward &&
+          !_isBottomNavVisible) {
         setState(() => _isBottomNavVisible = true);
       }
     }
@@ -58,7 +60,8 @@ class _LaundryMainShellState extends State<LaundryMainShell> {
               currentIndex: safeIndex,
               onChanged: (index) => controller.changeTab(index),
               items: const [
-                ModernNavItem(icon: Icons.home_outlined, activeIcon: Icons.home),
+                ModernNavItem(
+                    icon: Icons.home_outlined, activeIcon: Icons.home),
                 ModernNavItem(
                   icon: Icons.local_laundry_service_outlined,
                   activeIcon: Icons.local_laundry_service,

@@ -15,6 +15,14 @@ class AppColors {
   static const Color successGreen = Color(0xFF10B981);
   static const Color warningOrange = Color(0xFFF59E0B);
   
+  // Semantic Aliases
+  static const Color success = successGreen;
+  static const Color warning = warningOrange;
+  static const Color info = pendingBlue;
+  static const Color error = cancelledRed;
+  static const Color surfaceDark = headerBlue;
+  static const Color textMuted = requestedGrey;
+  
   // Modernization specific colors
   static const Color pendingBlue = Color(0xFF3B82F6);
   static const Color resolvedGreen = Color(0xFF22C55E);

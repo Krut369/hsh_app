@@ -5,7 +5,7 @@ import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/complain/presentation/controllers/complain_controller.dart';
 import 'package:hsh_app/modules/student/features/complaint/widgets/complaint_card.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_details_screen.dart';
-import 'package:uitoolkit/uitoolkit.dart' as ui;
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 
 class ComplaintScreen extends GetView<ComplainController> {
   const ComplaintScreen({super.key});

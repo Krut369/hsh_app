@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uitoolkit/uitoolkit.dart' as ui;
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 import '../../../core/constants/app_text.dart';
 import 'presentation/controllers/student_main_controller.dart';
+import 'features/profile/bindings/profile_binding.dart';
+import 'package:hsh_app/modules/complain/presentation/bindings/complain_binding.dart';
+import 'package:hsh_app/modules/laundry/presentation/bindings/laundry_binding.dart';
+import 'features/attendance/bindings/attendance_binding.dart';
 
 class StudentMainShell extends StatelessWidget {
   const StudentMainShell({super.key});
@@ -10,6 +14,10 @@ class StudentMainShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(StudentMainController());
+    ProfileBinding().dependencies();
+    ComplainBinding().dependencies();
+    LaundryBinding().dependencies();
+    AttendanceBinding().dependencies();
 
     final studentNavItems = [
       const ui.ModernNavItem(
