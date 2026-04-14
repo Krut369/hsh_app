@@ -4,7 +4,7 @@ import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_stats_model.dart';
 import 'package:hsh_app/modules/complain/domain/usecases/get_complaints_usecase.dart';
 import 'package:hsh_app/modules/complain/domain/repositories/complain_repository.dart';
-import 'package:uitoolkit/uitoolkit.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
 class ComplainController extends GetxController {
   final GetComplaintsUseCase _getComplaintsUseCase;
@@ -60,6 +60,8 @@ class ComplainController extends GetxController {
     int resolved = 0;
     int inProgress = 0;
 
+    categoryCounts.clear();
+
     for (var complaint in complaints) {
       // Status Stats
       switch (complaint.status) {
@@ -110,7 +112,8 @@ class ComplainController extends GetxController {
   List<Complaint> get filteredComplaints {
     return complaints.where((c) {
       final statusMatch = filter.value == null || c.status == filter.value;
-      final categoryMatch = categoryFilter.value == null || c.complaintType == categoryFilter.value;
+      final categoryMatch = categoryFilter.value == null ||
+          c.complaintType == categoryFilter.value;
       return statusMatch && categoryMatch;
     }).toList();
   }
@@ -192,7 +195,7 @@ class ComplainController extends GetxController {
 
       UIController.to.showSuccess('Complaint submitted successfully!');
       Get.back(); // Return to main screen
-      
+
       fetchComplaints();
       fetchStats();
       resetAddDraft();

@@ -19,7 +19,7 @@ class _ComplainMainShellState extends State<ComplainMainShell> {
   final screens = [
     const ComplainHomeScreen(),
     const ComplaintAdminScreen(),
-    const Scaffold(body: Center(child: Text('Reports Coming Soon'))),
+    // const Scaffold(body: Center(child: Text('Reports Coming Soon'))),
   ];
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -96,17 +96,17 @@ class _ComplainMainShellState extends State<ComplainMainShell> {
                   ),
                   label: 'Complaint',
                 ),
-                BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: EdgeInsets.only(bottom: 4),
-                    child: Icon(Icons.analytics_outlined, size: 28),
-                  ),
-                  activeIcon: Padding(
-                    padding: EdgeInsets.only(bottom: 4),
-                    child: Icon(Icons.analytics_rounded, size: 28),
-                  ),
-                  label: 'Reports',
-                ),
+                // BottomNavigationBarItem(
+                //   icon: Padding(
+                //     padding: EdgeInsets.only(bottom: 4),
+                //     child: Icon(Icons.analytics_outlined, size: 28),
+                //   ),
+                //   activeIcon: Padding(
+                //     padding: EdgeInsets.only(bottom: 4),
+                //     child: Icon(Icons.analytics_rounded, size: 28),
+                //   ),
+                //   label: 'Reports',
+                // ),
               ],
             )),
           ),

@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/complain/presentation/controllers/complain_controller.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
-import 'package:uitoolkit/uitoolkit.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart';
 
 class AddComplaintScreen extends GetView<ComplainController> {
   const AddComplaintScreen({super.key});
@@ -58,7 +58,12 @@ class AddComplaintScreen extends GetView<ComplainController> {
     return ModernScaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: ModernText("Add Complaint",fontWeight: FontWeight.bold,color: AppColors.textPrimary,fontSize: 18,),
+        title: ModernText(
+          "Add Complaint",
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary,
+          fontSize: 18,
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -117,7 +122,9 @@ class AddComplaintScreen extends GetView<ComplainController> {
                         children: [
                           Icon(
                             ComplaintUtils.getComplaintTypeIcon(itemType.name),
-                            color: isSelected ? Colors.white : Colors.grey[600]?.withValues(alpha: 0.8),
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.grey[600]?.withValues(alpha: 0.8),
                             size: 28,
                           ),
                           const SizedBox(height: 8),
@@ -149,7 +156,8 @@ class AddComplaintScreen extends GetView<ComplainController> {
                     style: theme.textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
-                _buildDirectDescriptionSection(selectedType.name, scheme, context),
+                _buildDirectDescriptionSection(
+                    selectedType.name, scheme, context),
               ],
               const SizedBox(height: 32),
             ],
@@ -230,7 +238,8 @@ class AddComplaintScreen extends GetView<ComplainController> {
     );
   }
 
-  Widget _buildDirectDescriptionSection(String key, ColorScheme scheme, BuildContext context) {
+  Widget _buildDirectDescriptionSection(
+      String key, ColorScheme scheme, BuildContext context) {
     return Column(
       children: [
         TextField(
@@ -247,7 +256,8 @@ class AddComplaintScreen extends GetView<ComplainController> {
     );
   }
 
-  Widget _buildImagePicker(String key, String? imagePath, BuildContext context) {
+  Widget _buildImagePicker(
+      String key, String? imagePath, BuildContext context) {
     if (imagePath == null) {
       return InkWell(
         onTap: () => _showImagePickerModal(context, key),

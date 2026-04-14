@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
 class ComplaintCard extends StatelessWidget {
   final Complaint complaint;
@@ -17,7 +17,8 @@ class ComplaintCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = ComplaintUtils.getStatusColor(context, complaint.status);
+    final statusColor =
+        ComplaintUtils.getStatusColor(context, complaint.status);
 
     return GestureDetector(
       onTap: onTap,
@@ -118,8 +119,8 @@ class ComplaintCard extends StatelessWidget {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: ModernText(
-                                  complaint.issues.entries.first.value
-                                      .description,
+                                  complaint
+                                      .issues.entries.first.value.description,
                                   fontSize: 13,
                                   color: AppColors.headerBlue
                                       .withValues(alpha: 0.8),
@@ -133,8 +134,7 @@ class ComplaintCard extends StatelessWidget {
                           // Sub-issues counter
                           if (complaint.issues.length > 1)
                             Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 8, left: 28),
+                              padding: const EdgeInsets.only(top: 8, left: 28),
                               child: ModernText(
                                 '+ ${complaint.issues.length - 1} more sub-issues',
                                 fontSize: 13,

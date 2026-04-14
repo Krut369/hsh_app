@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 import 'package:uuid/uuid.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
@@ -64,7 +64,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                 'type': 'paragraph',
                 'data': {
                   'delta': note.body.isNotEmpty
-                      ? [{'insert': note.body}]
+                      ? [
+                          {'insert': note.body}
+                        ]
                       : [],
                 },
               },
@@ -110,7 +112,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       backgroundColor: AppColors.white,
       appBar: PremiumAppBar(
         height: 75,
-        leading: BackButton(color: AppColors.white,),
+        leading: BackButton(
+          color: AppColors.white,
+        ),
         title: _isEditing ? 'Edit Story' : 'New Story',
         actions: [
           Padding(
@@ -164,8 +168,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     ),
                     decoration: InputDecoration(
                       hintText: 'Project Title...',
-                      hintStyle:
-                          TextStyle(color: AppColors.headerBlue.withValues(alpha: 0.2)),
+                      hintStyle: TextStyle(
+                          color: AppColors.headerBlue.withValues(alpha: 0.2)),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.zero,
                     ),
@@ -209,8 +213,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         editorStyle: EditorStyle(
                           padding: EdgeInsets.zero,
                           cursorColor: AppColors.primary,
-                          dragHandleColor: AppColors.primary.withValues(alpha: 0.5),
-                          selectionColor: AppColors.primary.withValues(alpha: 0.2),
+                          dragHandleColor:
+                              AppColors.primary.withValues(alpha: 0.5),
+                          selectionColor:
+                              AppColors.primary.withValues(alpha: 0.2),
                           textStyleConfiguration: const TextStyleConfiguration(
                             text: TextStyle(
                               color: AppColors.textPrimary,

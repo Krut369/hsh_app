@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hsh_app/modules/complain/domain/entities/complaint_model.dart';
 import 'package:hsh_app/modules/student/features/complaint/complaint_utils.dart';
-import 'package:uitoolkit/uitoolkit.dart' hide AppColors;
-import 'package:hsh_app/core/theme/app_colors.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
 /// Reusable status chip using uitoolkit [ModernText].
 /// Uses a colored pill with icon + label matching the complaint status.

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:uitoolkit/uitoolkit.dart';
 import 'package:hsh_app/modules/laundry/presentation/widgets/home/status_update_sheet.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
@@ -9,6 +8,7 @@ import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
 import 'package:hsh_app/modules/laundry/presentation/widgets/home/laundry_card.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart';
 
 class LaundryDetailScreen extends StatefulWidget {
   const LaundryDetailScreen({super.key});
@@ -180,8 +180,8 @@ class _LaundryDetailScreenState extends State<LaundryDetailScreen> {
                 }
 
                 final matchesSearch = order.orderId.toLowerCase().contains(
-                  searchQuery,
-                );
+                      searchQuery,
+                    );
                 return matchesStatus && (searchQuery.isEmpty || matchesSearch);
               }).toList();
 

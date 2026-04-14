@@ -4,7 +4,7 @@ import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/student/features/laundry/laundry_utils.dart';
 import 'package:hsh_app/modules/student/features/laundry/widgets/laundry_status_chip.dart';
-import 'package:uitoolkit/uitoolkit.dart' as ui;
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 
 class OrderDetailsScreen extends StatelessWidget {
   final LaundryOrderEntity order;
@@ -24,7 +24,7 @@ class OrderDetailsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                   Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ui.ModernText(
@@ -36,7 +36,6 @@ class OrderDetailsScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 32),
-
                   ui.ModernText(
                     'Items (${order.totalItems})',
                     fontSize: 18,
@@ -48,27 +47,29 @@ class OrderDetailsScreen extends StatelessWidget {
                     _buildEmptyState(context)
                   else
                     ...order.items.map((item) => _buildItemCard(context, item)),
-
                   const SizedBox(height: 32),
-
                   if (order.note != null && order.note!.isNotEmpty) ...[
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: AppColors.reviewOrange.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.reviewOrange.withValues(alpha: 0.2)),
+                        border: Border.all(
+                            color:
+                                AppColors.reviewOrange.withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.note_rounded, color: AppColors.reviewOrange, size: 20),
+                          const Icon(Icons.note_rounded,
+                              color: AppColors.reviewOrange, size: 20),
                           const SizedBox(width: 12),
                           Expanded(
                             child: ui.ModernText(
                               order.note!,
                               fontSize: 14,
-                              color: AppColors.headerBlue.withValues(alpha: 0.8),
+                              color:
+                                  AppColors.headerBlue.withValues(alpha: 0.8),
                             ),
                           ),
                         ],
@@ -76,7 +77,6 @@ class OrderDetailsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
                   ],
-
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -146,8 +146,10 @@ class OrderDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildItemCard(BuildContext context, LaundryItemEntity item) {
-    final color = LaundryUtils.getServiceIcon(item.selectedService.label) == Icons.iron_outlined 
-      ? AppColors.reviewOrange : AppColors.pendingBlue;
+    final color = LaundryUtils.getServiceIcon(item.selectedService.label) ==
+            Icons.iron_outlined
+        ? AppColors.reviewOrange
+        : AppColors.pendingBlue;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -180,7 +182,8 @@ class OrderDetailsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),

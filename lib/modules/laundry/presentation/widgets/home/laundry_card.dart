@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:uitoolkit/uitoolkit.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:intl/intl.dart';
 
@@ -52,7 +52,7 @@ class LaundryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         onTap: onTap,
         child: ModernActionCard(
-          title: 'Student Name', 
+          title: 'Student Name',
           subtitle: '${order.orderId} • ${order.totalItems} Items',
           badgeText: order.status.label,
           badgeColor: statusColor,

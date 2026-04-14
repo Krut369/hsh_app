@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:uitoolkit/uitoolkit.dart';
 import 'package:hsh_app/modules/laundry/presentation/controllers/laundry_controller.dart';
 import 'package:hsh_app/modules/laundry/domain/entities/laundry_entities.dart';
 import 'package:get/get.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart';
 
 class CostManagementScreen extends StatefulWidget {
   const CostManagementScreen({super.key});
@@ -75,31 +75,31 @@ class _CostManagementScreenState extends State<CostManagementScreen> {
                 fontWeight: FontWeight.bold,
               ),
               const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildStatCard(
-                        title: 'This Month',
-                        value: '₹${totalRevenue.toStringAsFixed(0)}',
-                        icon: Icons.currency_rupee,
-                        color: Colors.tealAccent.shade700,
-                      ),
-                      const SizedBox(width: 12),
-                      _buildStatCard(
-                        title: 'Orders',
-                        value: totalOrders.toString(),
-                        icon: Icons.inventory_2_outlined,
-                        color: Colors.indigoAccent,
-                      ),
-                      const SizedBox(width: 12),
-                      _buildStatCard(
-                        title: 'Avg. Order',
-                        value: '₹${avgOrder.toStringAsFixed(0)}',
-                        icon: Icons.trending_up,
-                        color: Colors.orange,
-                      ),
-                    ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildStatCard(
+                    title: 'This Month',
+                    value: '₹${totalRevenue.toStringAsFixed(0)}',
+                    icon: Icons.currency_rupee,
+                    color: Colors.tealAccent.shade700,
                   ),
+                  const SizedBox(width: 12),
+                  _buildStatCard(
+                    title: 'Orders',
+                    value: totalOrders.toString(),
+                    icon: Icons.inventory_2_outlined,
+                    color: Colors.indigoAccent,
+                  ),
+                  const SizedBox(width: 12),
+                  _buildStatCard(
+                    title: 'Avg. Order',
+                    value: '₹${avgOrder.toStringAsFixed(0)}',
+                    icon: Icons.trending_up,
+                    color: Colors.orange,
+                  ),
+                ],
+              ),
               const SizedBox(height: 32),
 
               // Service Prices Section
