@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:hsh_app/models/chat_group_model.dart';
 import 'widgets/chat_message_bubble.dart';
 
+@RoutePage()
 class GroupChatScreen extends StatefulWidget {
   final ChatGroup group;
 

@@ -16,45 +16,71 @@ class StudentSelectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Generate a consistent pseudo-avatar based on name length for demo purposes
+    final avatarId = name.length * 3;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(20),
+            // Ultra-subtle or no drop shadow per aesthetic mock
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 5),
+              BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 8, offset: const Offset(0, 2)),
             ],
           ),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundColor: Colors.grey[200],
-                child: const Icon(Icons.person, color: Colors.grey),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: NetworkImage('https://i.pravatar.cc/150?img=$avatarId'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text('Room $room', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                    Text(
+                      name, 
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600, 
+                        fontSize: 16,
+                        color: Color(0xFF1D3557)
+                      )
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      room.contains('Room') ? room : 'Room $room', 
+                      style: const TextStyle(
+                        color: Color(0xFF6B7A8A), 
+                        fontSize: 13
+                      )
+                    ),
                   ],
                 ),
               ),
               Container(
-                width: 24,
-                height: 24,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey[300]!),
-                  color: isSelected ? const Color(0xFF3D5A80) : Colors.transparent,
+                  color: isSelected ? const Color(0xFF0D253F) : const Color(0xFFE8F1F8),
                 ),
-                child: isSelected ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
+                alignment: Alignment.center,
+                child: isSelected 
+                    ? const Icon(Icons.check, size: 16, color: Colors.white) 
+                    : const Icon(Icons.add, size: 16, color: Color(0xFF6B7A8A)),
               ),
             ],
           ),

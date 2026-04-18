@@ -5,7 +5,7 @@ import 'package:hsh_app/modules/auth/screens/login_screen.dart';
 import 'package:hsh_app/modules/student/presentation/routes/student_routes.dart';
 import 'package:hsh_app/modules/laundry/presentation/laundry_routes.dart';
 import 'package:hsh_app/modules/complain/presentation/complain_routes.dart';
-import 'package:hsh_app/modules/leader/presentation/leader_routes.dart';
+import 'package:hsh_app/modules/leader/presentation/leader_auto_router.dart';
 import 'package:hsh_app/modules/auth/screens/splash_screen.dart';
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
 import 'package:hsh_app/core/enums/user_role.dart';
@@ -42,7 +42,7 @@ class AppPages {
     GetPage(
       name: '/leader_module',
       page: () => Router.withConfig(
-        config: GoRouter(routes: LeaderRoutes.routes, initialLocation: '/leader'),
+        config: LeaderAppRouter().config(),
       ),
     ),
   ];

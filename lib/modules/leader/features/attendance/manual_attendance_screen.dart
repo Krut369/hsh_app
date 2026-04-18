@@ -1,127 +1,129 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hsh_app/modules/leader/features/attendance/attendance_main_screen.dart';
 import '../../../../models/attendance_record_model.dart';
-import 'widgets/student_detail_card.dart';
+import 'package:hsh_app/modules/leader/features/attendance/widgets/student_roster_card.dart';
 
-class ManualAttendanceScreen extends StatefulWidget {
+class ManualAttendanceScreen extends StatelessWidget {
   final AttendanceEventType selectedEvent;
 
   const ManualAttendanceScreen({super.key, required this.selectedEvent});
 
   @override
-  State<ManualAttendanceScreen> createState() => _ManualAttendanceScreenState();
-}
-
-class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
-  final TextEditingController _codeController = TextEditingController();
-  bool _showStudentDetail = false;
-
-  // Mock student data
-  final Map<String, dynamic> _mockStudent = {
-    'name': 'Rahul Patel',
-    'id': 'SH772',
-    'room': '205',
-    'block': 'A',
-    'photo': 'assets/images/student_placeholder.png' // Mock path
-  };
-
-  void _onSearch() {
-    if (_codeController.text.isNotEmpty) {
-      setState(() {
-        _showStudentDetail = true;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Enter Student Code',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1D3557),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _codeController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'e.g. 772',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+    final controller = Get.find<LeaderAttendanceController>();
+
+    return Stack(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Student Roster',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1D3557),
                     ),
                   ),
-                  onSubmitted: (_) => _onSearch(),
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: _onSearch,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D507B),
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE2E8F0),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${controller.roster.length} Students',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF475569),
+                      ),
+                    ),
                   ),
-                ),
-                child: const Icon(Icons.search),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          if (_showStudentDetail) ...[
-            StudentDetailCard(
-              student: _mockStudent,
-              onMarkPresent: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Attendance marked successfully!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-                setState(() {
-                  _showStudentDetail = false;
-                  _codeController.clear();
-                });
-              },
             ),
-          ] else ...[
-            const SizedBox(height: 60),
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(40.0),
-                child: Column(
+            Expanded(
+              child: Obx(() {
+                final list = controller.filteredRoster;
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+                  itemCount: list.length,
+                  itemBuilder: (context, index) {
+                    final student = list[index];
+                    return StudentRosterCard(
+                      name: student['name'],
+                      id: student['id'],
+                      status: student['status'],
+                      markedPresent: student['marked'].value,
+                      onPresent: () => controller.markAttendance(index, true),
+                      onAbsent: () => controller.markAttendance(index, false),
+                      onUndo: () => controller.undoMarking(index),
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+
+        // Sticky Bottom Submit Button
+        Positioned(
+          bottom: 24,
+          left: 24,
+          right: 24,
+          child: Container(
+            height: 64,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1D3557),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF1D3557).withValues(alpha: 0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Attendance submitted successfully!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.person_search,
-                        size: 80, color: Color(0xFFD6ECF7)),
-                    SizedBox(height: 16),
                     Text(
-                      'Search for a student to mark attendance',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Color(0xFF5D90B3)),
+                      'Submit Attendance',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
+                    SizedBox(width: 12),
+                    Icon(Icons.send, color: Colors.white, size: 20),
                   ],
                 ),
               ),
             ),
-          ],
-        ],
-      ),
+          ),
+        ),
+      ],
     );
   }
 }

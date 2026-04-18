@@ -21,45 +21,23 @@ class FilterChipWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => onTap(status),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2D507B) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF2D507B) : const Color(0xFFE9F1F8),
-          ),
+          color: isSelected ? Colors.white : const Color(0xFF2D507B).withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: isSelected 
+            ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))]
+            : null,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : const Color(0xFF1D3557),
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                fontSize: 14,
-              ),
-            ),
-            if (count != null && count! > 0) ...[
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : Colors.orange,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  count.toString(),
-                  style: TextStyle(
-                    color: isSelected ? const Color(0xFF2D507B) : Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ],
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? const Color(0xFF1D3557) : Colors.white.withValues(alpha: 0.8),
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            fontSize: 15,
+          ),
         ),
       ),
     );

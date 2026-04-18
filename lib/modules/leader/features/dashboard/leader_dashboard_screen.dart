@@ -1,137 +1,163 @@
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
+import 'package:hsh_app/modules/leader/presentation/leader_auto_router.dart';
 import 'package:intl/intl.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart';
 import 'package:hsh_app/modules/leader/presentation/controllers/leader_controller.dart';
 import 'package:hsh_app/modules/auth/presentation/controllers/auth_controller.dart';
-import 'package:hsh_app/widgets/custom_app_bar.dart';
-import 'widgets/feature_card.dart';
-import 'widgets/system_status_widget.dart';
+import 'package:hsh_app/core/theme/app_colors.dart' as hsh;
+import 'widgets/dashboard_feature_card.dart';
 
+@RoutePage()
 class LeaderDashboardScreen extends GetView<LeaderController> {
   const LeaderDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD6ECF7),
-      appBar: CustomAppBar(
-        title: 'Dashboard',
-        titleWidget: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Hostel Management',
-                style: TextStyle(
+      backgroundColor: hsh.AppColors.background,
+      appBar: ModernAppBar(
+        title: 'Hostel Management',
+        barHeight: 70,
+        actions: [
+          // Notification icon with badge
+          GestureDetector(
+            onTap: () {},
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.notifications_outlined,
                     color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold)),
-            Text('ADMIN PORTAL',
-                style: TextStyle(color: Colors.white70, fontSize: 12)),
-          ],
-        ),
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8)),
-            child:
-                const Icon(Icons.calendar_today, color: Colors.white, size: 24),
+                    size: 22,
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFEF4444),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        showNotificationIcon: true,
-        showLogoutIcon: true,
-        onLogoutTap: () => Get.find<AuthController>().logout(),
+          const SizedBox(width: 10),
+          // Logout icon
+          GestureDetector(
+            onTap: () => Get.find<AuthController>().logout(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+        ],
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                  color: const Color(0xFF4A6FA5),
-                  borderRadius: BorderRadius.circular(12)),
-              child: const Row(
-                children: [
-                  Icon(Icons.location_on, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
-                  Expanded(
-                      child: Text('St. Jude Block - Sector A',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500))),
-                  Icon(Icons.keyboard_arrow_down, color: Colors.white),
-                ],
-              ),
+            // ── Quick Overview header ──
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ModernText(
+                  'Quick Overview',
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: hsh.AppColors.textPrimary,
+                ),
+                ModernText(
+                  DateFormat('MMM dd, yyyy')
+                      .format(DateTime.now())
+                      .toUpperCase(),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: hsh.AppColors.textSecondary,
+                  letterSpacing: 0.5,
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Quick Overview',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2D507B))),
-                  Text(DateFormat('MMM dd, yyyy').format(DateTime.now()),
-                      style: const TextStyle(
-                          fontSize: 14, color: Color(0xFF5D90B3))),
-                ],
-              ),
+            const SizedBox(height: 20),
+
+            // ── 2×2 Feature Grid ──
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 14,
+              crossAxisSpacing: 14,
+              childAspectRatio: 1.0,
+              children: [
+                // Attendance – LIVE badge (dark navy)
+                DashboardFeatureCard(
+                  icon: Icons.qr_code_scanner,
+                  iconColor: hsh.AppColors.primary,
+                  title: 'ATTENDANCE',
+                  value: '124',
+                  valueSuffix: '/ 150',
+                  badge: 'LIVE',
+                  badgeColor: hsh.AppColors.primary,
+                  onTap: () => context.router.push(const AttendanceMainRoute()),
+                ),
+
+                // Holidays – 5 PENDING badge (orange)
+                DashboardFeatureCard(
+                  icon: Icons.calendar_month_outlined,
+                  iconColor: hsh.AppColors.warningOrange,
+                  title: 'HOLIDAYS',
+                  actionLabel: 'Details',
+                  badge: '5 PENDING',
+                  badgeColor: hsh.AppColors.warningOrange,
+                  onTap: () => context.router.push(const LeaveRequestsRoute()),
+                ),
+
+                // Results – Analytics link
+                DashboardFeatureCard(
+                  icon: Icons.sync_alt_rounded,
+                  iconColor: hsh.AppColors.primary,
+                  title: 'RESULTS',
+                  actionLabel: 'Analytics',
+                  onTap: () => context.router.push(const StudentResultsRoute()),
+                ),
+
+                // Group Chat – 3 NEW badge (pink)
+                DashboardFeatureCard(
+                  icon: Icons.mark_chat_unread_outlined,
+                  iconColor: const Color(0xFFE53E6A),
+                  title: 'GROUP CHAT',
+                  actionLabel: 'Open',
+                  badge: '3 NEW',
+                  badgeColor: const Color(0xFFE53E6A),
+                  hasNotificationDot: true,
+                  onTap: () =>
+                      context.router.push(const HostelChatGroupsRoute()),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                children: [
-                  FeatureCard(
-                    icon: Icons.qr_code_scanner,
-                    iconColor: const Color(0xFF2D507B),
-                    title: 'ATTENDANCE',
-                    value: '124',
-                    subtitle: '/ 150',
-                    badge: 'LIVE',
-                    badgeColor: const Color(0xFF2D507B),
-                    onTap: () => context.push('/leader/attendance'),
-                  ),
-                  FeatureCard(
-                    icon: Icons.calendar_month,
-                    iconColor: Colors.orange,
-                    title: 'HOLIDAY REQUESTS',
-                    badge: '5 Pending',
-                    badgeColor: Colors.orange,
-                    onTap: () => controller.changeTab(2),
-                  ),
-                  FeatureCard(
-                    icon: Icons.emoji_events,
-                    iconColor: const Color(0xFF2D507B),
-                    title: 'STUDENT RESULTS',
-                    subtitle: 'View Analytics →',
-                    onTap: () => controller.changeTab(3),
-                  ),
-                  FeatureCard(
-                    icon: Icons.chat_bubble,
-                    iconColor: Colors.pink,
-                    title: 'HOSTEL GROUP',
-                    badge: '3 New Messages',
-                    badgeColor: Colors.pink,
-                    hasNotification: true,
-                    onTap: () => controller.changeTab(1),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            const SystemStatusWidget(),
           ],
         ),
       ),

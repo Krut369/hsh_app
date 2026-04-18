@@ -15,24 +15,42 @@ class ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: const Color(0xFF1D3557).withValues(alpha: 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: const Color(0xFFF1F5F9),
+                ),
+                child: Center(
+                  child: Text(
+                    result.studentName[0],
+                    style: const TextStyle(
+                      color: Color(0xFF1D3557),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,75 +58,92 @@ class ResultCard extends StatelessWidget {
                     Text(
                       result.studentName,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF1D3557),
                       ),
                     ),
-                    const SizedBox(height: 4),
                     Text(
-                      'ROOM ${result.room} | ID: ${result.studentId}',
+                      'ROOM ${result.room} | ID: ${result.id}',
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF5D90B3),
+                        fontSize: 13,
+                        color: Color(0xFF94A3B8),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
-              GradeBadge(grade: result.grade),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  result.grade,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1D3557),
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const SizedBox(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              Row(
                 children: [
-                  Text(
-                    result.cgpa.toString(),
+                   const Text(
+                    'CGPA Score',
                     style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: _getGradeColor(result.grade),
+                      fontSize: 14,
+                      color: Color(0xFF64748B),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const Text(
-                    'CGPA',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF5D90B3),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      result.cgpa.toString(),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1D3557),
+                      ),
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Center(
-            child: TextButton.icon(
-              onPressed: onViewReport,
-              icon: const Icon(Icons.arrow_forward, size: 16),
-              label: const Text('View Full Report'),
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF2D507B),
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
+              GestureDetector(
+                onTap: onViewReport,
+                child: const Row(
+                  children: [
+                    Text(
+                      'View Full Report',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1D3557),
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(Icons.chevron_right, size: 16, color: Color(0xFF1D3557)),
+                  ],
                 ),
               ),
-            ),
+            ],
           ),
         ],
       ),
     );
-  }
-
-  Color _getGradeColor(String grade) {
-     if (grade.contains('A+')) return Colors.green;
-     if (grade.contains('A')) return Colors.green;
-     return Colors.orange;
   }
 }

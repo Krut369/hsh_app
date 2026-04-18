@@ -17,181 +17,267 @@ class LeaveRequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = request.status == LeaveStatus.pending
-        ? Colors.orange
-        : request.status == LeaveStatus.approved
-            ? Colors.green
-            : Colors.red;
+    bool isPending = request.status == LeaveStatus.pending;
 
-    final timeAgo = _getTimeAgo(request.appliedAt);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: const Color(0xFFE9F1F8),
-                  child: Text(
-                    request.studentName[0],
-                    style: const TextStyle(
-                      color: Color(0xFF2D507B),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1D3557).withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Image.asset(
+                  request.studentAvatar,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 50,
+                    height: 50,
+                    color: const Color(0xFFE9F1F8),
+                    child: const Icon(Icons.person, color: Color(0xFF2D507B)),
                   ),
                 ),
-                const SizedBox(width: 12),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      request.studentName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1D3557),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(_getLeaveIcon(request.leaveType),
+                            size: 14, color: const Color(0xFF6B7A8A)),
+                        const SizedBox(width: 4),
+                        Text(
+                          request.leaveType,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF6B7A8A),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isPending
+                      ? const Color(0xFFDCE6F1)
+                      : const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  isPending ? 'PENDING' : 'PROCESSED',
+                  style: TextStyle(
+                    color: isPending
+                        ? const Color(0xFF1D3557).withValues(alpha: 0.5)
+                        : const Color(0xFF4A5568),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // Duration & Dates Box
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F4F8),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Row(
+              children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        request.studentName,
-                        style: const TextStyle(
-                          fontSize: 16,
+                      const Text(
+                        'DURATION',
+                        style: TextStyle(
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1D3557),
+                          color: Color(0xFF9BABBB),
+                          letterSpacing: 1,
                         ),
                       ),
+                      const SizedBox(height: 4),
                       Text(
-                        'Applied $timeAgo • ID: #${request.id}',
+                        '${request.durationInDays} ${request.durationInDays > 1 ? 'Days' : 'Day'}',
                         style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF5D90B3),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1D3557),
                         ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    request.status.name.toUpperCase(),
-                    style: TextStyle(
-                      color: statusColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  width: 1,
+                  height: 30,
+                  color: const Color(0xFFDCE6F1),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Icon(Icons.home, color: Color(0xFF2D507B), size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  request.leaveType,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF1D3557),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, color: Color(0xFF2D507B), size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  '${_formatDate(request.startDate)} - ${_formatDate(request.endDate)} (${request.durationInDays} Days)',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF5D90B3),
-                  ),
-                ),
-              ],
-            ),
-            if (request.status == LeaveStatus.pending) ...[
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => onApprove(request),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.green,
-                        side: const BorderSide(color: Colors.green, width: 2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                const SizedBox(width: 24),
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'DATES',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF9BABBB),
+                          letterSpacing: 1,
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatDates(request.startDate, request.endDate),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1D3557),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Actions
+          if (isPending)
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () => onApprove(request),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0D253F),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                       ),
                       child: const Text(
                         'Approve',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: SizedBox(
+                    height: 56,
+                    child: ElevatedButton(
                       onPressed: () => onReject(request),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red, width: 2),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE2E8F0),
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: const Text(
                         'Reject',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Color(0xFF4A5568),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
-                ],
+                ),
+              ],
+            )
+          else
+            Center(
+              child: Text(
+                'Approved by Admin on ${_formatProcessedDate(request.processedAt)}',
+                style: const TextStyle(
+                  color: Color(0xFF9BABBB),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ],
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
 
-  String _getTimeAgo(DateTime dateTime) {
-    final difference = DateTime.now().difference(dateTime);
-    if (difference.inHours < 1) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
-    } else {
-      return '${difference.inDays}d ago';
-    }
+  IconData _getLeaveIcon(String type) {
+    if (type.contains('Home')) return Icons.home_outlined;
+    if (type.contains('Medical')) return Icons.medical_services_outlined;
+    return Icons.celebration_outlined;
   }
 
-  String _formatDate(DateTime date) {
-    return '${_getMonthName(date.month)} ${date.day}, ${date.year}';
+  String _formatDates(DateTime start, DateTime end) {
+    if (start.month == end.month && start.year == end.year) {
+      if (start.day == end.day) {
+        return '${_getMonthName(start.month)} ${start.day}, ${start.year}';
+      }
+      return '${_getMonthName(start.month)} ${start.day} - ${end.day}';
+    }
+    return '${_getMonthName(start.month)} ${start.day} - ${_getMonthName(end.month)} ${end.day}';
+  }
+
+  String _formatProcessedDate(DateTime? date) {
+    if (date == null) return 'Oct 18';
+    return '${_getMonthName(date.month)} ${date.day}';
   }
 
   String _getMonthName(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
     return months[month - 1];
   }
 }

@@ -16,22 +16,22 @@ class EventTypeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2D507B).withOpacity(0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF2D507B) : Colors.grey.shade300,
-            width: isSelected ? 2 : 1,
-          ),
+          color: isSelected ? const Color(0xFF1D3557) : const Color(0xFFE2E8F0),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: isSelected 
+              ? [BoxShadow(color: const Color(0xFF1D3557).withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 4))]
+              : null,
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? const Color(0xFF2D507B) : Colors.black87,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 13,
+            color: isSelected ? Colors.white : const Color(0xFF64748B),
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            fontSize: 15,
           ),
         ),
       ),
