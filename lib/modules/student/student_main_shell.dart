@@ -20,24 +20,24 @@ class StudentMainShell extends StatelessWidget {
     AttendanceBinding().dependencies();
 
     final studentNavItems = [
-      const ui.ModernNavItem(
+      const ui.SimpleBottomBarItem(
         icon: Icons.person_outline,
-        activeIcon: Icons.person,
+        // activeIcon: Icons.person,
         label: AppText.profile,
       ),
-      const ui.ModernNavItem(
+      const ui.SimpleBottomBarItem(
         icon: Icons.warning_amber_rounded,
-        activeIcon: Icons.warning_rounded,
+        // activeIcon: Icons.warning_rounded,
         label: AppText.complaint,
       ),
-      const ui.ModernNavItem(
+      const ui.SimpleBottomBarItem(
         icon: Icons.local_laundry_service_outlined,
-        activeIcon: Icons.local_laundry_service,
+        // activeIcon: Icons.local_laundry_service,
         label: 'Laundry',
       ),
-      const ui.ModernNavItem(
+      const ui.SimpleBottomBarItem(
         icon: Icons.check_circle_outline,
-        activeIcon: Icons.check_circle,
+        // activeIcon: Icons.check_circle,
         label: AppText.attendance,
       ),
     ];
@@ -48,11 +48,13 @@ class StudentMainShell extends StatelessWidget {
             children: controller.pages,
           )),
       bottomNavigationBar: SafeArea(
-        child: Obx(() => ui.ModernBottomNav(
-              initialIndex: controller.currentIndex.value,
+        child: Obx(() => ui.SimpleBottomBar(
+          selectedIndex: controller.currentIndex.value,
               items: studentNavItems,
-              horizontalMargin: 20,
-              onChanged: controller.changePage,
+
+              onTap: controller.changePage,
+              // horizontalMargin: 20,
+              // onChanged: ,
             )),
       ),
     );
