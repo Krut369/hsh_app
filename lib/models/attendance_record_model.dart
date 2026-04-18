@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 enum AttendanceEventType {
+  breakfast,
   lunch,
   dinner,
   sabha,
@@ -11,6 +12,8 @@ enum AttendanceEventType {
 
   String get displayName {
     switch (this) {
+      case AttendanceEventType.breakfast:
+        return 'Breakfast';
       case AttendanceEventType.lunch:
         return 'Lunch';
       case AttendanceEventType.dinner:
