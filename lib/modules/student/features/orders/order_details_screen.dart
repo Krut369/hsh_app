@@ -116,7 +116,7 @@ class OrderDetailsScreen extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 20,
-        bottom: 30,
+        bottom: 14,
         left: 16,
         right: 24,
       ),
@@ -136,7 +136,7 @@ class OrderDetailsScreen extends StatelessWidget {
           const SizedBox(width: 8),
           const ui.ModernText(
             "Order Details",
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),

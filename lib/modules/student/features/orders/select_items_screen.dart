@@ -210,12 +210,13 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                                         )
                                       ],
                                     ),
-                                    child: Icon(
-                                      _getCategoryIcon(item.name),
-                                      color: isSelected
-                                          ? Colors.white
-                                          : const Color(0xFF94A3B8),
-                                      size: 32,
+                                    child: Center(
+                                      child: Image.asset(
+                                        _getCategoryImage(item.name, isWhite: isSelected),
+                                        width: 42,
+                                        height: 42,
+                                        fit: BoxFit.contain,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(height: 8),
@@ -268,10 +269,13 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
                               color: const Color(0xFFEFF6FF),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Icon(
-                              _getCategoryIcon(selectedItem.name),
-                              color: AppColors.headerBlue,
-                              size: 32,
+                            child: Center(
+                              child: Image.asset(
+                                _getCategoryImage(selectedItem.name),
+                                width: 42,
+                                height: 42,
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -469,15 +473,15 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
           const SizedBox(width: 8),
           const ui.ModernText(
             "Select Items",
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
           const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.white),
-            onPressed: () {},
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.search, color: Colors.white),
+          //   onPressed: () {},
+          // ),
         ],
       ),
     );
@@ -572,12 +576,15 @@ class _SelectItemsScreenState extends State<SelectItemsScreen> {
     );
   }
 
-  IconData _getCategoryIcon(String name) {
+  String _getCategoryImage(String name, {bool isWhite = false}) {
     final lower = name.toLowerCase();
-    if (lower.contains('shirt')) return Icons.dry_cleaning_rounded;
-    if (lower.contains('pant') || lower.contains('short')) return Icons.checkroom_rounded;
-    if (lower.contains('jacket')) return Icons.checkroom_rounded;
-    if (lower.contains('towel')) return Icons.sanitizer_rounded;
-    return Icons.local_laundry_service_rounded;
+    final suffix = isWhite ? '_white' : '';
+    if (lower.contains('t-shirt') || lower.contains('tshirt')) return 'assets/icons/icon_tshirt$suffix.png';
+    if (lower.contains('shirt')) return 'assets/icons/icon_shirt$suffix.png';
+    if (lower.contains('pant')) return 'assets/icons/icon_pant$suffix.png';
+    if (lower.contains('jacket')) return 'assets/icons/icon_jacket$suffix.png';
+    if (lower.contains('short')) return 'assets/icons/icon_shorts$suffix.png';
+    if (lower.contains('towel')) return 'assets/icons/icon_towel$suffix.png';
+    return 'assets/icons/icon_others$suffix.png';
   }
 }
