@@ -116,26 +116,18 @@ class LaundryCard extends StatelessWidget {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: ModernText(
-                                  '${order.items.first.name} (${order.items.first.quantity} units)',
+                                  order.items
+                                      .map((e) => '${e.name} (${e.quantity} units)')
+                                      .join(', '),
                                   fontSize: 13,
                                   color: AppColors.headerBlue
                                       .withValues(alpha: 0.8),
-                                  maxLines: 2,
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
-                          if (order.items.length > 1)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8, left: 28),
-                              child: ModernText(
-                                '+ ${order.items.length - 1} more items',
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.headerBlue,
-                              ),
-                            ),
                         ] else
                           Row(
                             children: [
