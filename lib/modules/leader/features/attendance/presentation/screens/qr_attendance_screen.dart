@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hsh_app/modules/leader/features/attendance/presentation/widgets/attendance_stats_card.dart';
 import 'dart:async';
-import '../../../../models/attendance_record_model.dart';
-import 'widgets/attendance_stats_card.dart';
+import '../../../../../../models/attendance_record_model.dart';
+import '../controllers/attendance_controller.dart';
 
 class QrAttendanceScreen extends StatefulWidget {
   final AttendanceEventType selectedEvent;
@@ -107,11 +109,14 @@ class _QrAttendanceScreenState extends State<QrAttendanceScreen> {
           const SizedBox(height: 40),
 
           // Stats Area
-          const AttendanceStatsCard(
-            total: '128',
-            present: '112',
-            absent: '16',
-          ),
+          Obx(() {
+            final controller = Get.find<LeaderAttendanceController>();
+            return AttendanceStatsCard(
+              total: '${controller.totalCount}',
+              present: '${controller.presentCount}',
+              absent: '${controller.absentCount}',
+            );
+          }),
 
           const SizedBox(height: 40),
         ],

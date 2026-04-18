@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hsh_app/models/student_result_model.dart';
+import '../../../../../../models/student_result_model.dart';
 import 'performance_insights_screen.dart';
 import 'package:get/get.dart';
 

@@ -1,13 +1,12 @@
 import 'package:go_router/go_router.dart';
-import 'package:hsh_app/modules/leader/leader_main_shell.dart';
-import 'package:hsh_app/modules/leader/features/attendance/attendance_main_screen.dart';
-import 'package:hsh_app/modules/leader/features/chat/group_chat_screen.dart';
-import 'package:hsh_app/modules/leader/features/chat/create_new_group_screen.dart';
-
-import 'package:hsh_app/models/chat_group_model.dart';
-import 'package:hsh_app/modules/leader/features/student_results/student_results_screen.dart';
-import 'package:hsh_app/modules/leader/features/leave_requests/leave_requests_screen.dart';
-import 'package:hsh_app/modules/leader/features/chat/hostel_chat_groups_screen.dart';
+import '../../../../models/chat_group_model.dart';
+import '../shell/leader_main_shell.dart';
+import '../../features/attendance/presentation/screens/attendance_main_screen.dart';
+import '../../features/chat/presentation/screens/group_chat_screen.dart';
+import '../../features/chat/presentation/screens/create_new_group_screen.dart';
+import '../../features/student_results/presentation/screens/student_results_screen.dart';
+import '../../features/leave_requests/presentation/screens/leave_requests_screen.dart';
+import '../../features/chat/presentation/screens/hostel_chat_groups_screen.dart';
 
 class LeaderRoutes {
   static const String main = '/leader';
@@ -51,7 +50,6 @@ class LeaderRoutes {
           path: chatCreate,
           builder: (context, state) => const CreateNewGroupScreen(),
         ),
-
       ],
     ),
   ];

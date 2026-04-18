@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hsh_app/modules/leader/presentation/leader_auto_router.dart';
+import 'package:hsh_app/modules/leader/presentation/router/leader_auto_router.dart';
 import 'package:auto_route/auto_route.dart';
-import 'widgets/student_selection_card.dart';
+import '../widgets/student_selection_card.dart';
 
 @RoutePage()
 class CreateNewGroupScreen extends StatefulWidget {

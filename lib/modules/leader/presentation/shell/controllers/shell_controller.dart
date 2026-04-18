@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-class LeaderController extends GetxController {
+class LeaderShellController extends GetxController {
   final tabIndex = 0.obs;
 
   void changeTab(int index) {

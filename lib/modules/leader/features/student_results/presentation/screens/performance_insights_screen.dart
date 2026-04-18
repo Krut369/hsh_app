@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:hsh_app/models/student_result_model.dart';
+import '../../../../../../models/student_result_model.dart';
 
 @RoutePage()
 class PerformanceInsightsScreen extends StatelessWidget {

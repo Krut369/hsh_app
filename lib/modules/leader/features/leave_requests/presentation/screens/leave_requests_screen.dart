@@ -1,107 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:get/get.dart';
-import 'package:hsh_app/modules/leader/presentation/leader_auto_router.dart';
-import 'package:hsh_app/models/leave_request_model.dart';
-import 'widgets/leave_request_card.dart';
-import 'widgets/filter_chip_widget.dart';
+import 'package:hsh_app/modules/leader/presentation/router/leader_auto_router.dart';
+import '../../../../../../models/leave_request_model.dart';
+import '../controllers/leave_requests_controller.dart';
+import '../widgets/leave_request_card.dart';
+import '../widgets/filter_chip_widget.dart';
 import 'leave_detail_screen.dart';
 
-class LeaveRequestsController extends GetxController {
-  final allRequests = <LeaveRequest>[].obs;
-  final selectedFilter = Rxn<LeaveStatus>();
-
-  @override
-  void onInit() {
-    super.onInit();
-    _loadDemoData();
-  }
-
-  void _loadDemoData() {
-    allRequests.assignAll([
-      LeaveRequest(
-        id: 'SH772',
-        studentId: '001',
-        studentName: 'Julian Alexander',
-        studentAvatar: 'assets/julian_avatar.png',
-        room: '205',
-        leaveType: 'Home Visit',
-        startDate: DateTime(2023, 10, 24),
-        endDate: DateTime(2023, 10, 26),
-        reason: 'Family function at home',
-        status: LeaveStatus.pending,
-        appliedAt: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      LeaveRequest(
-        id: 'RV901',
-        studentId: '002',
-        studentName: 'Maya Thompson',
-        studentAvatar: 'assets/maya_avatar.png',
-        room: '108',
-        leaveType: 'Medical Leave',
-        startDate: DateTime(2023, 10, 25),
-        endDate: DateTime(2023, 10, 25),
-        reason: 'Medical checkup',
-        status: LeaveStatus.pending,
-        appliedAt: DateTime.now().subtract(const Duration(hours: 5)),
-      ),
-      LeaveRequest(
-        id: 'SK123',
-        studentId: '003',
-        studentName: 'Ethan Wright',
-        studentAvatar: 'assets/ethan_avatar.png',
-        room: '302',
-        leaveType: 'Special Event',
-        startDate: DateTime(2023, 10, 20),
-        endDate: DateTime(2023, 10, 21),
-        reason: 'Personal work',
-        status: LeaveStatus.approved,
-        appliedAt: DateTime.now().subtract(const Duration(days: 1)),
-        processedAt: DateTime.now().subtract(const Duration(hours: 12)),
-      ),
-    ]);
-  }
-
-  List<LeaveRequest> get filteredRequests {
-    if (selectedFilter.value == null) return allRequests;
-    return allRequests.where((r) => r.status == selectedFilter.value).toList();
-  }
-
-  int get pendingCount =>
-      allRequests.where((r) => r.status == LeaveStatus.pending).length;
-
-  void setFilter(LeaveStatus? status) {
-    selectedFilter.value = status;
-  }
-
-  void approveRequest(LeaveRequest request) {
-    final index = allRequests.indexWhere((r) => r.id == request.id);
-    if (index != -1) {
-      allRequests[index] = allRequests[index].copyWith(
-        status: LeaveStatus.approved,
-        processedAt: DateTime.now(),
-      );
-    }
-  }
-
-  void rejectRequest(LeaveRequest request) {
-    final index = allRequests.indexWhere((r) => r.id == request.id);
-    if (index != -1) {
-      allRequests[index] = allRequests[index].copyWith(
-        status: LeaveStatus.rejected,
-        processedAt: DateTime.now(),
-      );
-    }
-  }
-}
-
 @RoutePage()
-class LeaveRequestsScreen extends StatelessWidget {
+class LeaveRequestsScreen extends GetView<LeaveRequestsController> {
   const LeaveRequestsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(LeaveRequestsController());
+    // No need for Get.put anymore as it's provided via LeaderBinding
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hsh_app/modules/leader/features/attendance/attendance_main_screen.dart';
-import '../../../../models/attendance_record_model.dart';
-import 'package:hsh_app/modules/leader/features/attendance/widgets/student_roster_card.dart';
+import '../controllers/attendance_controller.dart';
+import '../../../../../../models/attendance_record_model.dart';
+import '../widgets/student_roster_card.dart';
 
 class ManualAttendanceScreen extends StatelessWidget {
   final AttendanceEventType selectedEvent;
@@ -95,13 +95,18 @@ class ManualAttendanceScreen extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Attendance submitted successfully!'),
+                onTap: () async {
+                  final success = await controller.submitAttendance();
+                  if (success) {
+                    Get.snackbar(
+                      'Success',
+                      'Attendance submitted successfully!',
+                      snackPosition: SnackPosition.BOTTOM,
                       backgroundColor: Colors.green,
-                    ),
-                  );
+                      colorText: Colors.white,
+                      margin: const EdgeInsets.all(16),
+                    );
+                  }
                 },
                 borderRadius: BorderRadius.circular(20),
                 child: const Row(

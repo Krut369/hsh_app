@@ -154,6 +154,54 @@ class LeaveRequestsRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [PerformanceInsightsScreen]
+class PerformanceInsightsRoute
+    extends PageRouteInfo<PerformanceInsightsRouteArgs> {
+  PerformanceInsightsRoute({
+    Key? key,
+    required StudentResult result,
+    List<PageRouteInfo>? children,
+  }) : super(
+          PerformanceInsightsRoute.name,
+          args: PerformanceInsightsRouteArgs(key: key, result: result),
+          initialChildren: children,
+        );
+
+  static const String name = 'PerformanceInsightsRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<PerformanceInsightsRouteArgs>();
+      return PerformanceInsightsScreen(key: args.key, result: args.result);
+    },
+  );
+}
+
+class PerformanceInsightsRouteArgs {
+  const PerformanceInsightsRouteArgs({this.key, required this.result});
+
+  final Key? key;
+
+  final StudentResult result;
+
+  @override
+  String toString() {
+    return 'PerformanceInsightsRouteArgs{key: $key, result: $result}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! PerformanceInsightsRouteArgs) return false;
+    return key == other.key && result == other.result;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ result.hashCode;
+}
+
+/// generated route for
 /// [StudentResultsScreen]
 class StudentResultsRoute extends PageRouteInfo<void> {
   const StudentResultsRoute({List<PageRouteInfo>? children})
