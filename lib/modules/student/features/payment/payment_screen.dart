@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
-import 'package:hsh_app/widgets/custom_button.dart';
 import 'package:hsh_app/modules/student/features/payment/payment_components.dart';
 import 'package:hsh_app/modules/student/features/payment/payment_method_sheet.dart';
-
-import 'package:hsh_app/widgets/custom_app_bar.dart';
 
 class PaymentScreen extends StatelessWidget {
   const PaymentScreen({super.key});
@@ -17,14 +14,10 @@ class PaymentScreen extends StatelessWidget {
     final padding = ResponsiveUtil.responsivePadding(context);
     final vertical = ResponsiveUtil.verticalSpacing(context);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FE), // Light background color
-      appBar: CustomAppBar(
+    return ui.ModernScaffold(
+      backgroundColor: const Color(0xFFF8F9FE),
+      appBar: ui.ModernAppBar(
         title: AppText.feesAndPayments,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white), // Color changed to white for CustomAppBar
-          onPressed: () => Navigator.of(context).pop(),
-        ),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(padding),
@@ -60,17 +53,16 @@ class PaymentScreen extends StatelessWidget {
             SizedBox(height: vertical * 1.5),
 
             // 3. Pay Now Button
-              CustomButton(
-                text: AppText.payNow,
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => const PaymentMethodSheet(),
-                  );
-                },
-              backgroundColor: const Color(0xFF1976D2), // Strong blue
-              borderRadius: 25,
+            ui.ModernButton(
+              text: AppText.payNow,
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const PaymentMethodSheet(),
+                );
+              },
+              icon: Icons.payments_outlined,
             ),
             SizedBox(height: vertical * 1.5),
 
@@ -78,20 +70,17 @@ class PaymentScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                ui.ModernText(
                   AppText.paymentHistory,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
                 TextButton(
                   onPressed: () {},
-                  child: Text(
+                  child: ui.ModernText(
                     AppText.viewAll,
-                    style: TextStyle(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -147,3 +136,4 @@ class PaymentScreen extends StatelessWidget {
     );
   }
 }
+

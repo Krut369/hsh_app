@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 import 'package:uuid/uuid.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/models/note_model.dart';
 import 'package:hsh_app/modules/student/features/notes/controllers/notes_controller.dart';
 import 'package:hsh_app/modules/student/features/notes/note_components.dart';
-import 'package:hsh_app/widgets/premium_app_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:appflowy_editor/appflowy_editor.dart';
 import 'dart:convert';
@@ -108,33 +107,28 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: PremiumAppBar(
-        height: 75,
-        leading: BackButton(
-          color: AppColors.white,
-        ),
+    return ui.ModernScaffold(
+      backgroundColor: Colors.white,
+      appBar: ui.ModernAppBar(
+        barHeight: 75,
         title: _isEditing ? 'Edit Story' : 'New Story',
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: TextButton(
               onPressed: () => _saveNote(),
-              child: const Text(
+              child: const ui.ModernText(
                 'Save',
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ],
       ),
       body: Obx(() {
-        final isSaving = UIController.to.isLoading;
+        final isSaving = ui.UIController.to.isLoading;
 
         return Stack(
           children: [
@@ -142,16 +136,14 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-                  child: Text(
+                  child: ui.ModernText(
                     DateFormat('MMMM d, yyyy')
                         .format(widget.noteToEdit?.date ?? DateTime.now())
                         .toUpperCase(),
-                    style: TextStyle(
-                      color: AppColors.pendingBlue.withValues(alpha: 0.5),
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
+                    color: AppColors.pendingBlue.withValues(alpha: 0.5),
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
                   ),
                 ),
                 Padding(
@@ -245,7 +237,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   ),
               ],
             ),
-            if (isSaving) const Positioned.fill(child: ModernOverlayLoader()),
+            if (isSaving) const Positioned.fill(child: ui.ModernOverlayLoader()),
           ],
         );
       }),
@@ -396,7 +388,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   Future<void> _saveNote() async {
-    UIController.to.showLoading();
+    ui.UIController.to.showLoading();
     try {
       final title = _titleController.text.trim().isEmpty
           ? "New Note"
@@ -421,9 +413,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
       Get.back();
     } catch (e) {
-      UIController.to.showError('Failed to save note: $e');
+      ui.UIController.to.showError('Failed to save note: $e');
     } finally {
-      UIController.to.hideLoading();
+      ui.UIController.to.hideLoading();
     }
   }
 

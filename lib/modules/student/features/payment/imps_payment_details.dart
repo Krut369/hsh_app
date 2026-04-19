@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:hsh_app/core/constants/font.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
+import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
 import 'package:hsh_app/providers/payment_provider.dart';
-import 'package:hsh_app/widgets/account_detail_row.dart';
 import 'payment_proof_upload.dart';
 
 class ImpsPaymentDetails extends ConsumerWidget {
@@ -17,38 +16,24 @@ class ImpsPaymentDetails extends ConsumerWidget {
 
     final padding = ResponsiveUtil.responsivePadding(context);
     final spacing = ResponsiveUtil.verticalSpacing(context);
-    final headingFontSize = ResponsiveUtil.responsiveFontSize(context, 22);
 
     return Padding(
       padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
+          const ui.ModernText(
             'IMPS Account Information',
-            style: AppFonts.heading2(context).copyWith(
-              fontSize: headingFontSize,
-            ),
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: AppColors.headerBlue,
           ),
           SizedBox(height: spacing),
 
-          // 🧠 Safely read IMPS details with fallback
-          AccountDetailRow(
-            label: 'Bank Name',
-            value: impsDetails['Bank Name'] ?? 'N/A',
-          ),
-          AccountDetailRow(
-            label: 'Account Holder Name',
-            value: impsDetails['Account Holder Name'] ?? 'N/A',
-          ),
-          AccountDetailRow(
-            label: 'Account Number',
-            value: impsDetails['Account Number'] ?? 'N/A',
-          ),
-          AccountDetailRow(
-            label: 'IFSC Code',
-            value: impsDetails['IFSC Code'] ?? 'N/A',
-          ),
+          _buildDetailRow('Bank Name', impsDetails['Bank Name'] ?? 'N/A'),
+          _buildDetailRow('Account Holder Name', impsDetails['Account Holder Name'] ?? 'N/A'),
+          _buildDetailRow('Account Number', impsDetails['Account Number'] ?? 'N/A'),
+          _buildDetailRow('IFSC Code', impsDetails['IFSC Code'] ?? 'N/A'),
 
           SizedBox(height: spacing * 1.5),
           const PaymentProofUploadSection(
@@ -59,4 +44,28 @@ class ImpsPaymentDetails extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          ui.ModernText(
+            label,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textSecondary,
+          ),
+          ui.ModernText(
+            value,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: AppColors.headerBlue,
+          ),
+        ],
+      ),
+    );
+  }
 }
+

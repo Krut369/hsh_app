@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 
 import 'package:hsh_app/modules/student/features/payment/imps_payment_details.dart';
 import 'package:hsh_app/modules/student/features/payment/neft_payment_details.dart';
 import 'package:hsh_app/modules/student/features/payment/upi_payment_details.dart';
-
-import 'package:hsh_app/widgets/custom_app_bar.dart';
 
 class PaymentDetailsScreen extends StatelessWidget {
   final String paymentMethod;
@@ -33,14 +31,10 @@ class PaymentDetailsScreen extends StatelessWidget {
         content = const Center(child: Text('Unknown Payment Method'));
     }
 
-    return Scaffold(
+    return ui.ModernScaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(
+      appBar: ui.ModernAppBar(
         title: '$paymentMethod Payment',
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
       ),
       body: SingleChildScrollView(
         child: content,
@@ -48,3 +42,4 @@ class PaymentDetailsScreen extends StatelessWidget {
     );
   }
 }
+
