@@ -65,13 +65,17 @@ class ComplaintDetailsScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 8,
-        bottom: 16,
-        left: 8,
-        right: 16,
+        top: MediaQuery.of(context).padding.top + 20,
+        bottom: 14,
+        left: 16,
+        right: 24,
       ),
       decoration: const BoxDecoration(
         color: AppColors.headerBlue,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
       ),
       child: Row(
         children: [
@@ -79,16 +83,13 @@ class ComplaintDetailsScreen extends StatelessWidget {
             onPressed: () => Get.back(),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          Expanded(
-            child: ui.ModernText(
-              "Complaint Details",
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              textAlign: TextAlign.center,
-            ),
+          const SizedBox(width: 8),
+          const ui.ModernText(
+            "Complaint Details",
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-          const SizedBox(width: 48), // Balancing width of the back button
         ],
       ),
     );

@@ -24,6 +24,7 @@ class OrderDetailsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // ── Date & Status chip row ────────────────────────────
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -35,7 +36,13 @@ class OrderDetailsScreen extends StatelessWidget {
                       LaundryStatusChip(status: order.status),
                     ],
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
+
+                  // ── Status progress stepper ───────────────────────────
+                  _StatusStepper(currentStatus: order.status),
+                  const SizedBox(height: 28),
+
+                  // ── Items heading ─────────────────────────────────────
                   ui.ModernText(
                     'Items (${order.totalItems})',
                     fontSize: 18,
@@ -47,7 +54,9 @@ class OrderDetailsScreen extends StatelessWidget {
                     _buildEmptyState(context)
                   else
                     ...order.items.map((item) => _buildItemCard(context, item)),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
+
+                  // ── Note ─────────────────────────────────────────────
                   if (order.note != null && order.note!.isNotEmpty) ...[
                     Container(
                       padding: const EdgeInsets.all(16),
@@ -75,8 +84,10 @@ class OrderDetailsScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
                   ],
+
+                  // ── Order Summary card ────────────────────────────────
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -101,7 +112,7 @@ class OrderDetailsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -248,6 +259,191 @@ class OrderDetailsScreen extends StatelessWidget {
             'No specific items listed.',
             fontSize: 14,
             color: Colors.grey[500]!,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Status Stepper ─────────────────────────────────────────────────────────────
+
+class _StatusStepper extends StatelessWidget {
+  final OrderStatus currentStatus;
+
+  const _StatusStepper({required this.currentStatus});
+
+  /// Ordered steps (cancelled is handled separately as a dead-end state)
+  static const _steps = [
+    OrderStatus.requested,
+    OrderStatus.inProgress,
+    OrderStatus.readyForPickup,
+    OrderStatus.completed,
+  ];
+
+  static const _stepLabels = [
+    'Requested',
+    'Picked Up',
+    'Processing',
+    'Ready',
+  ];
+
+  static const _stepIcons = [
+    Icons.send_rounded,
+    Icons.directions_bike_outlined,
+    Icons.autorenew_rounded,
+    Icons.check_circle_outline,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    // If cancelled, show a simple banner instead of the stepper
+    if (currentStatus == OrderStatus.cancelled) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        decoration: BoxDecoration(
+          color: AppColors.cancelledRed.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+              color: AppColors.cancelledRed.withValues(alpha: 0.25), width: 1.2),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.cancel_outlined,
+                color: AppColors.cancelledRed, size: 20),
+            const SizedBox(width: 10),
+            const ui.ModernText(
+              'This order has been cancelled',
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.cancelledRed,
+            ),
+          ],
+        ),
+      );
+    }
+
+    final currentIdx = _steps.indexOf(currentStatus);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // ── Node row ──────────────────────────────────────────────
+          Row(
+            children: List.generate(_steps.length * 2 - 1, (i) {
+              if (i.isOdd) {
+                // Connector line between steps
+                final leftIdx = i ~/ 2;
+                final isDone = leftIdx < currentIdx;
+                return Expanded(
+                  child: Container(
+                    height: 2.5,
+                    decoration: BoxDecoration(
+                      gradient: isDone
+                          ? LinearGradient(colors: [
+                              AppColors.headerBlue,
+                              AppColors.headerBlue.withValues(alpha: 0.7),
+                            ])
+                          : null,
+                      color: isDone ? null : const Color(0xFFE2E8F0),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                );
+              }
+
+              final stepIdx = i ~/ 2;
+              final isDone = stepIdx < currentIdx;
+              final isCurrent = stepIdx == currentIdx;
+
+              Color nodeColor;
+              Color iconColor;
+              if (isDone) {
+                nodeColor = AppColors.headerBlue;
+                iconColor = Colors.white;
+              } else if (isCurrent) {
+                nodeColor = Colors.white;
+                iconColor = AppColors.headerBlue;
+              } else {
+                nodeColor = const Color(0xFFF1F5F9);
+                iconColor = Colors.grey.shade400;
+              }
+
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: nodeColor,
+                  shape: BoxShape.circle,
+                  border: isCurrent
+                      ? Border.all(color: AppColors.headerBlue, width: 2.5)
+                      : isDone
+                          ? null
+                          : Border.all(
+                              color: const Color(0xFFCBD5E1), width: 1.5),
+                  boxShadow: isCurrent
+                      ? [
+                          BoxShadow(
+                            color: AppColors.headerBlue.withValues(alpha: 0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          )
+                        ]
+                      : null,
+                ),
+                child: Icon(
+                  isDone ? Icons.check_rounded : _stepIcons[stepIdx],
+                  size: isDone ? 16 : 14,
+                  color: iconColor,
+                ),
+              );
+            }),
+          ),
+
+          const SizedBox(height: 10),
+
+          // ── Labels row ────────────────────────────────────────────
+          Row(
+            children: List.generate(_steps.length * 2 - 1, (i) {
+              if (i.isOdd) return const Expanded(child: SizedBox());
+
+              final stepIdx = i ~/ 2;
+              final isDone = stepIdx < currentIdx;
+              final isCurrent = stepIdx == currentIdx;
+
+              return SizedBox(
+                width: 36,
+                child: Text(
+                  _stepLabels[stepIdx],
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    fontWeight:
+                        isCurrent ? FontWeight.w700 : FontWeight.w500,
+                    color: isCurrent
+                        ? AppColors.headerBlue
+                        : isDone
+                            ? AppColors.headerBlue.withValues(alpha: 0.6)
+                            : Colors.grey.shade400,
+                    height: 1.2,
+                  ),
+                ),
+              );
+            }),
           ),
         ],
       ),
