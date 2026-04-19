@@ -10,6 +10,7 @@ import '../../features/payment/payment_screen.dart';
 import '../../features/services/all_services_screen.dart';
 import '../../features/vehicle/vehicle_registration_screen.dart';
 import '../../student_main_shell.dart';
+import '../bindings/student_binding.dart';
 
 class StudentRoutes {
   static const String shell = '/student';
@@ -57,14 +58,17 @@ class StudentRoutes {
     GetPage(
       name: holiday,
       page: () => const HolidayScreen(),
+      binding: StudentBinding(),
     ),
     GetPage(
       name: addHoliday,
       page: () => const HolidayForm(),
+      binding: StudentBinding(),
     ),
     GetPage(
       name: payment,
       page: () => const PaymentScreen(),
+      binding: StudentBinding(),
     ),
     GetPage(
       name: services,

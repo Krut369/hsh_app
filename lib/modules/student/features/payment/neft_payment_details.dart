@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:hsh_app/providers/payment_provider.dart';
+import 'package:hsh_app/modules/student/features/payment/controllers/payment_controller.dart';
 import 'payment_proof_upload.dart';
 
-class NeftPaymentDetails extends ConsumerWidget {
+class NeftPaymentDetails extends GetView<PaymentController> {
   const NeftPaymentDetails({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final data = ref.watch(paymentProvider).neftDetails;
+  Widget build(BuildContext context) {
 
     return Padding(
       padding: const EdgeInsets.all(24),
-      child: Column(
+      child: Obx(() {
+        final data = controller.paymentData.value.neftDetails;
+        return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const ui.ModernText(
@@ -43,7 +44,8 @@ class NeftPaymentDetails extends ConsumerWidget {
                 'Please upload a screenshot of your NEFT payment for verification.',
           ),
         ],
-      ),
+      );
+      }),
     );
   }
 

@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
-import 'package:hsh_app/providers/payment_provider.dart';
+import 'package:hsh_app/modules/student/features/payment/controllers/payment_controller.dart';
 import 'payment_proof_upload.dart';
 
-class ImpsPaymentDetails extends ConsumerWidget {
+class ImpsPaymentDetails extends GetView<PaymentController> {
   const ImpsPaymentDetails({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final paymentData = ref.watch(paymentProvider);
-    final impsDetails = paymentData.impsDetails;
+  Widget build(BuildContext context) {
 
     final padding = ResponsiveUtil.responsivePadding(context);
     final spacing = ResponsiveUtil.verticalSpacing(context);
 
     return Padding(
       padding: EdgeInsets.all(padding),
-      child: Column(
+      child: Obx(() {
+        final paymentData = controller.paymentData.value;
+        final impsDetails = paymentData.impsDetails;
+        return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const ui.ModernText(
@@ -41,7 +42,8 @@ class ImpsPaymentDetails extends ConsumerWidget {
             description: 'Please upload a screenshot of your IMPS payment for verification.',
           ),
         ],
-      ),
+      );
+      }),
     );
   }
 
