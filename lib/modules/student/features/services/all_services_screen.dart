@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hsh_app/core/constants/app_text.dart';
 import 'package:hsh_app/modules/student/features/common/quick_action_card.dart';
 import 'package:hsh_app/modules/student/features/attendance/attendance_screen.dart';
@@ -6,6 +7,7 @@ import 'package:hsh_app/modules/student/features/complaint/complaint_screen.dart
 import 'package:hsh_app/modules/student/features/payment/payment_screen.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_screen.dart';
 import 'package:hsh_app/modules/student/features/notes/notes_screen.dart';
+import 'package:hsh_app/modules/student/features/vehicle/vehicle_registration_screen.dart';
 
 class AllServicesScreen extends StatelessWidget {
   const AllServicesScreen({super.key});
@@ -62,6 +64,14 @@ class AllServicesScreen extends StatelessWidget {
             iconColor: Colors.teal,
             iconBgColor: Colors.teal.withOpacity(0.1),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotesScreen())),
+          ),
+          QuickActionCard(
+            icon: Icons.directions_car_outlined,
+            title: 'Vehicle',
+            subtitle: 'Register vehicle',
+            iconColor: const Color(0xFF0D9488),
+            iconBgColor: const Color(0xFF0D9488).withOpacity(0.1),
+            onTap: () => Get.toNamed('/student/vehicle-registration'),
           ),
         ],
       ),

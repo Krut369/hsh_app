@@ -113,7 +113,7 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
               width: double.infinity,
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).padding.top + 20,
-                bottom: 32,
+                bottom: 14,
                 left: 12,
                 right: 12,
               ),
