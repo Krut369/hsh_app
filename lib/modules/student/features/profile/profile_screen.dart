@@ -44,7 +44,7 @@ class ProfileScreen extends GetView<ProfileController> {
             ),
 
             // Add spacing to account for the floating card's height
-            const SizedBox(height: 70),
+            const SizedBox(height: 100),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: padding),
@@ -57,7 +57,7 @@ class ProfileScreen extends GetView<ProfileController> {
                     children: [
                       const ModernText(
                         AppText.quickActions,
-                        fontSize: 18,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: AppColors.headerBlue,
                       ),
@@ -119,6 +119,15 @@ class ProfileScreen extends GetView<ProfileController> {
                           value: 'Holiday',
                           accentColor: Colors.pink,
                           onTap: () => Get.toNamed('/student/holiday'),
+                        ),
+                        const SizedBox(width: 12),
+                        _buildStatCard(
+                          icon: Icons.directions_car_outlined,
+                          title: 'Register',
+                          value: 'Vehicle',
+                          accentColor: Colors.teal,
+                          onTap: () =>
+                              Get.toNamed('/student/vehicle-registration'),
                         ),
                       ],
                     ),

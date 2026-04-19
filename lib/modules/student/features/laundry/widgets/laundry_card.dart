@@ -165,8 +165,7 @@ class _LaundryStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      constraints: const BoxConstraints(maxWidth: 115),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(30),
@@ -176,16 +175,16 @@ class _LaundryStatusChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(LaundryUtils.getStatusIcon(status), color: color, size: 13),
-          const SizedBox(width: 5),
-          Flexible(
-            child: ModernText(
-              status.label,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: color,
-              textAlign: TextAlign.center,
-            ),
+          Icon(LaundryUtils.getStatusIcon(status), color: color, size: 12),
+          const SizedBox(width: 4),
+          ModernText(
+            status.label,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: color,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
