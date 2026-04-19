@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 
-import 'package:hsh_app/widgets/custom_button.dart';
 import 'package:hsh_app/modules/student/features/orders/select_items_screen.dart';
 
 class AddOrderForm extends ConsumerStatefulWidget {
@@ -26,7 +26,7 @@ class _AddOrderFormState extends ConsumerState<AddOrderForm> {
 
     _orderDate = DateTime.now();
     _orderId =
-    '#ORD${DateFormat('yyyyMMdd').format(_orderDate)}${(_uuid.v4().hashCode % 10000).abs()}';
+        '#ORD${DateFormat('yyyyMMdd').format(_orderDate)}${(_uuid.v4().hashCode % 10000).abs()}';
   }
 
   void _proceedToItemSelection() {
@@ -42,41 +42,36 @@ class _AddOrderFormState extends ConsumerState<AddOrderForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(16.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      elevation: 8,
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'New Laundry Order',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
+    return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ui.ModernCard(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const ui.ModernText(
+                    'New Laundry Order',
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
 
-              // Only show the action button
-              CustomButton(
-                text: 'Select Items',
-                onPressed: _proceedToItemSelection,
-                backgroundColor: const Color(0xFFC7B1E3),
+                  // Using ModernButton from the toolkit
+                  ui.ModernButton(
+                    text: 'Select Items',
+                    onPressed: _proceedToItemSelection,
+                    icon: Icons.shopping_basket_outlined,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }

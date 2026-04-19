@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:hsh_app/core/theme/app_colors.dart';
-import 'package:hsh_app/providers/holiday_provider.dart';
+import 'package:hsh_app/modules/student/features/holiday/controllers/holiday_controller.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
+import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/student/features/holiday/holiday_components.dart';
 import 'package:modern_ui_toolkit/uitoolkit.dart' hide AppColors;
 
-class HolidayScreen extends ConsumerWidget {
+class HolidayScreen extends GetView<HolidayController> {
   const HolidayScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final holidays = ref.watch(holidayListProvider);
+  Widget build(BuildContext context) {
     final padding = ResponsiveUtil.responsivePadding(context);
 
     return Scaffold(
@@ -32,21 +29,24 @@ class HolidayScreen extends ConsumerWidget {
 
           // Content
           Expanded(
-            child: holidays.isEmpty
-                ? const HolidayEmptyState()
-                : RefreshIndicator(
-                    onRefresh: () async {
-                      // Add refresh logic if needed
-                    },
-                    child: ListView.builder(
-                      padding: EdgeInsets.fromLTRB(padding, 20, padding, 50),
-                      itemCount: holidays.length,
-                      itemBuilder: (context, index) {
-                        final holiday = holidays[index];
-                        return HolidayListTile(holiday: holiday);
+            child: Obx(() {
+              final holidays = controller.holidays;
+              return holidays.isEmpty
+                  ? const HolidayEmptyState()
+                  : RefreshIndicator(
+                      onRefresh: () async {
+                        controller.fetchHolidays();
                       },
-                    ),
-                  ),
+                      child: ListView.builder(
+                        padding: EdgeInsets.fromLTRB(padding, 20, padding, 50),
+                        itemCount: holidays.length,
+                        itemBuilder: (context, index) {
+                          final holiday = holidays[index];
+                          return HolidayListTile(holiday: holiday);
+                        },
+                      ),
+                    );
+            }),
           ),
         ],
       ),

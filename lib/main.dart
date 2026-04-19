@@ -7,9 +7,9 @@ import 'package:hsh_app/modules/auth/presentation/bindings/auth_binding.dart';
 import 'package:hsh_app/modules/laundry/presentation/bindings/laundry_binding.dart';
 import 'package:hsh_app/modules/student/features/profile/bindings/profile_binding.dart';
 import 'package:hsh_app/modules/student/features/attendance/bindings/attendance_binding.dart';
+import 'package:hsh_app/modules/student/presentation/bindings/student_binding.dart';
 import 'package:hsh_app/modules/student/features/scanner/bindings/mobile_scanner_binding.dart';
 import 'package:hsh_app/controllers/chat_controller.dart';
-import 'package:hsh_app/providers/bottom_nav_provider.dart';
 import 'package:modern_ui_toolkit/uitoolkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hsh_app/routes/app_pages.dart';
@@ -32,8 +32,8 @@ void main() async {
   ProfileBinding().dependencies();
   AttendanceBinding().dependencies();
   MobileScannerBinding().dependencies();
+  StudentBinding().dependencies();
   Get.put(ChatController());
-  Get.put(BottomNavController());
   Get.put(UIController());
 
   runApp(

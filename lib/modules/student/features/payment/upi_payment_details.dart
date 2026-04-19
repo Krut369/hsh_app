@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:hsh_app/core/constants/font.dart';
 import 'package:hsh_app/core/utils/responsive_util.dart';
-import 'package:hsh_app/providers/payment_provider.dart';
+import 'package:hsh_app/modules/student/features/payment/controllers/payment_controller.dart';
 import 'package:hsh_app/modules/student/features/payment/payment_proof_upload.dart';
 
-class UpiPaymentDetails extends ConsumerWidget {
+class UpiPaymentDetails extends GetView<PaymentController> {
   const UpiPaymentDetails({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final paymentData = ref.watch(paymentProvider);
+  Widget build(BuildContext context) {
 
     final padding = ResponsiveUtil.responsivePadding(context);
     final spacing = ResponsiveUtil.verticalSpacing(context);
@@ -22,7 +21,9 @@ class UpiPaymentDetails extends ConsumerWidget {
 
     return Padding(
       padding: EdgeInsets.all(padding),
-      child: Column(
+      child: Obx(() {
+        final paymentData = controller.paymentData.value;
+        return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
@@ -59,7 +60,8 @@ class UpiPaymentDetails extends ConsumerWidget {
             description: 'Please upload a screenshot of your UPI payment for verification.',
           ),
         ],
-      ),
+      );
+      }),
     );
   }
 }

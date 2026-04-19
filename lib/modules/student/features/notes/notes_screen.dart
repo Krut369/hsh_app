@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:hsh_app/core/theme/app_colors.dart';
 import 'package:hsh_app/modules/student/features/notes/controllers/notes_controller.dart';
 import 'package:hsh_app/modules/student/features/notes/note_editor/note_editor_screen.dart';
-import 'package:hsh_app/widgets/premium_app_bar.dart';
+import 'package:modern_ui_toolkit/uitoolkit.dart' as ui;
 
 class NotesScreen extends GetView<NotesController> {
   const NotesScreen({super.key});
@@ -14,18 +14,20 @@ class NotesScreen extends GetView<NotesController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ui.ModernScaffold(
       backgroundColor: AppColors.mainBackground,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(75),
         child: Obx(
-          () => PremiumAppBar(
-            leading: BackButton(color: AppColors.white),
+          () => ui.ModernAppBar(
             title: controller.isSearching.value ? '' : 'My Notes',
-            titleWidget: controller.isSearching.value
-                ? Container(
+            actions: [
+              if (controller.isSearching.value)
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(22),
                     ),
                     child: ValueListenableBuilder<TextEditingValue>(
@@ -39,8 +41,7 @@ class NotesScreen extends GetView<NotesController> {
                           decoration: InputDecoration(
                             hintText: 'Search notes...',
                             hintStyle: TextStyle(
-                              color:
-                                  AppColors.textSecondary.withValues(alpha: 0.5),
+                              color: AppColors.textSecondary.withValues(alpha: 0.5),
                             ),
                             prefixIcon: const Icon(
                               Icons.search,
@@ -66,13 +67,12 @@ class NotesScreen extends GetView<NotesController> {
                         );
                       },
                     ),
-                  )
-                : null,
-            actions: [
+                  ),
+                ),
               IconButton(
                 icon: Icon(
                   controller.isSearching.value ? Icons.close : Icons.search,
-                  color: AppColors.white,
+                  color: Colors.white,
                 ),
                 onPressed: controller.toggleSearch,
               ),
@@ -94,7 +94,7 @@ class NotesScreen extends GetView<NotesController> {
                   width: 180,
                   height: 180,
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(40),
                     boxShadow: [
                       BoxShadow(
@@ -124,24 +124,20 @@ class NotesScreen extends GetView<NotesController> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                const Text(
+                const ui.ModernText(
                   'No notes yet',
-                  style: TextStyle(
-                      color: AppColors.headerBlue,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.headerBlue,
                 ),
                 const SizedBox(height: 12),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Text(
+                  child: ui.ModernText(
                     'Tap + to create your first note and start capturing your thoughts.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: AppColors.textSecondary.withValues(alpha: 0.7),
-                      fontSize: 16,
-                      height: 1.5,
-                    ),
+                    fontSize: 16,
+                    color: AppColors.textSecondary.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -156,31 +152,27 @@ class NotesScreen extends GetView<NotesController> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  const ui.ModernText(
                     'Recent Notes',
-                    style: TextStyle(
-                      color: AppColors.headerBlue,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.headerBlue,
                   ),
-                  Text(
+                  ui.ModernText(
                     DateFormat('MMMM yyyy')
                         .format(DateTime.now())
                         .toUpperCase(),
-                    style: TextStyle(
-                      color: AppColors.textSecondary.withValues(alpha: 0.6),
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                    color: AppColors.textSecondary.withValues(alpha: 0.6),
                   ),
                 ],
               ),
             ),
             Expanded(
               child: ListView.builder(
-                physics: BouncingScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 controller: controller.scrollController,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -208,7 +200,7 @@ class NotesScreen extends GetView<NotesController> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Icon(Icons.edit_outlined,
-                            color: AppColors.white, size: 28),
+                            color: Colors.white, size: 28),
                       ),
                       secondaryBackground: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -219,7 +211,7 @@ class NotesScreen extends GetView<NotesController> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Icon(Icons.delete_outline,
-                            color: AppColors.white, size: 28),
+                            color: Colors.white, size: 28),
                       ),
                       confirmDismiss: (direction) async {
                         if (direction == DismissDirection.startToEnd) {
@@ -266,7 +258,7 @@ class NotesScreen extends GetView<NotesController> {
           elevation: 8,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          child: const Icon(Icons.add, color: AppColors.white, size: 30),
+          child: const Icon(Icons.add, color: Colors.white, size: 30),
         ),
       ),
     );
@@ -283,19 +275,8 @@ class NotesScreen extends GetView<NotesController> {
   }) {
     final String cleanPreview = controller.getPreviewText(preview);
 
-    return Container(
+    return ui.ModernCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -303,48 +284,27 @@ class NotesScreen extends GetView<NotesController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Text(
+                child: ui.ModernText(
                   title.isNotEmpty ? title : 'Untitled Note',
+                  fontSize: 19,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.headerBlue,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.headerBlue,
-                    height: 1.2,
-                  ),
                 ),
               ),
               const SizedBox(width: 12),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  tag.toUpperCase(),
-                  style: TextStyle(
-                    color: AppColors.primary.withValues(alpha: 0.7),
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+              ui.ModernBadge(
+                text: tag.toUpperCase(),
+                type: ui.BadgeType.info,
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Text(
+          ui.ModernText(
             cleanPreview,
+            fontSize: 15,
+            color: AppColors.textSecondary.withValues(alpha: 0.8),
             maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 15,
-              color: AppColors.textSecondary.withValues(alpha: 0.8),
-              height: 1.5,
-            ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -353,24 +313,20 @@ class NotesScreen extends GetView<NotesController> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  ui.ModernText(
                     'CREATED: $date'.toUpperCase(),
-                    style: TextStyle(
-                      color: AppColors.textSecondary.withValues(alpha: 0.4),
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.3,
-                    ),
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.3,
+                    color: AppColors.textSecondary.withValues(alpha: 0.4),
                   ),
                   const SizedBox(height: 2),
-                  Text(
+                  ui.ModernText(
                     'MODIFIED: $modifiedDate'.toUpperCase(),
-                    style: TextStyle(
-                      color: AppColors.textSecondary.withValues(alpha: 0.4),
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.3,
-                    ),
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.3,
+                    color: AppColors.textSecondary.withValues(alpha: 0.4),
                   ),
                 ],
               ),
@@ -390,3 +346,4 @@ class NotesScreen extends GetView<NotesController> {
     );
   }
 }
+
