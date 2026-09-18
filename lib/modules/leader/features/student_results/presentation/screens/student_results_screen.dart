@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:get/get.dart';
-import 'package:hsh_app/modules/leader/presentation/router/leader_auto_router.dart';
-import '../../../../../../models/student_result_model.dart';
+
+
 import '../controllers/student_results_controller.dart';
 import '../widgets/result_card.dart';
 import 'student_result_detail_screen.dart';

@@ -1,51 +1,61 @@
-// Enum to define the current status of a complaint
+/// V2.0.0 complaint statuses: pending | resolved | reviewed
+/// underReview maps to V2 backend "reviewed" status.
 enum ComplaintStatus {
-  underReview,
   pending,
+  underReview,
   awaitingFeedback,
   resolved,
 }
 
-// Extension to get user-friendly labels for each complaint status
 extension ComplaintStatusExtension on ComplaintStatus {
   String get label {
     switch (this) {
-      case ComplaintStatus.underReview:
-        return 'Under Review';
       case ComplaintStatus.pending:
         return 'Pending';
-      case ComplaintStatus.awaitingFeedback:
-        return 'Awaiting Feedback';
       case ComplaintStatus.resolved:
         return 'Resolved';
+      case ComplaintStatus.underReview:
+        return 'Under Review';
+      case ComplaintStatus.awaitingFeedback:
+        return 'Awaiting Feedback';
     }
   }
 
-  // Optional: Add color codes or icons based on status
   String get colorHex {
     switch (this) {
-      case ComplaintStatus.underReview:
-        return '#FFA500'; // Orange
       case ComplaintStatus.pending:
-        return '#FF4C4C'; // Red
-      case ComplaintStatus.awaitingFeedback:
-        return '#1E90FF'; // Blue
+        return '#FF9800'; // Orange
       case ComplaintStatus.resolved:
-        return '#28A745'; // Green
+        return '#4CAF50'; // Green
+      case ComplaintStatus.underReview:
+      case ComplaintStatus.awaitingFeedback:
+        return '#2196F3'; // Blue
     }
   }
 
-  // Backend string value
   String get toBackendString {
     switch (this) {
-      case ComplaintStatus.underReview:
-        return 'UNDER_REVIEW';
       case ComplaintStatus.pending:
-        return 'PENDING';
-      case ComplaintStatus.awaitingFeedback:
-        return 'AWAITING_FEEDBACK';
+        return 'pending';
       case ComplaintStatus.resolved:
-        return 'RESOLVED';
+        return 'resolved';
+      case ComplaintStatus.underReview:
+      case ComplaintStatus.awaitingFeedback:
+        return 'reviewed';
+    }
+  }
+
+  static ComplaintStatus fromString(String? value) {
+    switch (value?.toLowerCase()) {
+      case 'resolved':
+        return ComplaintStatus.resolved;
+      case 'reviewed':
+      case 'underreview':
+        return ComplaintStatus.underReview;
+      case 'awaitingfeedback':
+        return ComplaintStatus.awaitingFeedback;
+      default:
+        return ComplaintStatus.pending;
     }
   }
 }
@@ -115,59 +125,76 @@ class ComplaintIssueData {
   }
 }
 
-// Represents a user-submitted complaint
+/// V2.0.0 complaint record
 class Complaint {
   final String id;
-  final DateTime dateTime;
-  final String complaintType;
-  final Map<String, ComplaintIssueData> issues; // SubComplaint name (or Type name) -> Issue Data
+  final String? room;
+  final String? aadhar;
+  final String compType; // Category e.g. "Electrical"
+  final String compDesc;
   final ComplaintStatus status;
+  final int imageCount; // Number of uploaded images
+  final DateTime? submitTime;
+  final DateTime? resolvedAt;
+  final String? staffResponse;
+
+  /// Issues map kept for backward compatibility with UI components
+  /// Key = compType, Value = ComplaintIssueData with compDesc
+  Map<String, ComplaintIssueData> get issues => {
+        compType: ComplaintIssueData(description: compDesc),
+      };
+
+  String get complaintType => compType;
 
   Complaint({
     required this.id,
-    required this.dateTime,
-    required this.complaintType,
-    required this.issues,
+    this.room,
+    this.aadhar,
+    String? compType,
+    String? compDesc,
+    String? complaintType,
+    Map<String, ComplaintIssueData>? issues,
     this.status = ComplaintStatus.pending,
-  });
+    this.imageCount = 0,
+    DateTime? submitTime,
+    DateTime? dateTime,
+    this.resolvedAt,
+    this.staffResponse,
+  })  : compType = compType ??
+            complaintType ??
+            (issues != null && issues.isNotEmpty ? issues.keys.first : 'General'),
+        compDesc = compDesc ??
+            (issues != null && issues.isNotEmpty
+                ? issues.values.first.description
+                : ''),
+        submitTime = submitTime ?? dateTime;
+
+  DateTime get dateTime => submitTime ?? DateTime.now();
 
   factory Complaint.fromJson(Map<String, dynamic> json) {
-    // Complaint Type from category object
-    final categoryObj = json['category'];
-    final String typeName = (categoryObj is Map) ? (categoryObj['name'] ?? 'General') : (json['complaintType'] ?? 'General');
-
-    // Parse issues array from backend into Map structure used by frontend
-    final issuesList = json['issues'] as List<dynamic>? ?? [];
-    final issuesMap = <String, ComplaintIssueData>{};
-
-    for (var issue in issuesList) {
-      // Subcategory might be nested object
-      final subCategoryObj = issue['subCategory'];
-      final String? subCategoryName = (subCategoryObj is Map) ? subCategoryObj['name'] : null;
-      
-      // Use subCategory name as key if valid, else use complaintType
-      final key = subCategoryName ?? typeName;
-      
-      issuesMap[key] = ComplaintIssueData.fromJson(issue);
-    }
-    
-    // Status parsing
-    ComplaintStatus status = ComplaintStatus.pending;
-    try {
-        final statusStr = json['status']?.toString().toUpperCase();
-        if (statusStr == 'PENDING') status = ComplaintStatus.pending;
-        else if (statusStr == 'UNDER_REVIEW') status = ComplaintStatus.underReview;
-        else if (statusStr == 'AWAITING_FEEDBACK') status = ComplaintStatus.awaitingFeedback;
-        else if (statusStr == 'RESOLVED') status = ComplaintStatus.resolved;
-    } catch (_) {}
-
     return Complaint(
       id: json['id']?.toString() ?? '',
-      dateTime: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
-      complaintType: typeName,
-      issues: issuesMap,
-      status: status,
+      room: json['room'] as String?,
+      aadhar: json['aadhar'] as String?,
+      compType: json['compType'] as String? ?? 'General',
+      compDesc: json['compDesc'] as String? ?? '',
+      status: ComplaintStatusExtension.fromString(json['status'] as String?),
+      imageCount: (json['images'] as num?)?.toInt() ?? 0,
+      submitTime: json['submitTime'] != null
+          ? DateTime.tryParse(json['submitTime'] as String)
+          : null,
+      resolvedAt: json['resolvedAt'] != null
+          ? DateTime.tryParse(json['resolvedAt'] as String)
+          : null,
+      staffResponse: json['response'] as String?,
     );
+  }
+
+  /// Build image URL for a given index
+  /// Pattern: /uploads/complains/complain_{id}_{index}.jpg
+  String imageUrl(int index, {String ext = 'jpg'}) {
+    final intId = int.tryParse(id) ?? 0;
+    return 'http://localhost:5000/uploads/complains/complain_${intId}_$index.$ext';
   }
 }
 

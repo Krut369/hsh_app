@@ -4,7 +4,6 @@ import '../models/auth_user_model.dart';
 import '../sources/auth_local_data_source.dart';
 import '../sources/auth_remote_data_source.dart';
 
-
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remoteDataSource;
   final AuthLocalDataSource _localDataSource;
@@ -13,12 +12,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<UserEntity?> login(String email, String password) async {
-    // (Removed static "Test" account overriding to ensure real tokens from the backend)
-
     final AuthUserModel userModel =
         await _remoteDataSource.login(email, password);
-    final token = userModel.token;
 
+    // V2.0.0: token is at top level of response
+    final token = userModel.token;
     if (token != null) {
       await _localDataSource.saveToken(token);
       await _remoteDataSource.setToken(token);
@@ -33,19 +31,11 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String name,
-    required String role,
-    String? roomNumber,
-    String? hostelBlock,
-    String? phone,
   }) async {
     return await _remoteDataSource.register(
       email: email,
       password: password,
       name: name,
-      role: role,
-      roomNumber: roomNumber,
-      hostelBlock: hostelBlock,
-      phone: phone,
     );
   }
 
@@ -72,5 +62,4 @@ class AuthRepositoryImpl implements AuthRepository {
     final token = await _localDataSource.getToken();
     return token != null && token.isNotEmpty;
   }
-
 }

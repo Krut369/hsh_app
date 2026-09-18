@@ -4,15 +4,14 @@ import '../models/auth_user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<AuthUserModel> login(String email, String password);
+
+  /// V2.0.0 register: only name, email, password required.
   Future<bool> register({
     required String email,
     required String password,
     required String name,
-    required String role,
-    String? roomNumber,
-    String? hostelBlock,
-    String? phone,
   });
+
   Future<void> setToken(String token);
   Future<void> clearToken();
 }
@@ -30,8 +29,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       'password': password,
     });
 
-    // Retrofit already handles the body and mapping if it's correct
-    // But since the backend returns a Map, we might need to handle HttpResponse
     if (response.response.statusCode == 200) {
       return response.data;
     } else {
@@ -45,19 +42,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
     required String name,
-    required String role,
-    String? roomNumber,
-    String? hostelBlock,
-    String? phone,
   }) async {
     final response = await _apiService.register({
-      'username': email, // Backend uses username as email usually
+      'email': email,
       'password': password,
       'name': name,
-      'role': role,
-      if (roomNumber != null) 'room_number': roomNumber,
-      if (hostelBlock != null) 'hostel_block': hostelBlock,
-      if (phone != null) 'phone': phone,
     });
 
     return response.response.statusCode == 200 ||
@@ -66,11 +55,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> setToken(String token) async {
-    // This logic might move to interceptors in Dio, but for now we keep the interface
+    // Token is injected by the Dio interceptor in ApiClient
   }
 
   @override
   Future<void> clearToken() async {
-    // Clear logic handled in interceptors or shared prefs
+    // Clear handled via ApiClient.clearToken() from local data source
   }
 }

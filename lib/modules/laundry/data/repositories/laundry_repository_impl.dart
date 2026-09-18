@@ -19,7 +19,8 @@ class LaundryRepositoryImpl implements LaundryRepository {
 
   @override
   Future<void> updateOrderStatus(String orderId, OrderStatus status) async {
-    await _remoteDataSource.updateOrderStatus(orderId, status.name);
+    final intId = int.tryParse(orderId) ?? 0;
+    await _remoteDataSource.updateOrderStatus(intId, status.name);
   }
 
   @override

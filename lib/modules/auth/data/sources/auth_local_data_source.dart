@@ -8,6 +8,8 @@ abstract class AuthLocalDataSource {
   Future<AuthUserModel?> getUser();
   Future<void> saveToken(String token);
   Future<String?> getToken();
+  Future<void> saveAadhar(String aadhar);
+  Future<String?> getAadhar();
   Future<void> clearAll();
 }
 
@@ -44,9 +46,21 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     return _prefs.getString(ApiConstants.tokenKey);
   }
 
+  /// Cache the student's Aadhar number after dashboard bootstrap
+  @override
+  Future<void> saveAadhar(String aadhar) async {
+    await _prefs.setString(ApiConstants.aadharKey, aadhar);
+  }
+
+  @override
+  Future<String?> getAadhar() async {
+    return _prefs.getString(ApiConstants.aadharKey);
+  }
+
   @override
   Future<void> clearAll() async {
     await _prefs.remove(ApiConstants.userKey);
     await _prefs.remove(ApiConstants.tokenKey);
+    await _prefs.remove(ApiConstants.aadharKey);
   }
 }

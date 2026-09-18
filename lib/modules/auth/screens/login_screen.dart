@@ -25,7 +25,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _onLoginPressed() async {
-    // Unfocus keyboard
     FocusScope.of(context).unfocus();
 
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -73,10 +72,19 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Image.asset(
                 'assets/login_screen_bg.jpeg',
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF0F172A), Color(0xFF1E3A8A)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
               ),
             ),
 
-            // Subtle Overlay to ensure readability if background is too busy
+            // Subtle Vignette Overlay
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -84,9 +92,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.white.withValues(alpha: 0.4),
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.05),
+                      Colors.black.withValues(alpha: 0.2),
+                      Colors.black.withValues(alpha: 0.5),
                     ],
                   ),
                 ),
@@ -98,33 +105,83 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Center(
                 child: SingleChildScrollView(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                      const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Logo
-                        Hero(
-                          tag: 'app_logo',
-                          child: Image.asset(
-                            'assets/Ai logo.png',
-                            height: 200,
-                            fit: BoxFit.contain,
+                        // Glass Container for Header Logo
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(28),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 25,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Hero(
+                            tag: 'app_logo',
+                            child: Image.asset(
+                              'assets/Ai logo.png',
+                              height: 160,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
+                                Icons.apartment_rounded,
+                                size: 80,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 16),
 
-                        // Spacing to match image
-                        const SizedBox(height: 50),
+                        const Text(
+                          'Hari Saurabh Hostel',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black45,
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              )
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
 
-                        // Login Inputs Container
+                        Text(
+                          'Hostel Management Portal',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+
+                        // Login Inputs
                         _buildInputField(
                           controller: _emailOrPhoneController,
-                          hintText: 'Email or Phone',
-                          icon: Icons.mail_outline_rounded,
+                          hintText: 'Email address',
+                          icon: Icons.alternate_email_rounded,
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 16),
 
                         _buildInputField(
                           controller: _passwordController,
@@ -136,30 +193,30 @@ class _LoginScreenState extends State<LoginScreen> {
                               () => _obscurePassword = !_obscurePassword),
                         ),
 
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 28),
 
                         // Login Button
                         Obx(() {
                           final isLoading = authController.isLoading.value;
                           return Container(
                             width: double.infinity,
-                            height: 58,
+                            height: 56,
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [
-                                  Color(0xFF4285F4),
-                                  Color(0xFF1967D2),
+                                  Color(0xFF2563EB),
+                                  Color(0xFF1D4ED8),
                                 ],
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                               ),
-                              borderRadius: BorderRadius.circular(30),
+                              borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF1967D2)
-                                      .withValues(alpha: 0.3),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 8),
+                                  color: const Color(0xFF1D4ED8)
+                                      .withValues(alpha: 0.4),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
                                 ),
                               ],
                             ),
@@ -169,26 +226,38 @@ class _LoginScreenState extends State<LoginScreen> {
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
                               child: isLoading
                                   ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
+                                      height: 22,
+                                      width: 22,
                                       child: CircularProgressIndicator(
                                         color: Colors.white,
                                         strokeWidth: 2.5,
                                       ),
                                     )
-                                  : const Text(
-                                      'Login',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.5,
-                                      ),
+                                  : const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Sign In',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Icon(
+                                          Icons.arrow_forward_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ],
                                     ),
                             ),
                           );
@@ -197,28 +266,29 @@ class _LoginScreenState extends State<LoginScreen> {
                         // Error Message Display
                         Obx(() {
                           final error = authController.error.value;
-                          if (error == null || error.isEmpty)
+                          if (error == null || error.isEmpty) {
                             return const SizedBox.shrink();
+                          }
                           return Container(
-                            margin: const EdgeInsets.only(top: 24),
+                            margin: const EdgeInsets.only(top: 20),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
-                              color: Colors.red.withValues(alpha: 0.1),
+                              color: Colors.red.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                  color: Colors.red.withValues(alpha: 0.3)),
+                                  color: Colors.red.withValues(alpha: 0.4)),
                             ),
                             child: Row(
                               children: [
                                 const Icon(Icons.error_outline_rounded,
-                                    color: Colors.red, size: 20),
+                                    color: Colors.redAccent, size: 20),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     error,
                                     style: const TextStyle(
-                                      color: Colors.red,
+                                      color: Colors.white,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13,
                                     ),
@@ -250,42 +320,45 @@ class _LoginScreenState extends State<LoginScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(30),
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: TextFormField(
         controller: controller,
         obscureText: obscureText,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF0F172A),
+        ),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 15),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: Icon(icon, color: Colors.grey[600], size: 22),
-          ),
+          hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+          prefixIcon: Icon(icon, color: const Color(0xFF3B82F6), size: 22),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
                     obscureText
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
-                    color: Colors.grey[600],
+                    color: const Color(0xFF64748B),
                     size: 22,
                   ),
                   onPressed: onToggleVisibility,
                 )
               : null,
           border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
           contentPadding:
-              const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+              const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
         ),
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
