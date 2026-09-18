@@ -7,7 +7,7 @@ import 'package:hsh_app/modules/student/features/complaint/complaint_screen.dart
 import 'package:hsh_app/modules/student/features/payment/payment_screen.dart';
 import 'package:hsh_app/modules/student/features/chat/chat_screen.dart';
 import 'package:hsh_app/modules/student/features/notes/notes_screen.dart';
-import 'package:hsh_app/modules/student/features/vehicle/vehicle_registration_screen.dart';
+
 
 class AllServicesScreen extends StatelessWidget {
   const AllServicesScreen({super.key});

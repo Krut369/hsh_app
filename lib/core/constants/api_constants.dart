@@ -1,71 +1,91 @@
-/// API Configuration Constants
+/// API Configuration Constants for HSH Management Backend V2.0.0
 class ApiConstants {
-  // Base URL
-  static const String baseUrl = 'https://hsh-backend.onrender.com';
+  // ── Base URL (localhost for dev; swap to deployed URL for prod) ──────────
+  static const String baseUrl = 'http://localhost:5000';
 
-  // API Version
-  static const String apiVersion = '/api/v1';
+  // API mount path
+  static const String apiVersion = '/api';
 
-  // Full Base URL
+  // Full Base URL → http://localhost:5000/api
   static String get apiBaseUrl => '$baseUrl$apiVersion';
 
-  // Timeout Duration
-  static const Duration connectionTimeout = Duration(seconds: 10);
-  static const Duration receiveTimeout = Duration(seconds: 10);
+  // Static uploads base URL → http://localhost:5000/uploads/
+  static String get uploadsBaseUrl => '$baseUrl/uploads/';
 
-  // Authentication Endpoints
+  // Timeout Duration
+  static const Duration connectionTimeout = Duration(seconds: 15);
+  static const Duration receiveTimeout = Duration(seconds: 15);
+
+  // ── Authentication Endpoints ─────────────────────────────────────────────
   static const String login = '/auth/login';
   static const String register = '/auth/register';
+  static const String authMe = '/auth/me';
+  static const String authUsers = '/auth/users'; // Admin: provision accounts
 
-  // Student Endpoints
-  static const String studentProfile = '/student/profile';
+  // ── Student Endpoints ────────────────────────────────────────────────────
+  // NOTE: Student profile uses /:aadhar param — build URL dynamically in service
+  static const String students = '/students';
+  static const String studentsAdmin = '/students/admin';
+  static const String studentsAdminApprove = '/students/admin/approve';
+  static const String studentsAdminSwap = '/students/admin/swap';
+  static const String studentsAdminLeft = '/students/admin/left';
 
-  // Attendance Endpoints
+  // ── Attendance Endpoints ─────────────────────────────────────────────────
   static const String attendance = '/attendance';
-  static const String attendanceMark = '/attendance/mark';
-  static const String attendanceHistory = '/attendance/history';
-  static const String attendanceStats = '/attendance/stats';
+  static const String attendanceSabhas = '/attendance/sabhas';
+  static const String attendanceDates = '/attendance/dates';
+  static const String attendanceAdminSabhas = '/attendance/admin/sabhas';
 
-  // Vehicle Endpoints
-  static const String vehicleRegister = '/vehicle/register';
-  static const String vehicleStatus = '/vehicle/status';
+  // ── Leave Endpoints ──────────────────────────────────────────────────────
+  static const String leaves = '/leaves';
+  // For admin approve/reject: PATCH /leaves/admin/:id  (build dynamically)
+  static const String leavesAdmin = '/leaves/admin';
 
-  // Notes Endpoints
+  // ── Fees / Finance Endpoints ─────────────────────────────────────────────
+  static const String fees = '/fees';
+  static const String feesSummary = '/fees/summary';
+  static const String feesTransactions = '/fees/transactions';
+  static const String feesDebits = '/fees/debits';
+  static const String feesDeposits = '/fees/deposits';
+  static const String feesAdminTransactions = '/fees/admin/transactions';
+  static const String feesAdminDeposits = '/fees/admin/deposits';
+  static const String feesAdminDebits = '/fees/admin/debits';
+
+  // Legacy aliases (so existing payment controllers compile without changes)
+  static const String payments = '/fees/transactions';
+  static const String paymentsHistory = '/fees/transactions';
+  static const String paymentsSummary = '/fees/summary';
+
+  // ── Laundry Endpoints ────────────────────────────────────────────────────
+  static const String laundry = '/laundry';
+  static const String laundryBalance = '/laundry/balance';
+  static const String laundryAdmin = '/laundry/admin';
+  static const String laundryAdminRecharge = '/laundry/admin/recharge';
+
+  // ── Complaint Endpoints (NOTE: /complains not /complaints) ───────────────
+  static const String complains = '/complains';
+  static const String complainsCategories = '/complains/categories';
+  // Image URL pattern: /uploads/complains/complain_{id}_{index}.{ext}
+  static String complainImageUrl(int id, int index, String ext) =>
+      '${uploadsBaseUrl}complains/complain_${id}_$index.$ext';
+
+  // ── Vehicle Endpoints ───────────────────────────────────────────────────
+  static const String vehicleRegister = '/vehicles';
+  static const String vehicleStatus = '/vehicles/status';
+
+  // ── Notes Endpoints ──────────────────────────────────────────────────────
   static const String notes = '/notes';
 
-  // Payments Endpoints
-  static const String payments = '/payments';
-  static const String paymentsHistory = '/payments/history';
-  static const String paymentsSummary = '/payments/summary';
-
-  // Laundry Endpoints
-  static const String laundry = '/laundry';
-  static const String laundryOrders = '/laundry';      // Updated to match backend
-  static const String laundryPrices = '/laundry/prices';
-  static const String laundryItems = '/laundry/items';
-  static const String laundryConfig = '/laundry/prices';
-  static const String laundryStats = '/laundry/stats';
-
-  // Complaint Endpoints
-  static const String complaints = '/complaints';
-  static const String complaintStats = '/complaints/stats';
-  static const String upload = '/upload';
-
-  // Holiday Endpoints
-  static const String holidays = '/holidays';
-  static const String holidayList = '/holidays/list';
-  static const String holidayRequest = '/holidays/request';
-
-  // Chat Endpoints
+  // ── Chat Endpoints ───────────────────────────────────────────────────────
   static const String chatGroups = '/chat/groups';
   static const String chatMessages = '/chat/messages';
 
-  // Headers
+  // ── Headers ──────────────────────────────────────────────────────────────
   static const String contentTypeJson = 'application/json';
   static const String contentTypeMultipart = 'multipart/form-data';
 
-  // Storage Keys
+  // ── Storage Keys ─────────────────────────────────────────────────────────
   static const String tokenKey = 'auth_token';
   static const String userKey = 'user_data';
-  static const String refreshTokenKey = 'refresh_token';
+  static const String aadharKey = 'student_aadhar'; // cached after bootstrap
 }

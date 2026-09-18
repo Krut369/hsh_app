@@ -1,66 +1,105 @@
 import 'package:hsh_app/modules/laundry/data/models/laundry_models.dart';
 import 'package:hsh_app/services/service_provider.dart';
 
+/// Laundry Remote Data Source — V2.0.0 API
 class LaundryRemoteDataSource {
   final _service = serviceProvider.laundry;
 
-  /// Fetch laundry labels and orders
+  /// Get prepaid laundry balance
+  /// GET /laundry/balance
+  Future<Map<String, dynamic>> getBalance() async {
+    final response = await _service.getLaundryBalance();
+    if (response.success && response.data != null) {
+      final data = response.data;
+      if (data is Map) {
+        final inner = data['data'] ?? data;
+        if (inner is Map) {
+          return (inner['balance'] ?? inner) as Map<String, dynamic>;
+        }
+      }
+    }
+    throw Exception(response.message ?? 'Failed to fetch laundry balance');
+  }
+
+  /// Fetch laundry tickets
   /// GET /laundry
-  Future<List<LaundryOrderModel>> getOrders() async {
-    final response = await _service.getLaundryOrders();
+  Future<List<LaundryOrderModel>> getOrders({String? status}) async {
+    final response = await _service.getLaundryOrders(status: status);
 
     if (response.success && response.data != null) {
-      final List<dynamic> list = (response.data is Map && response.data.containsKey('data'))
-          ? (response.data['data'] as List<dynamic>)
-          : (response.data is List ? response.data : []);
-      return list.map((e) => LaundryOrderModel.fromJson(e)).toList();
+      final data = response.data;
+      List<dynamic> list = [];
+      if (data is Map) {
+        final inner = data['data'] ?? data;
+        if (inner is Map) {
+          list = (inner['laundry'] ?? inner['data'] ?? []) as List<dynamic>;
+        } else if (inner is List) {
+          list = inner;
+        }
+      } else if (data is List) {
+        list = data;
+      }
+      return list
+          .map((e) => LaundryOrderModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     return [];
   }
 
-  /// Update laundry order status
-  /// PATCH /laundry/:id/status
-  Future<void> updateOrderStatus(String orderId, String status) async {
-    final response = await _service.updateOrderStatus(
-      orderId: orderId,
-      status: status,
-    );
+  /// Get single ticket details
+  /// GET /laundry/:id
+  Future<LaundryOrderModel> getTicket(int id) async {
+    final response = await _service.getLaundryTicket(id);
+    if (response.success && response.data != null) {
+      final data = response.data;
+      if (data is Map) {
+        final inner = data['data'] ?? data;
+        if (inner is Map) {
+          final ticket = inner['laundry'] ?? inner;
+          return LaundryOrderModel.fromJson(ticket as Map<String, dynamic>);
+        }
+      }
+    }
+    throw Exception(response.message ?? 'Failed to fetch ticket');
+  }
+
+  /// Update laundry ticket status (admin)
+  /// PATCH /laundry/admin/:id
+  Future<void> updateOrderStatus(int id, String status) async {
+    final response = await _service.updateOrderStatus(id: id, status: status);
     if (!response.success) {
       throw Exception(response.message ?? 'Failed to update order status');
     }
   }
 
-  /// Get pricing configuration
-  /// GET /laundry/prices
-  Future<LaundryCostModel> getLaundryCost() async {
-    final response = await _service.getLaundryPrices();
-    if (response.success && response.data != null) {
-      final data = response.data is Map && response.data.containsKey('data')
-          ? response.data['data']
-          : response.data;
-      return LaundryCostModel.fromJson(data);
-    }
-    throw Exception(response.message ?? 'Failed to fetch laundry prices');
-  }
-
-  /// Update pricing configuration
-  /// PUT /laundry/prices
-  Future<void> updateLaundryCost(LaundryCostModel cost) async {
-    final response = await _service.updateLaundryPrices(cost.toJson());
-    if (!response.success) {
-      throw Exception(response.message ?? 'Failed to update laundry prices');
-    }
-  }
-
-  /// Create a new laundry order
+  /// Submit a new laundry ticket
   /// POST /laundry
-  Future<void> createOrder(Map<String, dynamic> body) async {
-    final response = await _service.createLaundryOrder(
-      serviceType: body['serviceType'],
-      items: (body['items'] as List).cast<Map<String, dynamic>>(),
+  Future<void> createOrder(Map<String, dynamic> garments) async {
+    final response = await _service.submitLaundryTicket(
+      pants: garments['pants'] ?? 0,
+      pressPants: garments['pressPants'] ?? 0,
+      shirts: garments['shirts'] ?? 0,
+      pressShirts: garments['pressShirts'] ?? 0,
+      tShirts: garments['tShirts'] ?? 0,
+      pressTShirts: garments['pressTShirts'] ?? 0,
+      towels: garments['towels'] ?? 0,
+      pressTowels: garments['pressTowels'] ?? 0,
+      blanket: garments['blanket'] ?? 0,
+      jacket: garments['jacket'] ?? 0,
+      bedSheet: garments['bedSheet'] ?? 0,
+      others: garments['others'] ?? 0,
+      pressOthers: garments['pressOthers'] ?? 0,
     );
     if (!response.success) {
       throw Exception(response.message ?? 'Failed to place laundry order');
     }
   }
+
+  // ── Backward compatibility methods for LaundryRepository ────────────────
+
+  Future<LaundryCostModel> getLaundryCost() async {
+    return LaundryCostModel(washPrice: 10.0, pressPrice: 5.0, bothPrice: 15.0);
+  }
+
+  Future<void> updateLaundryCost(LaundryCostModel cost) async {}
 }

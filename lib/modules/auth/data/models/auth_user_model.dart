@@ -5,73 +5,75 @@ import '../../domain/entities/user_entity.dart';
 
 part 'auth_user_model.g.dart';
 
+/// Matches the V2.0.0 API user schema:
+///   { status, token, data: { user: { id, name, email, role, groupName, isTemporary, expiry } } }
+/// Token is at the TOP LEVEL of the response (not inside data).
 @JsonSerializable()
 class AuthUserModel {
-  @JsonKey(name: 'username')
-  final String? username;
+  @JsonKey(name: 'id')
+  final int? id;
 
   @JsonKey(name: 'name')
   final String? name;
+
+  @JsonKey(name: 'email')
+  final String? email;
 
   @JsonKey(
       name: 'role', fromJson: UserRole.parse, defaultValue: UserRole.student)
   final UserRole role;
 
-  @JsonKey(name: 'room_number')
-  final String? roomNumber;
+  @JsonKey(name: 'groupName')
+  final String? groupName;
 
-  @JsonKey(name: 'email')
-  final String? email;
+  @JsonKey(name: 'isTemporary')
+  final bool isTemporary;
 
-  @JsonKey(name: 'hostel_block')
-  final String? hostelBlock;
-
-  @JsonKey(name: 'phone')
-  final String? phone;
-
-  @JsonKey(name: 'profile_image')
-  final String? profileImage;
-
+  /// JWT access token — lives at TOP LEVEL of login response.
   @JsonKey(name: 'token')
   final String? token;
 
   AuthUserModel({
-    this.username,
+    this.id,
     this.name,
-    required this.role,
-    this.roomNumber,
     this.email,
-    this.hostelBlock,
-    this.phone,
-    this.profileImage,
+    required this.role,
+    this.groupName,
+    this.isTemporary = false,
     this.token,
   });
 
+  /// V2.0.0 login response shape:
+  ///   { status: "success", token: "<jwt>", data: { user: { id, name, email, role, ... } } }
   factory AuthUserModel.fromJson(Map<String, dynamic> json) {
     debugPrint('AuthUserModel.fromJson received: $json');
-    // Start with all top-level keys
+
     final target = Map<String, dynamic>.from(json);
 
-    // Check for "data" and then "user" recursively (backend returns data -> user)
-    // We want to pull all fields from both to the top level for mapping
+    // Extract token from top level or data level
+    final topLevelToken = json['token'];
+
+    // Flatten data.user into target
     final data = json['data'];
     if (data is Map<String, dynamic>) {
-      target.addAll(Map<String, dynamic>.from(data));
       final user = data['user'];
       if (user is Map<String, dynamic>) {
         target.addAll(Map<String, dynamic>.from(user));
+      } else {
+        target.addAll(Map<String, dynamic>.from(data));
       }
     }
 
-    // Also check for direct "user" if present
+    // Also check for direct user key
     final directUser = json['user'];
     if (directUser is Map<String, dynamic>) {
       target.addAll(Map<String, dynamic>.from(directUser));
     }
 
-    // Capture token from any possible level
-    target['token'] ??=
-        json['token'] ?? json['data']?['token'] ?? json['user']?['token'];
+    // Always preserve top-level token
+    if (topLevelToken != null) {
+      target['token'] = topLevelToken;
+    }
 
     return _$AuthUserModelFromJson(target);
   }
@@ -79,13 +81,10 @@ class AuthUserModel {
   Map<String, dynamic> toJson() => _$AuthUserModelToJson(this);
 
   UserEntity toEntity() => UserEntity(
-        username: username ?? email ?? '',
-        name: name ?? username ?? 'User',
+        id: id,
+        username: email ?? '',
+        name: name ?? email ?? 'User',
         role: role,
-        roomNumber: roomNumber,
-        hostelBlock: hostelBlock,
-        phone: phone,
-        profileImage: profileImage,
         token: token,
       );
 }

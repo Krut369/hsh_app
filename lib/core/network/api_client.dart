@@ -23,7 +23,7 @@ class ApiClient {
       },
     );
 
-    // Add Auth Interceptor
+    // Auth interceptor — attaches Bearer token to every request
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final prefs = await SharedPreferences.getInstance();
@@ -34,12 +34,12 @@ class ApiClient {
         return handler.next(options);
       },
       onError: (e, handler) {
-        // Handle 401 locally if needed or just pass through
+        // 401 → pass through; AuthController watches for this and routes to login
         return handler.next(e);
       },
     ));
 
-    // Optional: Add Logger
+    // Logger (debug builds only)
     dio.interceptors.add(PrettyDioLogger(
       error: true,
       requestHeader: true,
@@ -49,6 +49,7 @@ class ApiClient {
       responseBody: true,
     ));
   }
+
 
   /// REST GET Request (legacy compatible)
   Future<ApiResponse> get(
@@ -134,45 +135,39 @@ class ApiClient {
     }
   }
 
-  /// File Upload (legacy compatible)
-  Future<ApiResponse> uploadFile(
+  /// Multi-file Upload (for complaints: up to 5 images)
+  Future<ApiResponse> uploadFiles(
     String endpoint,
-    dynamic fileData, // Can be File or byte list
-    {
-    String fieldName = 'file',
-    String? fileName,
+    List<File> files, {
+    String fieldName = 'images',
     Map<String, String>? additionalFields,
-    bool includeAuth = true,
   }) async {
     try {
-      dynamic uploadData;
-      if (fileData is File) {
-        uploadData =
-            await MultipartFile.fromFile(fileData.path, filename: fileName);
-      } else if (fileData is List<int>) {
-        uploadData =
-            MultipartFile.fromBytes(fileData, filename: fileName ?? 'file');
-      } else {
-        throw Exception('Invalid file data for upload');
+      final formMap = <String, dynamic>{};
+
+      // Add each file under the same field name (array)
+      final fileList = <MultipartFile>[];
+      for (final file in files) {
+        fileList.add(await MultipartFile.fromFile(file.path));
+      }
+      formMap[fieldName] = fileList;
+
+      if (additionalFields != null) {
+        formMap.addAll(additionalFields);
       }
 
-      final formData = FormData.fromMap({
-        fieldName: uploadData,
-        if (additionalFields != null) ...additionalFields,
-      });
-
+      final formData = FormData.fromMap(formMap);
       final response = await dio.post(
         endpoint,
         data: formData,
-        options: Options(
-          contentType: ApiConstants.contentTypeMultipart,
-        ),
+        options: Options(contentType: 'multipart/form-data'),
       );
       return _handleResponse(response);
     } on DioException catch (e) {
       return _handleDioError(e);
     }
   }
+
 
   /// Handle Dio Response -> Legacy ApiResponse
   ApiResponse _handleResponse(Response response) {
